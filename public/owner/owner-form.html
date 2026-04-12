@@ -1,0 +1,430 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Estate49 – Owner Listing</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:20px; }
+    .container { max-width: 950px; margin:0 auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    h1 { margin-bottom:16px; color:#c0392b; }
+    fieldset { border:1px solid #ddd; border-radius:6px; padding:15px; margin-bottom:16px; }
+    legend { padding:0 6px; font-weight:bold; color:#333; }
+    .row { display:flex; gap:10px; margin-bottom:10px; }
+    .row > div { flex:1; }
+    label { display:block; font-size:13px; margin-bottom:4px; }
+    input, select, textarea { width:100%; padding:8px; border-radius:4px; border:1px solid #ccc; font-size:14px; }
+    textarea { resize: vertical; min-height:60px; }
+    .note { font-size:12px; color:#777; margin-bottom:8px; }
+    .btn { background:#c0392b; color:#fff; border:none; padding:10px 18px; border-radius:6px; font-size:15px; cursor:pointer; }
+    .btn.secondary { background:#555; }
+    .btn:disabled { opacity:0.6; cursor:not-allowed; }
+    #status, #uploadStatus, #mapStatus { margin-top:12px; font-size:14px; }
+    #status.error, #uploadStatus.error, #mapStatus.error { color:#b00020; }
+    #status.success, #uploadStatus.success, #mapStatus.success { color:#2e7d32; }
+    .preview-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:10px; margin-top:12px; }
+    .preview-card { border:1px solid #ddd; border-radius:6px; padding:6px; background:#fafafa; }
+    .preview-card img { width:100%; height:100px; object-fit:cover; border-radius:4px; }
+    .preview-card p { font-size:11px; margin-top:6px; word-break:break-all; }
+    #map { height: 320px; border-radius:8px; border:1px solid #ccc; margin:10px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Estate49 – Owner / Broker Listing</h1>
+    <p class="note">Fill this form carefully. Required fields are marked with *.</p>
+
+    <form id="propertyForm">
+      <fieldset>
+        <legend>Basic Details</legend>
+        <div class="row">
+          <div>
+            <label>Title *</label>
+            <input name="title" required placeholder="2 BHK Apartment in Whitefield">
+          </div>
+          <div>
+            <label>Property Type *</label>
+            <select name="property_type" required>
+              <option value="">Select</option>
+              <option value="rent">Rent</option>
+              <option value="sale">Sale</option>
+            </select>
+          </div>
+          <div>
+            <label>BHK</label>
+            <input name="bhk" type="number" min="1" step="1" placeholder="2">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Price (₹) *</label>
+            <input name="price" type="number" min="0" step="100" required placeholder="22000">
+          </div>
+          <div>
+            <label>Area (sq.ft)</label>
+            <input name="area_sqft" type="number" min="0" step="10">
+          </div>
+          <div>
+            <label>Available From</label>
+            <input name="available_from" type="date">
+          </div>
+        </div>
+
+        <label>Description</label>
+        <textarea name="description" placeholder="Short description about the property, floor, facing, etc."></textarea>
+      </fieldset>
+
+      <fieldset>
+        <legend>Location & Map</legend>
+        <p class="note">Click on the map to select the exact property location. Address fields will try to auto-fill.</p>
+        <div id="map"></div>
+        <div id="mapStatus"></div>
+
+        <div class="row">
+          <div>
+            <label>Address *</label>
+            <input name="address" required placeholder="House / Apartment address">
+          </div>
+          <div>
+            <label>Locality</label>
+            <input name="locality" placeholder="Whitefield, Marathahalli, etc.">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Landmark</label>
+            <input name="landmark" placeholder="Near ITPL, Opp. Forum Mall">
+          </div>
+          <div>
+            <label>Pincode *</label>
+            <input name="pincode" required pattern="\d{6}" placeholder="560066">
+          </div>
+          <div>
+            <label>City</label>
+            <input name="city" placeholder="Bengaluru" value="Bengaluru">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Latitude</label>
+            <input name="latitude" id="latitude" type="number" step="0.000001" placeholder="12.969800">
+          </div>
+          <div>
+            <label>Longitude</label>
+            <input name="longitude" id="longitude" type="number" step="0.000001" placeholder="77.749900">
+          </div>
+          <div>
+            <label>Google Map Link</label>
+            <input name="google_map_link" id="google_map_link" placeholder="Auto-generated from selected map point">
+          </div>
+        </div>
+
+        <label>Full Map Address</label>
+        <textarea name="map_address" id="map_address" placeholder="Auto-filled from map"></textarea>
+      </fieldset>
+
+      <fieldset>
+        <legend>Owner / Broker Details</legend>
+        <div class="row">
+          <div>
+            <label>Listing Source *</label>
+            <select name="listing_source" required>
+              <option value="">Select</option>
+              <option value="owner">Owner</option>
+              <option value="broker">Broker / Agent</option>
+              <option value="builder">Builder / Developer</option>
+            </select>
+          </div>
+          <div>
+            <label>Verification Status</label>
+            <select name="verification_status">
+              <option value="pending">Pending</option>
+              <option value="verified">Verified</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div>
+            <label>Furnishing</label>
+            <select name="furnishing">
+              <option value="">Select</option>
+              <option value="unfurnished">Unfurnished</option>
+              <option value="semi-furnished">Semi-Furnished</option>
+              <option value="fully-furnished">Fully Furnished</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Parking</label>
+            <select name="parking">
+              <option value="">Select</option>
+              <option value="none">No Parking</option>
+              <option value="bike">Bike Only</option>
+              <option value="car">Car Parking</option>
+              <option value="car+bike">Car + Bike</option>
+            </select>
+          </div>
+          <div>
+            <label>Contact Person *</label>
+            <input name="contact_name" required placeholder="Owner / Broker name">
+          </div>
+          <div>
+            <label>Contact Phone *</label>
+            <input name="contact_phone" required placeholder="10-digit mobile">
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Owner Name (optional)</label>
+            <input name="owner_name">
+          </div>
+          <div>
+            <label>Owner Phone</label>
+            <input name="owner_phone">
+          </div>
+          <div>
+            <label>Owner WhatsApp</label>
+            <input name="owner_whatsapp">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Brokerage Details</legend>
+        <div class="row">
+          <div>
+            <label>Brokerage Type</label>
+            <select name="brokerage_type">
+              <option value="">Select</option>
+              <option value="none">No Brokerage</option>
+              <option value="fixed">Fixed Amount</option>
+              <option value="percentage">Percentage</option>
+              <option value="one_month_rent">One Month Rent</option>
+            </select>
+          </div>
+          <div>
+            <label>Brokerage Amount (₹ or %)</label>
+            <input name="brokerage_amount" type="number" step="500" placeholder="0">
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Property Photos</legend>
+        <label>Select Photos</label>
+        <input type="file" id="photoInput" accept="image/*" multiple>
+        <div style="margin-top:10px;">
+          <button type="button" class="btn secondary" id="uploadBtn">Upload Photos</button>
+        </div>
+        <div id="uploadStatus"></div>
+        <div id="photoPreview" class="preview-grid"></div>
+      </fieldset>
+
+      <button type="submit" class="btn" id="submitBtn">Save Property</button>
+      <div id="status"></div>
+    </form>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <script>
+    const form = document.getElementById('propertyForm');
+    const statusDiv = document.getElementById('status');
+    const uploadStatusDiv = document.getElementById('uploadStatus');
+    const mapStatusDiv = document.getElementById('mapStatus');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+    const googleMapLinkInput = document.getElementById('google_map_link');
+    const mapAddressInput = document.getElementById('map_address');
+
+    let uploadedPhotos = [];
+
+    // Leaflet map
+    const map = L.map('map').setView([12.9716, 77.5946], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker = null;
+
+    async function reverseGeocode(lat, lon) {
+      mapStatusDiv.textContent = 'Fetching address from map...';
+      mapStatusDiv.className = '';
+
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&addressdetails=1`);
+        const data = await res.json();
+
+        const address = data.address || {};
+        const displayName = data.display_name || '';
+
+        mapAddressInput.value = displayName;
+        googleMapLinkInput.value = `https://maps.google.com/?q=${lat},${lon}`;
+
+        if (!document.querySelector('input[name="address"]').value) {
+          document.querySelector('input[name="address"]').value =
+            address.road || address.neighbourhood || address.suburb || displayName;
+        }
+
+        if (!document.querySelector('input[name="locality"]').value) {
+          document.querySelector('input[name="locality"]').value =
+            address.suburb || address.neighbourhood || address.city_district || '';
+        }
+
+        if (!document.querySelector('input[name="city"]').value || document.querySelector('input[name="city"]').value === 'Bengaluru') {
+          document.querySelector('input[name="city"]').value =
+            address.city || address.town || address.village || 'Bengaluru';
+        }
+
+        if (!document.querySelector('input[name="pincode"]').value) {
+          document.querySelector('input[name="pincode"]').value = address.postcode || '';
+        }
+
+        mapStatusDiv.textContent = '✅ Location selected and address fetched';
+        mapStatusDiv.className = 'success';
+      } catch (err) {
+        mapStatusDiv.textContent = '❌ Could not fetch address automatically. You can still fill it manually.';
+        mapStatusDiv.className = 'error';
+      }
+    }
+
+    map.on('click', async function(e) {
+      const lat = Number(e.latlng.lat.toFixed(6));
+      const lon = Number(e.latlng.lng.toFixed(6));
+
+      latitudeInput.value = lat;
+      longitudeInput.value = lon;
+      googleMapLinkInput.value = `https://maps.google.com/?q=${lat},${lon}`;
+
+      if (marker) {
+        marker.setLatLng([lat, lon]);
+      } else {
+        marker = L.marker([lat, lon]).addTo(map);
+      }
+
+      await reverseGeocode(lat, lon);
+    });
+
+    uploadBtn.addEventListener('click', async () => {
+      uploadStatusDiv.textContent = '';
+      uploadStatusDiv.className = '';
+
+      if (!photoInput.files || photoInput.files.length === 0) {
+        uploadStatusDiv.textContent = '❌ Please select at least one photo';
+        uploadStatusDiv.className = 'error';
+        return;
+      }
+
+      const formData = new FormData();
+      for (const file of photoInput.files) {
+        formData.append('photos', file);
+      }
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = 'Uploading...';
+
+      try {
+        const res = await fetch('/api/upload/photos', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Photo upload failed');
+        }
+
+        uploadedPhotos = data.photos || [];
+        uploadStatusDiv.textContent = '✅ Photos uploaded successfully';
+        uploadStatusDiv.className = 'success';
+
+        photoPreview.innerHTML = '';
+        uploadedPhotos.forEach((photoPath) => {
+          const card = document.createElement('div');
+          card.className = 'preview-card';
+          card.innerHTML = `
+            <img src="${photoPath}" alt="Uploaded property photo">
+            <p>${photoPath}</p>
+          `;
+          photoPreview.appendChild(card);
+        });
+      } catch (err) {
+        uploadStatusDiv.textContent = '❌ ' + err.message;
+        uploadStatusDiv.className = 'error';
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Upload Photos';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusDiv.textContent = '';
+      statusDiv.className = '';
+      submitBtn.disabled = true;
+
+      const formData = new FormData(form);
+      const body = {};
+
+      formData.forEach((value, key) => {
+        body[key] = value.trim();
+      });
+
+      if (body.bhk) body.bhk = Number(body.bhk);
+      if (body.price) body.price = Number(body.price);
+      if (body.area_sqft) body.area_sqft = Number(body.area_sqft);
+      if (body.brokerage_amount) body.brokerage_amount = Number(body.brokerage_amount);
+      if (body.latitude) body.latitude = Number(body.latitude);
+      if (body.longitude) body.longitude = Number(body.longitude);
+
+      body.photos = uploadedPhotos;
+
+      try {
+        const res = await fetch('/api/properties', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to save property');
+        }
+
+        statusDiv.textContent = '✅ Property saved successfully with ID: ' + data.property.id;
+        statusDiv.className = 'success';
+
+        form.reset();
+        uploadedPhotos = [];
+        photoPreview.innerHTML = '';
+        uploadStatusDiv.textContent = '';
+        uploadStatusDiv.className = '';
+        mapStatusDiv.textContent = '';
+        mapStatusDiv.className = '';
+
+        if (marker) {
+          map.removeLayer(marker);
+          marker = null;
+        }
+        map.setView([12.9716, 77.5946], 11);
+      } catch (err) {
+        statusDiv.textContent = '❌ ' + err.message;
+        statusDiv.className = 'error';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
