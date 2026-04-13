@@ -20,9 +20,9 @@
       --text-secondary: #6e6e80;
       --text-muted: #acacbe;
       --border: #e5e5e5;
-      --shadow: 0 2px 12px rgba(0,0,0,0.08);
       --radius: 18px;
       --sidebar-width: 260px;
+      --content-width: 720px;
     }
 
     html, body {
@@ -33,7 +33,6 @@
       overflow: hidden;
     }
 
-    /* ── App Shell ── */
     .app {
       display: flex;
       height: 100dvh;
@@ -156,6 +155,14 @@
     }
     .footer-item:hover { background: var(--bg-tertiary); }
 
+    .footer-brand {
+      padding: 10px 8px 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
     /* ── Main ── */
     .main {
       flex: 1;
@@ -164,9 +171,10 @@
       height: 100%;
       overflow: hidden;
       min-width: 0;
+      background: var(--bg);
     }
 
-    /* ── Topbar (mobile only) ── */
+    /* ── Topbar (mobile) ── */
     .topbar {
       display: none;
       align-items: center;
@@ -199,11 +207,7 @@
       gap: 8px;
     }
 
-    .topbar-title {
-      font-weight: 700;
-      font-size: 17px;
-      color: var(--primary);
-    }
+    .topbar-title { font-weight: 700; font-size: 17px; color: var(--primary); }
 
     .mode-badge {
       font-size: 11px;
@@ -218,12 +222,19 @@
     .messages {
       flex: 1;
       overflow-y: auto;
-      padding: 20px 16px;
+      padding: 32px 16px;
       scroll-behavior: smooth;
     }
 
-    .messages::-webkit-scrollbar { width: 3px; }
+    .messages::-webkit-scrollbar { width: 4px; }
     .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* Claude-style: center content column */
+    .msg-inner {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      width: 100%;
+    }
 
     /* Welcome */
     .welcome {
@@ -231,113 +242,133 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 65vh;
+      min-height: 60vh;
       text-align: center;
       padding: 24px 16px;
     }
 
     .welcome-icon {
-      width: 68px;
-      height: 68px;
+      width: 72px;
+      height: 72px;
       background: var(--primary);
-      border-radius: 18px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 34px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 20px rgba(192,57,43,0.3);
+      font-size: 36px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 24px rgba(192,57,43,0.25);
     }
 
-    .welcome h1 {
-      font-size: 22px;
-      font-weight: 700;
+    .welcome h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+
+    .welcome .sub {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 420px;
+      line-height: 1.6;
       margin-bottom: 8px;
     }
 
-    .welcome p {
-      font-size: 14px;
-      color: var(--text-secondary);
-      max-width: 300px;
-      line-height: 1.6;
-      margin-bottom: 28px;
+    .welcome .by {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
     }
 
     .cards-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
-      max-width: 420px;
+      max-width: 480px;
     }
 
     .card {
       background: var(--bg-secondary);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
+      border-radius: 14px;
+      padding: 16px;
       cursor: pointer;
       text-align: left;
       transition: all 0.2s;
     }
-    .card:hover { background: var(--primary-light); border-color: var(--primary); }
-    .card .c-icon { font-size: 20px; margin-bottom: 6px; display: block; }
+    .card:hover { background: var(--primary-light); border-color: var(--primary); transform: translateY(-1px); }
+    .card .c-icon { font-size: 22px; margin-bottom: 8px; display: block; }
     .card .c-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-    .card .c-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .card .c-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
 
-    /* Message rows */
+    /* Message rows — Claude style */
     .msg-row {
       display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      margin-bottom: 16px;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 24px;
     }
-    .msg-row.user { flex-direction: row-reverse; }
+
+    .msg-row.user {
+      flex-direction: row-reverse;
+    }
 
     .avatar {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 15px;
+      margin-top: 2px;
     }
     .avatar.ai { background: var(--primary); }
-    .avatar.me { background: var(--bg-tertiary); }
+    .avatar.me { background: var(--bg-tertiary); border: 1px solid var(--border); }
 
+    /* Claude: AI bubble is full width, user is pill */
     .bubble {
-      max-width: 80%;
-      padding: 12px 16px;
-      border-radius: 18px;
-      font-size: 14px;
-      line-height: 1.65;
+      font-size: 15px;
+      line-height: 1.7;
       word-break: break-word;
     }
+
     .bubble.ai {
-      background: var(--bg-secondary);
+      flex: 1;
       color: var(--text-primary);
-      border-bottom-left-radius: 4px;
+      background: transparent;
+      padding: 0;
     }
+
     .bubble.user {
       background: var(--primary);
       color: white;
+      padding: 12px 18px;
+      border-radius: 20px;
       border-bottom-right-radius: 4px;
+      max-width: 75%;
     }
 
-    .bubble p { margin-bottom: 6px; }
+    .bubble p { margin-bottom: 8px; }
     .bubble p:last-child { margin-bottom: 0; }
-
     .price-highlight { color: var(--primary); font-weight: 700; }
 
-    /* Photo gallery inside bubble */
+    /* Property card inside bubble */
+    .prop-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin: 10px 0;
+      transition: box-shadow 0.2s;
+    }
+    .prop-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+
+    /* Photo gallery */
     .photo-gallery {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 3px;
-      margin-top: 10px;
-      border-radius: 10px;
+      gap: 4px;
+      margin-top: 12px;
+      border-radius: 12px;
       overflow: hidden;
     }
     .photo-gallery img {
@@ -348,30 +379,19 @@
       transition: opacity 0.2s;
     }
     .photo-gallery img:hover { opacity: 0.85; }
-    .photo-gallery img:only-child {
-      grid-column: span 3;
-      aspect-ratio: 16/9;
-    }
-    .photo-gallery img:first-child:nth-last-child(2),
-    .photo-gallery img:first-child:nth-last-child(2) ~ img {
-      grid-column: span 1;
-      aspect-ratio: 4/3;
-    }
+    .photo-gallery img:only-child { grid-column: span 3; aspect-ratio: 16/9; }
 
-    /* Typing dots */
+    /* Typing */
     .typing-row {
       display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      margin-bottom: 16px;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 24px;
     }
     .typing-dots {
       display: flex;
-      gap: 4px;
-      background: var(--bg-secondary);
-      padding: 14px 18px;
-      border-radius: 18px;
-      border-bottom-left-radius: 4px;
+      gap: 5px;
+      padding: 14px 0 4px;
     }
     .typing-dots span {
       width: 7px;
@@ -388,19 +408,24 @@
       40% { transform: translateY(-6px); }
     }
 
-    /* ── Input Area ── */
+    /* ── Input Area — Claude style centered ── */
     .input-area {
-      padding: 8px 14px 14px;
+      padding: 8px 16px 16px;
       background: var(--bg);
-      border-top: 1px solid var(--border);
       flex-shrink: 0;
+    }
+
+    /* Center input to content-width */
+    .input-inner {
+      max-width: var(--content-width);
+      margin: 0 auto;
     }
 
     .chips {
       display: flex;
       gap: 6px;
       overflow-x: auto;
-      padding: 6px 0 8px;
+      padding: 4px 0 10px;
       scrollbar-width: none;
     }
     .chips::-webkit-scrollbar { display: none; }
@@ -409,7 +434,7 @@
       display: flex;
       align-items: center;
       gap: 4px;
-      padding: 5px 12px;
+      padding: 5px 13px;
       background: var(--bg-secondary);
       border: 1px solid var(--border);
       border-radius: 20px;
@@ -429,9 +454,10 @@
       gap: 6px;
       background: var(--bg-secondary);
       border: 1.5px solid var(--border);
-      border-radius: 16px;
-      padding: 8px 8px 8px 14px;
+      border-radius: 18px;
+      padding: 10px 10px 10px 16px;
       transition: border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     .input-box:focus-within {
       border-color: var(--primary);
@@ -447,7 +473,7 @@
       color: var(--text-primary);
       outline: none;
       resize: none;
-      max-height: 120px;
+      max-height: 140px;
       min-height: 24px;
       line-height: 1.5;
     }
@@ -492,18 +518,12 @@
     }
     .send-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
     .send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
-    .send-btn.recording { background: #e74c3c; animation: pulse 1s infinite; }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.08); }
-    }
 
     .input-hint {
       text-align: center;
       font-size: 11px;
       color: var(--text-muted);
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
     /* ── Overlay ── */
@@ -530,13 +550,11 @@
     .lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 8px; }
     .lb-close {
       position: absolute;
-      top: 16px;
-      right: 16px;
+      top: 16px; right: 16px;
       background: rgba(255,255,255,0.15);
       border: none;
       color: white;
-      width: 40px;
-      height: 40px;
+      width: 40px; height: 40px;
       border-radius: 50%;
       font-size: 20px;
       cursor: pointer;
@@ -572,8 +590,8 @@
       }
       .sidebar.open { transform: translateX(0); }
       .topbar { display: flex; }
-      .messages { padding: 14px 12px; }
-      .bubble { max-width: 88%; }
+      .messages { padding: 16px 12px; }
+      .bubble.user { max-width: 88%; }
       .cards-grid { grid-template-columns: 1fr 1fr; }
       .welcome h1 { font-size: 20px; }
     }
@@ -615,10 +633,10 @@
     <div class="sidebar-section">
       <div class="section-title">Quick Topics</div>
       <div class="nav-btns">
-        <button class="nav-btn" onclick="quick('Best areas to rent in Bengaluru 2025')">
+        <button class="nav-btn" onclick="quick('Best areas to rent in Bengaluru for IT professionals')">
           <span class="n-icon">📍</span> Best Areas
         </button>
-        <button class="nav-btn" onclick="quick('Average rent for 2BHK in Whitefield')">
+        <button class="nav-btn" onclick="quick('Average rent trends for 2BHK in Whitefield Bengaluru 2025')">
           <span class="n-icon">💰</span> Rent Trends
         </button>
         <button class="nav-btn" onclick="quick('Tips for first-time home buyers in India')">
@@ -630,8 +648,14 @@
         <button class="nav-btn" onclick="quick('What is RERA and how does it protect home buyers in India?')">
           <span class="n-icon">⚖️</span> RERA & Legal
         </button>
-        <button class="nav-btn" onclick="quick('Best investment areas in Bengaluru for 2025')">
+        <button class="nav-btn" onclick="quick('Best real estate investment areas in Bengaluru 2025')">
           <span class="n-icon">📈</span> Investment
+        </button>
+        <button class="nav-btn" onclick="quick('How to buy property in Dubai as an Indian NRI?')">
+          <span class="n-icon">🌍</span> Global Markets
+        </button>
+        <button class="nav-btn" onclick="quick('How to calculate rental yield and ROI on a property?')">
+          <span class="n-icon">🧮</span> ROI Calculator
         </button>
       </div>
     </div>
@@ -640,7 +664,11 @@
 
     <div class="sidebar-footer">
       <div class="footer-item" onclick="toast('Settings coming soon!')">⚙️ Settings</div>
-      <div class="footer-item" onclick="toast('Help center opening soon!')">❓ Help & FAQ</div>
+      <div class="footer-item" onclick="toast('Help center coming soon!')">❓ Help & FAQ</div>
+      <div class="footer-brand">
+        Estate49 · A Stenkepler Corporation Product<br/>
+        Founded by Alisten Andrew
+      </div>
     </div>
   </aside>
 
@@ -658,30 +686,33 @@
 
     <!-- Messages -->
     <div class="messages" id="messages">
-      <div class="welcome" id="welcome">
-        <div class="welcome-icon">🏠</div>
-        <h1>Welcome to Estate49</h1>
-        <p>Your AI-powered real estate assistant for Bengaluru. Search, rent, buy, or list any property.</p>
-        <div class="cards-grid">
-          <div class="card" onclick="quick('I am looking for a 2BHK flat to rent in Bengaluru under ₹25000')">
-            <span class="c-icon">🔍</span>
-            <div class="c-title">Find a rental</div>
-            <div class="c-sub">2BHK, 3BHK flats</div>
-          </div>
-          <div class="card" onclick="quick('I want to buy a flat in Whitefield Bengaluru')">
-            <span class="c-icon">🏡</span>
-            <div class="c-title">Buy a property</div>
-            <div class="c-sub">Apartments, villas</div>
-          </div>
-          <div class="card" onclick="setMode('lister')">
-            <span class="c-icon">📋</span>
-            <div class="c-title">List your property</div>
-            <div class="c-sub">Free listing</div>
-          </div>
-          <div class="card" onclick="quick('Best localities in Bengaluru for families with good schools')">
-            <span class="c-icon">📍</span>
-            <div class="c-title">Explore areas</div>
-            <div class="c-sub">Locality guide</div>
+      <div class="msg-inner">
+        <div class="welcome" id="welcome">
+          <div class="welcome-icon">🏠</div>
+          <h1>Welcome to Estate49</h1>
+          <p class="sub">Your AI-powered real estate assistant — search, rent, buy, list, and get expert advice on properties worldwide.</p>
+          <p class="by">A Stenkepler Corporation product · Founded by Alisten Andrew</p>
+          <div class="cards-grid">
+            <div class="card" onclick="quick('I am looking for a 2BHK flat to rent in Bengaluru under ₹25000')">
+              <span class="c-icon">🔍</span>
+              <div class="c-title">Find a rental</div>
+              <div class="c-sub">2BHK, 3BHK flats</div>
+            </div>
+            <div class="card" onclick="quick('I want to buy a flat in Whitefield Bengaluru under 80 lakhs')">
+              <span class="c-icon">🏡</span>
+              <div class="c-title">Buy a property</div>
+              <div class="c-sub">Apartments, villas</div>
+            </div>
+            <div class="card" onclick="setMode('lister')">
+              <span class="c-icon">📋</span>
+              <div class="c-title">List your property</div>
+              <div class="c-sub">Free listing</div>
+            </div>
+            <div class="card" onclick="quick('Best localities in Bengaluru for families with good schools and connectivity')">
+              <span class="c-icon">📍</span>
+              <div class="c-title">Explore areas</div>
+              <div class="c-sub">Locality guide</div>
+            </div>
           </div>
         </div>
       </div>
@@ -689,34 +720,37 @@
 
     <!-- Input -->
     <div class="input-area">
-      <div class="chips">
-        <div class="chip" onclick="quick('2BHK rent under ₹25,000 in Bengaluru')">🏠 2BHK Rent</div>
-        <div class="chip" onclick="quick('3BHK buy in Whitefield')">🏡 Buy 3BHK</div>
-        <div class="chip" onclick="quick('Fully furnished flat near metro station')">🚇 Near Metro</div>
-        <div class="chip" onclick="quick('No brokerage flats in Bengaluru')">✅ No Brokerage</div>
-        <div class="chip" onclick="quick('Pet friendly rental apartments Bengaluru')">🐾 Pet Friendly</div>
-        <div class="chip" onclick="quick('1BHK studio apartment rent Bengaluru')">🛏️ 1BHK</div>
-        <div class="chip" onclick="quick('Gated community villas for sale Bengaluru')">🏘️ Villas</div>
-      </div>
-
-      <div class="input-box">
-        <textarea
-          id="chat-input"
-          placeholder="Ask about properties, areas, pricing, documents..."
-          rows="1"
-          onkeydown="handleKey(event)"
-          oninput="resize(this)"
-        ></textarea>
-        <div class="input-btns">
-          <button class="ibt" id="voice-btn" onclick="toggleVoice()" title="Voice input">🎙️</button>
-          <button class="send-btn" id="send-btn" onclick="send()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
+      <div class="input-inner">
+        <div class="chips">
+          <div class="chip" onclick="quick('2BHK rent under ₹25,000 in Bengaluru')">🏠 2BHK Rent</div>
+          <div class="chip" onclick="quick('3BHK flat to buy in Whitefield')">🏡 Buy 3BHK</div>
+          <div class="chip" onclick="quick('Fully furnished flat near metro station Bengaluru')">🚇 Near Metro</div>
+          <div class="chip" onclick="quick('No brokerage flats for rent in Bengaluru')">✅ No Brokerage</div>
+          <div class="chip" onclick="quick('Pet friendly rental apartments in Bengaluru')">🐾 Pet Friendly</div>
+          <div class="chip" onclick="quick('1BHK studio apartment rent Bengaluru under ₹15000')">🛏️ 1BHK</div>
+          <div class="chip" onclick="quick('Gated community villas for sale in Bengaluru')">🏘️ Villas</div>
+          <div class="chip" onclick="quick('How to buy property in Dubai as Indian NRI?')">🌍 Dubai</div>
         </div>
+
+        <div class="input-box">
+          <textarea
+            id="chat-input"
+            placeholder="Ask about properties, areas, pricing, legal, investments..."
+            rows="1"
+            onkeydown="handleKey(event)"
+            oninput="resize(this)"
+          ></textarea>
+          <div class="input-btns">
+            <button class="ibt" id="voice-btn" onclick="toggleVoice()" title="Voice input">🎙️</button>
+            <button class="send-btn" id="send-btn" onclick="send()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="input-hint">Estate49 AI · Bengaluru & Global Real Estate · A Stenkepler Corporation Product</div>
       </div>
-      <div class="input-hint">Estate49 AI · Bengaluru Real Estate · Powered by AI</div>
     </div>
   </div>
 </div>
@@ -731,23 +765,20 @@
 <div class="toast" id="toast-el"></div>
 
 <script>
-  // ── Config ──────────────────────────────────────
-  const BACKEND = '';   // empty = same origin; change to full URL if frontend is separate
+  const BACKEND = '';
   let history = [];
   let mode = 'client';
   let busy = false;
   let recording = false;
   let recog = null;
 
-  // ── Boot ────────────────────────────────────────
   window.addEventListener('DOMContentLoaded', () => {
     initVoice();
     setTimeout(() => {
-      appendAi("👋 Hey! Welcome to Estate49 — your smart real estate assistant for Bengaluru.\n\nI can help you:\n🔍 Find a flat to rent or buy\n📋 List your property for free\n💡 Get real estate advice and market insights\n\nWhat are you looking for today?");
-    }, 500);
+      appendAi("👋 Hey! Welcome to Estate49 — your smart real estate assistant.\n\nBuilt by Alisten Andrew and the Stenkepler Corporation team, I can help you:\n\n🔍 Find a flat to rent or buy in Bengaluru\n🌍 Get real estate advice for any market worldwide\n📋 List your property for free\n💡 Understand pricing, legal, ROI, and more\n\nWhat are you looking for today?");
+    }, 400);
   });
 
-  // ── Mode ────────────────────────────────────────
   function setMode(m) {
     mode = m;
     document.getElementById('btn-client').classList.toggle('active', m === 'client');
@@ -756,29 +787,30 @@
     newChat();
     closeSidebar();
     const msg = m === 'client'
-      ? "Switched to Find mode. Tell me what you are looking for — BHK, budget, area!"
-      : "Switched to List mode. Let's get your property listed! Are you an owner, broker, or builder?";
+      ? "Switched to Find mode. Tell me what you are looking for — BHK, budget, area, or any real estate question!"
+      : "Switched to List mode. Let's get your property listed on Estate49! Are you an owner, broker, or builder?";
     setTimeout(() => appendAi(msg), 200);
   }
 
-  // ── Sidebar ─────────────────────────────────────
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('open');
   }
+
   function closeSidebar() {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('overlay').classList.remove('open');
   }
 
-  // ── New Chat ─────────────────────────────────────
   function newChat() {
     history = [];
-    document.getElementById('messages').innerHTML = `
+    const m = document.getElementById('messages');
+    m.innerHTML = `<div class="msg-inner">
       <div class="welcome" id="welcome">
         <div class="welcome-icon">🏠</div>
         <h1>How can I help you?</h1>
-        <p>Search properties, explore areas, or get real estate advice — all in one place.</p>
+        <p class="sub">Search properties, explore markets, or get expert real estate advice — all in one place.</p>
+        <p class="by">Estate49 · A Stenkepler Corporation Product · Founded by Alisten Andrew</p>
         <div class="cards-grid">
           <div class="card" onclick="quick('I am looking for a 2BHK flat to rent in Bengaluru under ₹25000')">
             <span class="c-icon">🔍</span>
@@ -787,24 +819,24 @@
           </div>
           <div class="card" onclick="quick('I want to buy a flat in Whitefield Bengaluru')">
             <span class="c-icon">🏡</span>
-            <div class="c-title">Buy a property</div>
+            <div class="c-title">Buy property</div>
             <div class="c-sub">Apartments, villas</div>
           </div>
-          <div class="card" onclick="setMode('lister')">
-            <span class="c-icon">📋</span>
-            <div class="c-title">List property</div>
-            <div class="c-sub">Free listing</div>
+          <div class="card" onclick="quick('How to invest in real estate in Dubai as an Indian?')">
+            <span class="c-icon">🌍</span>
+            <div class="c-title">Global markets</div>
+            <div class="c-sub">Dubai, UK, USA, SG</div>
           </div>
-          <div class="card" onclick="quick('Best localities in Bengaluru for IT professionals')">
-            <span class="c-icon">📍</span>
-            <div class="c-title">Explore areas</div>
-            <div class="c-sub">Locality guide</div>
+          <div class="card" onclick="quick('Best investment areas in Bengaluru for rental yield 2025')">
+            <span class="c-icon">📈</span>
+            <div class="c-title">Investment advice</div>
+            <div class="c-sub">ROI & rental yield</div>
           </div>
         </div>
-      </div>`;
+      </div>
+    </div>`;
   }
 
-  // ── Send ─────────────────────────────────────────
   async function send() {
     const el = document.getElementById('chat-input');
     const text = el.value.trim();
@@ -829,7 +861,7 @@
       const data = await res.json();
       removeTyping();
 
-      const reply = data.reply || data.message || 'Sorry, something went wrong. Please try again.';
+      const reply = data.reply || data.message || 'Sorry, something went wrong.';
       const toolData = data.toolData || null;
 
       appendAi(reply, toolData);
@@ -857,28 +889,37 @@
     }
   }
 
-  // ── Render ───────────────────────────────────────
   function removeWelcome() {
-    const w = document.getElementById('welcome');
-    if (w) w.remove();
+    document.getElementById('welcome')?.remove();
+  }
+
+  function getMsgInner() {
+    let inner = document.querySelector('#messages .msg-inner:last-child');
+    if (!inner || inner.classList.contains('used')) {
+      inner = document.createElement('div');
+      inner.className = 'msg-inner';
+      document.getElementById('messages').appendChild(inner);
+    }
+    return inner;
   }
 
   function appendUser(text) {
     const m = document.getElementById('messages');
-    const row = document.createElement('div');
-    row.className = 'msg-row user';
-    row.innerHTML = `
-      <div class="avatar me">👤</div>
-      <div class="bubble user">${esc(text)}</div>
-    `;
-    m.appendChild(row);
+    let inner = document.createElement('div');
+    inner.className = 'msg-inner';
+    inner.innerHTML = `
+      <div class="msg-row user">
+        <div class="avatar me">👤</div>
+        <div class="bubble user">${esc(text)}</div>
+      </div>`;
+    m.appendChild(inner);
     scrollDown();
   }
 
   function appendAi(text, toolData) {
     const m = document.getElementById('messages');
-    const row = document.createElement('div');
-    row.className = 'msg-row';
+    let inner = document.createElement('div');
+    inner.className = 'msg-inner';
 
     let photosHtml = '';
     if (toolData?.photos?.length) {
@@ -888,23 +929,22 @@
       photosHtml = `<div class="photo-gallery">${imgs}</div>`;
     }
 
-    row.innerHTML = `
-      <div class="avatar ai">🏠</div>
-      <div class="bubble ai">${fmt(text)}${photosHtml}</div>
-    `;
-    m.appendChild(row);
+    inner.innerHTML = `
+      <div class="msg-row">
+        <div class="avatar ai">🏠</div>
+        <div class="bubble ai">${fmt(text)}${photosHtml}</div>
+      </div>`;
+    m.appendChild(inner);
     scrollDown();
   }
 
   function fmt(text) {
     let h = esc(text);
-    // Paragraphs
     h = '<p>' + h.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
-    // Highlight prices in red
-    h = h.replace(/(₹[\d,]+(?:\/month|\/mo|L|Cr)?)/g,
+    h = h.replace(/(₹[\d,]+(?:\/month|\/mo|L|Cr|K)?)/g,
       '<span class="price-highlight">$1</span>');
-    // Highlight section separators like ─────
-    h = h.replace(/(─{3,})/g, '<hr style="border:none;border-top:1px solid var(--border);margin:8px 0">');
+    h = h.replace(/─{3,}/g,
+      '<hr style="border:none;border-top:1px solid var(--border);margin:10px 0">');
     return h;
   }
 
@@ -916,28 +956,27 @@
       .replace(/"/g, '&quot;');
   }
 
-  // ── Typing ───────────────────────────────────────
   function showTyping() {
     const m = document.getElementById('messages');
-    const row = document.createElement('div');
-    row.className = 'typing-row';
-    row.id = 'typing';
-    row.innerHTML = `
-      <div class="avatar ai">🏠</div>
-      <div class="typing-dots"><span></span><span></span><span></span></div>
-    `;
-    m.appendChild(row);
+    const inner = document.createElement('div');
+    inner.className = 'msg-inner';
+    inner.id = 'typing-wrap';
+    inner.innerHTML = `
+      <div class="typing-row">
+        <div class="avatar ai">🏠</div>
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>`;
+    m.appendChild(inner);
     scrollDown();
   }
 
   function removeTyping() {
-    document.getElementById('typing')?.remove();
+    document.getElementById('typing-wrap')?.remove();
   }
 
-  // ── Helpers ──────────────────────────────────────
   function resize(el) {
     el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
   }
 
   function scrollDown() {
@@ -951,7 +990,6 @@
     document.getElementById('send-btn').disabled = b;
   }
 
-  // ── Voice ────────────────────────────────────────
   function initVoice() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { document.getElementById('voice-btn').style.display = 'none'; return; }
@@ -959,7 +997,6 @@
     recog.continuous = false;
     recog.interimResults = false;
     recog.lang = 'en-IN';
-
     recog.onresult = e => {
       document.getElementById('chat-input').value = e.results[0][0].transcript;
       resize(document.getElementById('chat-input'));
@@ -969,17 +1006,13 @@
     recog.onerror = () => { stopVoice(); toast('Voice not available. Try typing.'); };
   }
 
-  function toggleVoice() {
-    recording ? stopVoice() : startVoice();
-  }
+  function toggleVoice() { recording ? stopVoice() : startVoice(); }
 
   function startVoice() {
     if (!recog) return;
     recording = true;
     recog.start();
-    const b = document.getElementById('voice-btn');
-    b.textContent = '🔴';
-    b.classList.add('recording');
+    document.getElementById('voice-btn').textContent = '🔴';
     toast('🎙️ Listening...');
   }
 
@@ -987,21 +1020,15 @@
     if (!recog) return;
     recording = false;
     try { recog.stop(); } catch(e) {}
-    const b = document.getElementById('voice-btn');
-    b.textContent = '🎙️';
-    b.classList.remove('recording');
+    document.getElementById('voice-btn').textContent = '🎙️';
   }
 
-  // ── Lightbox ─────────────────────────────────────
   function openLb(url) {
     document.getElementById('lb-img').src = url;
     document.getElementById('lightbox').classList.add('open');
   }
-  function closeLb() {
-    document.getElementById('lightbox').classList.remove('open');
-  }
+  function closeLb() { document.getElementById('lightbox').classList.remove('open'); }
 
-  // ── Toast ─────────────────────────────────────────
   function toast(msg) {
     const el = document.getElementById('toast-el');
     el.textContent = msg;

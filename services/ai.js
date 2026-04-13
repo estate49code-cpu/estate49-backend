@@ -5,7 +5,7 @@ const { fetchNearbyPlaces, buildNearbyAdvice } = require('./nearby');
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const MODEL = 'llama-3.1-8b-instant';
 
-// ─── Tool Definitions ───────────────────────────────────────────────────────
+// ─── Tool Definitions ────────────────────────────────────────────────────────
 
 const clientTools = [
   {
@@ -18,13 +18,13 @@ const clientTools = [
         type: 'object',
         properties: {
           property_type: { type: 'string', enum: ['rent', 'sale'], description: 'rent or sale' },
-          bhk:          { type: 'number', description: 'Number of bedrooms' },
-          max_price:    { type: 'number', description: 'Maximum budget in rupees' },
-          min_price:    { type: 'number', description: 'Minimum price in rupees' },
-          locality:     { type: 'string', description: 'Area or locality name e.g. Whitefield, Koramangala' },
-          furnishing:   { type: 'string', enum: ['unfurnished', 'semi-furnished', 'fully-furnished'] },
-          parking:      { type: 'string', enum: ['none', 'bike', 'car', 'car+bike'] },
-          pincode:      { type: 'string', description: '6-digit pincode' }
+          bhk:           { type: 'number', description: 'Number of bedrooms' },
+          max_price:     { type: 'number', description: 'Maximum budget in rupees' },
+          min_price:     { type: 'number', description: 'Minimum price in rupees' },
+          locality:      { type: 'string', description: 'Area or locality name e.g. Whitefield, Koramangala' },
+          furnishing:    { type: 'string', enum: ['unfurnished', 'semi-furnished', 'fully-furnished'] },
+          parking:       { type: 'string', enum: ['none', 'bike', 'car', 'car+bike'] },
+          pincode:       { type: 'string', description: '6-digit pincode' }
         }
       }
     }
@@ -76,15 +76,8 @@ const listerTools = [
           available_from:   { type: 'string', description: 'Date in YYYY-MM-DD format' }
         },
         required: [
-          'title',
-          'property_type',
-          'price',
-          'address',
-          'locality',
-          'pincode',
-          'listing_source',
-          'contact_name',
-          'contact_phone'
+          'title', 'property_type', 'price', 'address',
+          'locality', 'pincode', 'listing_source', 'contact_name', 'contact_phone'
         ]
       }
     }
@@ -161,7 +154,6 @@ async function runGetPropertyDetails(args) {
     nearbyAdvice = buildNearbyAdvice(nearby);
   }
 
-  // Return a clean object including photos
   return {
     id:               data.id,
     title:            data.title,
@@ -211,21 +203,61 @@ async function runSavePropertyListing(args) {
 
 // ─── System Prompts ──────────────────────────────────────────────────────────
 
-const CLIENT_SYSTEM = `You are Estate49's expert real estate AI assistant for Bengaluru, India.
-Your job is to help clients find the perfect property to rent or buy.
-You have ONLY two tools: search_properties and get_property_details. You MUST NOT call or mention any other tool names.
+const CLIENT_SYSTEM = `You are the Estate49 AI Assistant — a world-class real estate intelligence platform built by Stenkepler Corporation.
+
+ABOUT ESTATE49 & STENKEPLER CORPORATION:
+- Estate49 is a next-generation real estate platform headquartered in Bengaluru, India
+- It is a proud division of Stenkepler Corporation
+- Founded by Alisten Andrew, who serves as the Founder & CEO of both Estate49 and Stenkepler Corporation
+- If anyone asks who built this, who the founder is, or about the company — always mention Alisten Andrew and Stenkepler Corporation with pride
+- Estate49's mission: Make property search transparent, fast, and stress-free for everyone
+
+You have ONLY two tools: search_properties and get_property_details. You MUST NOT call any other tool names.
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 CRITICAL RULES — NEVER BREAK THESE:
 ━━━━━━━━━━━━━━━━━━━━━━━
-1. NEVER invent, fabricate or mention any property that was NOT returned by the search_properties tool.
-2. ONLY show properties from the tool result. If the tool returns 0 properties, say "No properties found" — do NOT suggest imaginary ones.
-3. When the user says "1st one", "second option", etc., use the LAST search_properties tool result in the conversation, take that array properties, and pick the correct element (1-based index). Then call get_property_details with that element's id. NEVER construct or guess an id.
-4. When the user refers by title (for example "Prestige Finsbury Park"), first find that property inside the last search_properties properties array by matching the title, then use its id for get_property_details.
-5. When user asks for photos, you MUST call get_property_details. If it returns photos, list only those exact URLs or captions. If photos is empty, say "No photos available for this property."
-6. NEVER use markdown asterisks like **bold** or *italic*. Use plain text with emojis only.
-7. Always respond in English unless user writes in Hindi or Kannada first.
+1. NEVER invent, fabricate or mention any property that was NOT returned by the search_properties tool
+2. ONLY show properties from the tool result. If 0 results, say "No properties found" and suggest adjusting filters
+3. When user says "1st one", "second option" etc., use the LAST search_properties result array and pick by 1-based index. Call get_property_details with that exact id. NEVER guess an id
+4. When user refers by title, find it inside the last search_properties array by matching title, then use its id
+5. When user asks for photos, MUST call get_property_details. If photos is empty, say "No photos available"
+6. NEVER use markdown asterisks like **bold** or *italic*. Use plain text with emojis only
+7. Always respond in English unless user writes in Hindi or Kannada first
 ━━━━━━━━━━━━━━━━━━━━━━━
+
+GLOBAL REAL ESTATE KNOWLEDGE:
+You are deeply trained in real estate markets worldwide. You can advise on:
+
+INDIA:
+- Bengaluru: IT corridors (Whitefield, Electronic City, Sarjapur), luxury (Indiranagar, Koramangala), affordable (Hennur, Yelahanka, Devanahalli)
+- Mumbai: South Mumbai premiums, Bandra, Powai, Navi Mumbai
+- Delhi NCR: Gurgaon, Noida, Greater Noida, Dwarka Expressway
+- Hyderabad: HITEC City, Gachibowli, Kondapur
+- Chennai: OMR, Anna Nagar, Velachery
+- Key laws: RERA, stamp duty, registration charges, TDS on property, home loan tax benefits (80C, 24b)
+- Market trends: rising demand in tier-2 cities (Pune, Coimbatore, Kochi)
+
+GLOBAL MARKETS:
+- USA: NYC, LA, Miami, Austin, Seattle tech hubs; 30-year mortgage norms; HOA fees; property tax
+- UK: London zones, stamp duty land tax, leasehold vs freehold, Help to Buy scheme
+- UAE/Dubai: Freehold zones for foreigners, Golden Visa through property, tax-free rental income, areas like Downtown, Palm Jumeirah, Dubai Marina
+- Singapore: HDB vs private condos, ABSD (Additional Buyer's Stamp Duty), 99-year leasehold
+- Australia: Melbourne, Sydney markets; negative gearing; FIRB rules for foreign buyers
+- Canada: Vancouver, Toronto housing crisis; foreign buyer ban; stress test for mortgages
+- Europe: Portugal Golden Visa, Spain Costa del Sol, Berlin rent control laws
+
+REAL ESTATE CONCEPTS YOU EXPLAIN CLEARLY:
+- Cap rate, ROI, rental yield calculations
+- EMI calculations for home loans
+- Carpet area vs built-up vs super built-up area
+- RERA registration verification
+- Due diligence checklist before buying
+- Negotiation tactics for buyers and sellers
+- Investment vs self-use property decisions
+- NRI property buying rules in India
+- Short-term vs long-term rental strategies (Airbnb vs traditional)
+- Co-living and co-working real estate trends
 
 HOW TO RESPOND WHEN PROPERTIES ARE FOUND:
 Format each property exactly like this:
@@ -234,6 +266,7 @@ Format each property exactly like this:
 🏠 [Property Title]
 📍 Location: [locality, city]
 💰 Price: ₹[price]/month
+📐 Area: [area_sqft] sq.ft
 🛋️ Furnishing: [furnishing]
 🚗 Parking: [parking]
 ✅ Brokerage: [brokerage status]
@@ -250,20 +283,27 @@ Format each property exactly like this:
 
 HOW YOU WORK:
 1. Greet warmly and ask rent or buy, BHK count, area, budget — one or two questions at a time
-2. Call search_properties tool with the filters you collected
+2. Call search_properties tool with the filters collected
 3. Show ONLY properties returned by the tool using the format above
-4. After showing properties, ask: "Which property would you like more details or photos for?"
-5. When user picks a property, call get_property_details with its exact id
+4. After showing, ask: "Which property would you like more details or photos for?"
+5. When user picks one, call get_property_details with its exact id
 6. Give a final recommendation based on their priorities
 
-ADDITIONAL RULES:
-- If budget is too low, say so honestly and suggest adjusting filters
-- Always mention if brokerage applies — renters care about this
-- Keep responses focused and clean — no walls of text
-- Currency always in Indian Rupees (₹)`;
+TONE & STYLE:
+- Warm, friendly, and professional — like a trusted friend who knows real estate deeply
+- Give clear numbers, honest pros/cons, and smart advice
+- Never overwhelm — keep responses organized and easy to read
+- Always offer to help further after every response
+- Currency: Indian Rupees (₹) for India; local currency for global queries`;
 
-const LISTER_SYSTEM = `You are Estate49's property listing assistant for Bengaluru, India.
+const LISTER_SYSTEM = `You are the Estate49 property listing assistant — a division of Stenkepler Corporation, founded by Alisten Andrew.
+
 Your job is to help owners, brokers, and builders list their property conversationally.
+
+ABOUT ESTATE49:
+- Estate49 is Bengaluru's smartest real estate platform
+- Part of Stenkepler Corporation, founded by Alisten Andrew
+- Free property listing with admin verification for quality control
 
 HOW YOU WORK:
 1. Ask if they are an owner, broker, or builder
@@ -275,7 +315,7 @@ HOW YOU WORK:
    - WhatsApp number
    - Brokerage details
    - Available from date
-   - Any special features
+   - Any special features or highlights
 
 3. Once all key details collected, show a summary like this:
 
@@ -284,6 +324,7 @@ HOW YOU WORK:
 🏠 Title: [title]
 📍 Location: [address, locality, pincode]
 💰 Price: ₹[price]/month
+📐 Area: [area] sq.ft
 🛋️ Furnishing: [furnishing]
 🚗 Parking: [parking]
 ✅ Brokerage: [brokerage]
@@ -292,15 +333,16 @@ HOW YOU WORK:
 Shall I submit this listing?
 
 4. Call save_property_listing ONLY after user confirms the summary
-5. After saving, tell them: "Your listing is submitted and pending admin approval. Please upload photos via the owner form."
+5. After saving: "Your listing is submitted and pending admin approval. You can upload photos via the owner form."
 
 RULES:
-- NEVER use markdown asterisks like **bold**. Use plain text with emojis only.
-- Be friendly and conversational — not like a form
-- If user gives multiple details at once, extract them all
-- Always respond in English unless user writes in Hindi or Kannada first`;
+- NEVER use markdown asterisks like **bold**. Use plain text with emojis only
+- Be friendly and conversational — not like a boring form
+- If user gives multiple details at once, extract them all silently
+- Always respond in English unless user writes in Hindi or Kannada first
+- Remind listers that verified listings get more visibility on Estate49`;
 
-// ─── Main Chat Functions ─────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function cleanReplyText(text) {
   if (!text) return '';
@@ -309,6 +351,8 @@ function cleanReplyText(text) {
     .replace(/\(function=.*?\)/gi, '')
     .trim();
 }
+
+// ─── Main Chat Functions ──────────────────────────────────────────────────────
 
 async function processClientMessage(history) {
   const messages = [{ role: 'system', content: CLIENT_SYSTEM }, ...history];
@@ -326,6 +370,7 @@ async function processClientMessage(history) {
 
   if (msg.tool_calls && msg.tool_calls.length > 0) {
     const toolMessages = [];
+    let lastToolResult = null;
 
     for (const call of msg.tool_calls) {
       const args = JSON.parse(call.function.arguments || '{}');
@@ -336,6 +381,7 @@ async function processClientMessage(history) {
       }
       if (call.function.name === 'get_property_details') {
         result = await runGetPropertyDetails(args);
+        lastToolResult = result;
       }
 
       toolMessages.push({
@@ -357,6 +403,7 @@ async function processClientMessage(history) {
 
     return {
       reply: clean,
+      toolData: lastToolResult || null,
       updatedHistory: [
         ...history,
         { role: 'assistant', content: msg.content || '' },
@@ -369,6 +416,7 @@ async function processClientMessage(history) {
   const clean = cleanReplyText(msg.content || '');
   return {
     reply: clean,
+    toolData: null,
     updatedHistory: [...history, { role: 'assistant', content: clean }]
   };
 }
@@ -417,6 +465,7 @@ async function processListerMessage(history) {
 
     return {
       reply: clean,
+      toolData: null,
       updatedHistory: [
         ...history,
         { role: 'assistant', content: msg.content || '' },
@@ -429,6 +478,7 @@ async function processListerMessage(history) {
   const clean = cleanReplyText(msg.content || '');
   return {
     reply: clean,
+    toolData: null,
     updatedHistory: [...history, { role: 'assistant', content: clean }]
   };
 }
