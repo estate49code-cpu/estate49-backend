@@ -54,26 +54,26 @@ const listerTools = [
       parameters: {
         type: 'object',
         properties: {
-          title:          { type: 'string', description: 'Property title e.g. 2 BHK Apartment in Whitefield' },
-          property_type:  { type: 'string', enum: ['rent', 'sale'] },
-          bhk:            { type: 'number' },
-          price:          { type: 'number', description: 'Monthly rent or sale price in rupees' },
-          area_sqft:      { type: 'number', description: 'Property area in square feet' },
-          description:    { type: 'string' },
-          address:        { type: 'string' },
-          locality:       { type: 'string' },
-          landmark:       { type: 'string' },
-          pincode:        { type: 'string' },
-          city:           { type: 'string' },
-          furnishing:     { type: 'string', enum: ['unfurnished', 'semi-furnished', 'fully-furnished'] },
-          parking:        { type: 'string', enum: ['none', 'bike', 'car', 'car+bike'] },
-          listing_source: { type: 'string', enum: ['owner', 'broker', 'builder'] },
-          contact_name:   { type: 'string' },
-          contact_phone:  { type: 'string' },
-          owner_whatsapp: { type: 'string' },
-          brokerage_type: { type: 'string', enum: ['none', 'fixed', 'percentage', 'one_month_rent'] },
+          title:            { type: 'string', description: 'Property title e.g. 2 BHK Apartment in Whitefield' },
+          property_type:    { type: 'string', enum: ['rent', 'sale'] },
+          bhk:              { type: 'number' },
+          price:            { type: 'number', description: 'Monthly rent or sale price in rupees' },
+          area_sqft:        { type: 'number', description: 'Property area in square feet' },
+          description:      { type: 'string' },
+          address:          { type: 'string' },
+          locality:         { type: 'string' },
+          landmark:         { type: 'string' },
+          pincode:          { type: 'string' },
+          city:             { type: 'string' },
+          furnishing:       { type: 'string', enum: ['unfurnished', 'semi-furnished', 'fully-furnished'] },
+          parking:          { type: 'string', enum: ['none', 'bike', 'car', 'car+bike'] },
+          listing_source:   { type: 'string', enum: ['owner', 'broker', 'builder'] },
+          contact_name:     { type: 'string' },
+          contact_phone:    { type: 'string' },
+          owner_whatsapp:   { type: 'string' },
+          brokerage_type:   { type: 'string', enum: ['none', 'fixed', 'percentage', 'one_month_rent'] },
           brokerage_amount: { type: 'number' },
-          available_from: { type: 'string', description: 'Date in YYYY-MM-DD format' }
+          available_from:   { type: 'string', description: 'Date in YYYY-MM-DD format' }
         },
         required: [
           'title',
@@ -163,28 +163,28 @@ async function runGetPropertyDetails(args) {
 
   // Return a clean object including photos
   return {
-    id:             data.id,
-    title:          data.title,
-    property_type:  data.property_type,
-    bhk:            data.bhk,
-    price:          data.price,
-    area_sqft:      data.area_sqft,
-    address:        data.address,
-    locality:       data.locality,
-    landmark:       data.landmark,
-    city:           data.city,
-    pincode:        data.pincode,
-    furnishing:     data.furnishing,
-    parking:        data.parking,
-    listing_source: data.listing_source,
-    contact_name:   data.contact_name,
-    contact_phone:  data.contact_phone,
-    owner_whatsapp: data.owner_whatsapp,
-    brokerage_type: data.brokerage_type,
+    id:               data.id,
+    title:            data.title,
+    property_type:    data.property_type,
+    bhk:              data.bhk,
+    price:            data.price,
+    area_sqft:        data.area_sqft,
+    address:          data.address,
+    locality:         data.locality,
+    landmark:         data.landmark,
+    city:             data.city,
+    pincode:          data.pincode,
+    furnishing:       data.furnishing,
+    parking:          data.parking,
+    listing_source:   data.listing_source,
+    contact_name:     data.contact_name,
+    contact_phone:    data.contact_phone,
+    owner_whatsapp:   data.owner_whatsapp,
+    brokerage_type:   data.brokerage_type,
     brokerage_amount: data.brokerage_amount,
-    available_from: data.available_from,
-    photos:         data.photos || [],
-    nearby_summary: nearbyAdvice
+    available_from:   data.available_from,
+    photos:           data.photos || [],
+    nearby_summary:   nearbyAdvice
   };
 }
 
@@ -213,6 +213,7 @@ async function runSavePropertyListing(args) {
 
 const CLIENT_SYSTEM = `You are Estate49's expert real estate AI assistant for Bengaluru, India.
 Your job is to help clients find the perfect property to rent or buy.
+You have ONLY two tools: search_properties and get_property_details. You MUST NOT call or mention any other tool names.
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 CRITICAL RULES — NEVER BREAK THESE:
@@ -303,8 +304,10 @@ RULES:
 
 function cleanReplyText(text) {
   if (!text) return '';
-  // Remove any accidental <function=...> blocks if model emits them
-  return text.replace(/<function=[\s\S]*?<\/function>/gi, '').trim();
+  return text
+    .replace(/<function=[\s\S]*?<\/function>/gi, '')
+    .replace(/\(function=.*?\)/gi, '')
+    .trim();
 }
 
 async function processClientMessage(history) {
