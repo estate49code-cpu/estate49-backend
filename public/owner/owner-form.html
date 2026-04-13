@@ -333,28 +333,37 @@
       uploadBtn.textContent = 'Uploading...';
 
       try {
-        const res = await fetch('/api/upload/photos', {
+        // FIX 1: correct URL — was /api/upload/photos, now /api/upload
+        const res = await fetch('/api/upload', {
           method: 'POST',
           body: formData
         });
 
-        const data = await res.json();
+        let data;
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          throw new Error('Server returned unexpected response: ' + text.substring(0, 200));
+        }
 
         if (!res.ok || !data.success) {
           throw new Error(data.error || 'Photo upload failed');
         }
 
-        uploadedPhotos = data.photos || [];
-        uploadStatusDiv.textContent = '✅ Photos uploaded successfully';
+        // FIX 2: correct key — was data.photos, now data.urls
+        uploadedPhotos = data.urls || [];
+        uploadStatusDiv.textContent = `✅ ${uploadedPhotos.length} photo(s) uploaded successfully`;
         uploadStatusDiv.className = 'success';
 
         photoPreview.innerHTML = '';
-        uploadedPhotos.forEach((photoPath) => {
+        uploadedPhotos.forEach((photoUrl) => {
           const card = document.createElement('div');
           card.className = 'preview-card';
           card.innerHTML = `
-            <img src="${photoPath}" alt="Uploaded property photo">
-            <p>${photoPath}</p>
+            <img src="${photoUrl}" alt="Uploaded property photo" loading="lazy">
+            <p>${photoUrl.split('/').pop()}</p>
           `;
           photoPreview.appendChild(card);
         });
@@ -377,7 +386,7 @@
       const body = {};
 
       formData.forEach((value, key) => {
-        body[key] = value.trim();
+        body[key] = typeof value === 'string' ? value.trim() : value;
       });
 
       if (body.bhk) body.bhk = Number(body.bhk);
