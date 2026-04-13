@@ -26,14 +26,48 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/properties', propertiesRoute);
 app.use('/api/upload', uploadRoute);
 
+// ─── NEW: REST Chat Route (for index.html) ───────────────────────────────────
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { history, mode } = req.body;
+
+    if (!history || !Array.isArray(history)) {
+      return res.status(400).json({ error: 'Invalid history format.' });
+    }
+
+    const cleanHistory = history.filter(
+      (m) => m.role === 'user' || m.role === 'assistant'
+    );
+
+    const result = mode === 'lister'
+      ? await processListerMessage(cleanHistory)
+      : await processClientMessage(cleanHistory);
+
+    res.json(result);
+
+  } catch (err) {
+    console.error('Chat API error:', err.message);
+    res.status(500).json({
+      reply: '❌ Something went wrong. Please try again.',
+      updatedHistory: req.body.history || []
+    });
+  }
+});
+// ─────────────────────────────────────────────────────────────────────────────
+
 // Test DB connection
 supabase.from('properties').select('id').limit(1).then(({ error }) => {
   if (error) console.log('DB Error:', error.message);
   else console.log('Database connected successfully! ✅');
 });
 
-// Home chat page
+// Home chat page → now serves new index.html
 app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Old test chat still accessible at /test-chat
+app.get('/test-chat', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'test-chat.html'));
 });
 
@@ -56,7 +90,7 @@ function detectMode(text) {
   return listerKeywords.some(k => lower.includes(k)) ? 'lister' : 'client';
 }
 
-// ─── Socket.io AI Chat ───────────────────────────────────────────────────────
+// ─── Socket.io AI Chat (for test-chat.html) ──────────────────────────────────
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
@@ -68,7 +102,6 @@ io.on('connection', (socket) => {
     timestamp: new Date()
   });
 
-  // Listen to old event name so frontend works without changes
   socket.on('user_message', async (data) => {
     try {
       const userText = (data && data.message ? data.message : data || '')
@@ -80,18 +113,14 @@ io.on('connection', (socket) => {
 
       const session = sessions.get(socket.id) || { mode: null, history: [] };
 
-      // Detect mode on first message
       if (!session.mode) {
         session.mode = detectMode(userText);
       }
 
-      // Add user message to history
       session.history.push({ role: 'user', content: userText });
 
-      // Show typing indicator
       socket.emit('typing', true);
 
-      // Filter history to only user/assistant roles for AI
       const cleanHistory = session.history.filter(
         (m) => m.role === 'user' || m.role === 'assistant'
       );
@@ -103,13 +132,11 @@ io.on('connection', (socket) => {
         result = await processClientMessage(cleanHistory);
       }
 
-      // Safety: ensure reply is plain string
       const replyText =
         typeof result.reply === 'string'
           ? result.reply
           : JSON.stringify(result.reply || '');
 
-      // Update session history
       session.history = result.updatedHistory || cleanHistory;
       sessions.set(socket.id, session);
 
