@@ -12,18 +12,19 @@ const clientTools = [
     type: 'function',
     function: {
       name: 'search_properties',
-      description: 'Search properties from the database based on client filters like type, BHK, budget, locality, furnishing, parking.',
+      description:
+        'Search properties from the database. ALWAYS return the list in an array called properties, in the same order you show to the user. When the user later says "1st", "second", "3rd", etc., use that index (1-based) to pick property.id for get_property_details.',
       parameters: {
         type: 'object',
         properties: {
-          property_type:  { type: 'string',  enum: ['rent', 'sale'], description: 'rent or sale' },
-          bhk:            { type: 'number',  description: 'Number of bedrooms' },
-          max_price:      { type: 'number',  description: 'Maximum budget in rupees' },
-          min_price:      { type: 'number',  description: 'Minimum price in rupees' },
-          locality:       { type: 'string',  description: 'Area or locality name e.g. Whitefield, Koramangala' },
-          furnishing:     { type: 'string',  enum: ['unfurnished', 'semi-furnished', 'fully-furnished'] },
-          parking:        { type: 'string',  enum: ['none', 'bike', 'car', 'car+bike'] },
-          pincode:        { type: 'string',  description: '6-digit pincode' }
+          property_type: { type: 'string', enum: ['rent', 'sale'], description: 'rent or sale' },
+          bhk:          { type: 'number', description: 'Number of bedrooms' },
+          max_price:    { type: 'number', description: 'Maximum budget in rupees' },
+          min_price:    { type: 'number', description: 'Minimum price in rupees' },
+          locality:     { type: 'string', description: 'Area or locality name e.g. Whitefield, Koramangala' },
+          furnishing:   { type: 'string', enum: ['unfurnished', 'semi-furnished', 'fully-furnished'] },
+          parking:      { type: 'string', enum: ['none', 'bike', 'car', 'car+bike'] },
+          pincode:      { type: 'string', description: '6-digit pincode' }
         }
       }
     }
@@ -53,28 +54,38 @@ const listerTools = [
       parameters: {
         type: 'object',
         properties: {
-          title:               { type: 'string',  description: 'Property title e.g. 2 BHK Apartment in Whitefield' },
-          property_type:       { type: 'string',  enum: ['rent', 'sale'] },
-          bhk:                 { type: 'number' },
-          price:               { type: 'number',  description: 'Monthly rent or sale price in rupees' },
-          area_sqft:           { type: 'number',  description: 'Property area in square feet' },
-          description:         { type: 'string' },
-          address:             { type: 'string' },
-          locality:            { type: 'string' },
-          landmark:            { type: 'string' },
-          pincode:             { type: 'string' },
-          city:                { type: 'string' },
-          furnishing:          { type: 'string',  enum: ['unfurnished', 'semi-furnished', 'fully-furnished'] },
-          parking:             { type: 'string',  enum: ['none', 'bike', 'car', 'car+bike'] },
-          listing_source:      { type: 'string',  enum: ['owner', 'broker', 'builder'] },
-          contact_name:        { type: 'string' },
-          contact_phone:       { type: 'string' },
-          owner_whatsapp:      { type: 'string' },
-          brokerage_type:      { type: 'string',  enum: ['none', 'fixed', 'percentage', 'one_month_rent'] },
-          brokerage_amount:    { type: 'number' },
-          available_from:      { type: 'string',  description: 'Date in YYYY-MM-DD format' }
+          title:          { type: 'string', description: 'Property title e.g. 2 BHK Apartment in Whitefield' },
+          property_type:  { type: 'string', enum: ['rent', 'sale'] },
+          bhk:            { type: 'number' },
+          price:          { type: 'number', description: 'Monthly rent or sale price in rupees' },
+          area_sqft:      { type: 'number', description: 'Property area in square feet' },
+          description:    { type: 'string' },
+          address:        { type: 'string' },
+          locality:       { type: 'string' },
+          landmark:       { type: 'string' },
+          pincode:        { type: 'string' },
+          city:           { type: 'string' },
+          furnishing:     { type: 'string', enum: ['unfurnished', 'semi-furnished', 'fully-furnished'] },
+          parking:        { type: 'string', enum: ['none', 'bike', 'car', 'car+bike'] },
+          listing_source: { type: 'string', enum: ['owner', 'broker', 'builder'] },
+          contact_name:   { type: 'string' },
+          contact_phone:  { type: 'string' },
+          owner_whatsapp: { type: 'string' },
+          brokerage_type: { type: 'string', enum: ['none', 'fixed', 'percentage', 'one_month_rent'] },
+          brokerage_amount: { type: 'number' },
+          available_from: { type: 'string', description: 'Date in YYYY-MM-DD format' }
         },
-        required: ['title', 'property_type', 'price', 'address', 'locality', 'pincode', 'listing_source', 'contact_name', 'contact_phone']
+        required: [
+          'title',
+          'property_type',
+          'price',
+          'address',
+          'locality',
+          'pincode',
+          'listing_source',
+          'contact_name',
+          'contact_phone'
+        ]
       }
     }
   }
@@ -105,28 +116,30 @@ async function runSearchProperties(args) {
 
   const { data, error } = await query;
   if (error) return { error: error.message };
-  if (!data || data.length === 0) return { found: 0, properties: [], message: 'No matching properties found.' };
+  if (!data || data.length === 0) {
+    return { found: 0, properties: [], message: 'No matching properties found.' };
+  }
 
   return {
     found: data.length,
-    properties: data.map(p => ({
-      id:           p.id,
-      title:        p.title,
-      type:         p.property_type,
-      bhk:          p.bhk,
-      price:        p.price,
-      area_sqft:    p.area_sqft,
-      locality:     p.locality,
-      address:      p.address,
-      landmark:     p.landmark,
-      pincode:      p.pincode,
-      furnishing:   p.furnishing,
-      parking:      p.parking,
-      brokerage:    p.brokerage_type === 'none' ? 'No Brokerage' : `${p.brokerage_type} - ₹${p.brokerage_amount}`,
-      contact_name: p.contact_name,
-      contact_phone: p.contact_phone,
-      whatsapp:     p.owner_whatsapp || p.contact_phone,
-      photos:       p.photos || [],
+    properties: data.map((p) => ({
+      id:             p.id,
+      title:          p.title,
+      type:           p.property_type,
+      bhk:            p.bhk,
+      price:          p.price,
+      area_sqft:      p.area_sqft,
+      locality:       p.locality,
+      address:        p.address,
+      landmark:       p.landmark,
+      pincode:        p.pincode,
+      furnishing:     p.furnishing,
+      parking:        p.parking,
+      brokerage:      p.brokerage_type === 'none' ? 'No Brokerage' : `${p.brokerage_type} - ₹${p.brokerage_amount}`,
+      contact_name:   p.contact_name,
+      contact_phone:  p.contact_phone,
+      whatsapp:       p.owner_whatsapp || p.contact_phone,
+      photos:         p.photos || [],
       available_from: p.available_from,
       listing_source: p.listing_source
     }))
@@ -148,7 +161,31 @@ async function runGetPropertyDetails(args) {
     nearbyAdvice = buildNearbyAdvice(nearby);
   }
 
-  return { ...data, nearby_summary: nearbyAdvice };
+  // Return a clean object including photos
+  return {
+    id:             data.id,
+    title:          data.title,
+    property_type:  data.property_type,
+    bhk:            data.bhk,
+    price:          data.price,
+    area_sqft:      data.area_sqft,
+    address:        data.address,
+    locality:       data.locality,
+    landmark:       data.landmark,
+    city:           data.city,
+    pincode:        data.pincode,
+    furnishing:     data.furnishing,
+    parking:        data.parking,
+    listing_source: data.listing_source,
+    contact_name:   data.contact_name,
+    contact_phone:  data.contact_phone,
+    owner_whatsapp: data.owner_whatsapp,
+    brokerage_type: data.brokerage_type,
+    brokerage_amount: data.brokerage_amount,
+    available_from: data.available_from,
+    photos:         data.photos || [],
+    nearby_summary: nearbyAdvice
+  };
 }
 
 async function runSavePropertyListing(args) {
@@ -165,7 +202,11 @@ async function runSavePropertyListing(args) {
     .single();
 
   if (error) return { success: false, error: error.message };
-  return { success: true, property_id: data.id, message: 'Property listed successfully and is pending admin approval.' };
+  return {
+    success: true,
+    property_id: data.id,
+    message: 'Property listed successfully and is pending admin approval.'
+  };
 }
 
 // ─── System Prompts ──────────────────────────────────────────────────────────
@@ -181,6 +222,9 @@ CRITICAL RULES — NEVER BREAK THESE:
 3. When user asks for photos, call get_property_details using the EXACT id field from the search result. NEVER make up an ID.
 4. NEVER use markdown asterisks like **bold** or *italic*. Use plain text with emojis only.
 5. Always respond in English unless user writes in Hindi or Kannada first.
+6. When the user says "1st one", "second option", etc., map that to the corresponding property in the LAST search_properties result and call get_property_details with its id.
+7. NEVER invent an ID; always use property.id from the last tool result.
+8. When get_property_details returns photos, list them as plain HTTPS URLs (Supabase links) or short captions. Do not invent example.com URLs.
 ━━━━━━━━━━━━━━━━━━━━━━━
 
 HOW TO RESPOND WHEN PROPERTIES ARE FOUND:
@@ -258,6 +302,12 @@ RULES:
 
 // ─── Main Chat Functions ─────────────────────────────────────────────────────
 
+function cleanReplyText(text) {
+  if (!text) return '';
+  // Remove any accidental <function=...> blocks if model emits them
+  return text.replace(/<function=[\s\S]*?<\/function>/gi, '').trim();
+}
+
 async function processClientMessage(history) {
   const messages = [{ role: 'system', content: CLIENT_SYSTEM }, ...history];
 
@@ -276,11 +326,15 @@ async function processClientMessage(history) {
     const toolMessages = [];
 
     for (const call of msg.tool_calls) {
-      const args = JSON.parse(call.function.arguments);
+      const args = JSON.parse(call.function.arguments || '{}');
       let result;
 
-      if (call.function.name === 'search_properties')    result = await runSearchProperties(args);
-      if (call.function.name === 'get_property_details') result = await runGetPropertyDetails(args);
+      if (call.function.name === 'search_properties') {
+        result = await runSearchProperties(args);
+      }
+      if (call.function.name === 'get_property_details') {
+        result = await runGetPropertyDetails(args);
+      }
 
       toolMessages.push({
         role: 'tool',
@@ -296,15 +350,24 @@ async function processClientMessage(history) {
       max_tokens: 1024
     });
 
+    const followMsg = followUp.choices[0].message;
+    const clean = cleanReplyText(followMsg.content || '');
+
     return {
-      reply: followUp.choices[0].message.content,
-      updatedHistory: [...history, msg, ...toolMessages, followUp.choices[0].message]
+      reply: clean,
+      updatedHistory: [
+        ...history,
+        { role: 'assistant', content: msg.content || '' },
+        ...toolMessages,
+        { role: 'assistant', content: clean }
+      ]
     };
   }
 
+  const clean = cleanReplyText(msg.content || '');
   return {
-    reply: msg.content,
-    updatedHistory: [...history, msg]
+    reply: clean,
+    updatedHistory: [...history, { role: 'assistant', content: clean }]
   };
 }
 
@@ -326,10 +389,12 @@ async function processListerMessage(history) {
     const toolMessages = [];
 
     for (const call of msg.tool_calls) {
-      const args = JSON.parse(call.function.arguments);
+      const args = JSON.parse(call.function.arguments || '{}');
       let result;
 
-      if (call.function.name === 'save_property_listing') result = await runSavePropertyListing(args);
+      if (call.function.name === 'save_property_listing') {
+        result = await runSavePropertyListing(args);
+      }
 
       toolMessages.push({
         role: 'tool',
@@ -345,15 +410,24 @@ async function processListerMessage(history) {
       max_tokens: 1024
     });
 
+    const followMsg = followUp.choices[0].message;
+    const clean = cleanReplyText(followMsg.content || '');
+
     return {
-      reply: followUp.choices[0].message.content,
-      updatedHistory: [...history, msg, ...toolMessages, followUp.choices[0].message]
+      reply: clean,
+      updatedHistory: [
+        ...history,
+        { role: 'assistant', content: msg.content || '' },
+        ...toolMessages,
+        { role: 'assistant', content: clean }
+      ]
     };
   }
 
+  const clean = cleanReplyText(msg.content || '');
   return {
-    reply: msg.content,
-    updatedHistory: [...history, msg]
+    reply: clean,
+    updatedHistory: [...history, { role: 'assistant', content: clean }]
   };
 }
 

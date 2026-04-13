@@ -71,7 +71,9 @@ io.on('connection', (socket) => {
   // Listen to old event name so frontend works without changes
   socket.on('user_message', async (data) => {
     try {
-      const userText = (data.message || data || '').toString().trim();
+      const userText = (data && data.message ? data.message : data || '')
+        .toString()
+        .trim();
       if (!userText) return;
 
       console.log(`Message [${socket.id}]:`, userText);
@@ -91,7 +93,7 @@ io.on('connection', (socket) => {
 
       // Filter history to only user/assistant roles for AI
       const cleanHistory = session.history.filter(
-        m => m.role === 'user' || m.role === 'assistant'
+        (m) => m.role === 'user' || m.role === 'assistant'
       );
 
       let result;
@@ -101,16 +103,21 @@ io.on('connection', (socket) => {
         result = await processClientMessage(cleanHistory);
       }
 
+      // Safety: ensure reply is plain string
+      const replyText =
+        typeof result.reply === 'string'
+          ? result.reply
+          : JSON.stringify(result.reply || '');
+
       // Update session history
-      session.history = result.updatedHistory;
+      session.history = result.updatedHistory || cleanHistory;
       sessions.set(socket.id, session);
 
       socket.emit('typing', false);
       socket.emit('bot_reply', {
-        message: result.reply,
+        message: replyText,
         timestamp: new Date()
       });
-
     } catch (err) {
       console.error('Socket error:', err.message);
       socket.emit('typing', false);
