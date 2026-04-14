@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Properties — Estate49</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/auth.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #c0392b;
+      --primary-dark: #a93226;
+      --primary-light: #fadbd8;
+      --bg: #ffffff;
+      --bg-secondary: #f7f7f8;
+      --bg-tertiary: #ececf1;
+      --border: #e5e5e5;
+      --text: #0d0d0d;
+      --muted: #6e6e80;
+      --radius: 14px;
+    }
+
+    body { font-family: 'Inter', sans-serif; background: var(--bg-secondary); color: var(--text); min-height: 100vh; }
+
+    /* Auth loading */
+    .auth-loading {
+      position: fixed; inset: 0; background: white;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px; z-index: 9999;
+    }
+    .al-icon { width: 56px; height: 56px; background: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 16px rgba(192,57,43,0.25); }
+    .al-spin { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .al-text { font-size: 14px; color: var(--muted); }
+
+    /* Navbar */
+    nav {
+      background: white; border-bottom: 1px solid var(--border);
+      padding: 0 32px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+    }
+    .nav-left { display: flex; align-items: center; gap: 24px; }
+    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .nav-logo-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .nav-logo-text { font-size: 17px; font-weight: 800; color: var(--primary); }
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      padding: 6px 12px; border-radius: 8px; border: none; background: transparent;
+      font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .nav-link:hover { background: var(--bg-secondary); color: var(--text); }
+    .nav-link.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .btn-list {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; background: var(--primary); color: white;
+      border: none; border-radius: 10px; font-size: 13px; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-list:hover { background: var(--primary-dark); }
+
+    /* Page layout */
+    .page { display: none; flex-direction: column; min-height: 100vh; }
+
+    /* Search hero */
+    .search-hero {
+      background: linear-gradient(135deg, #1a0a09 0%, var(--primary-dark) 100%);
+      padding: 32px 32px 0;
+      position: relative; overflow: hidden;
+    }
+    .search-hero::before {
+      content: '🏠'; position: absolute; right: 40px; top: 10px;
+      font-size: 120px; opacity: 0.07;
+    }
+    .search-hero-title { color: white; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .search-hero-sub { color: rgba(255,255,255,0.6); font-size: 13px; margin-bottom: 20px; }
+
+    /* Type tabs */
+    .type-tabs {
+      display: flex; gap: 0;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 3px;
+      width: fit-content; margin-bottom: 16px;
+    }
+    .type-tab {
+      padding: 8px 20px; border-radius: 8px; border: none;
+      font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.65);
+      background: transparent;
+    }
+    .type-tab.active { background: white; color: var(--primary); }
+
+    /* Search bar */
+    .search-bar-wrap {
+      display: flex; gap: 8px; margin-bottom: 0;
+      padding-bottom: 20px;
+    }
+    .search-bar {
+      flex: 1; display: flex; align-items: center; gap: 10px;
+      background: white; border-radius: 12px;
+      padding: 0 16px; height: 48px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    .search-bar input {
+      flex: 1; border: none; outline: none;
+      font-size: 14px; font-family: inherit; color: var(--text);
+      background: transparent;
+    }
+    .search-bar input::placeholder { color: var(--muted); }
+    .search-icon { font-size: 18px; color: var(--muted); }
+    .search-submit {
+      height: 48px; padding: 0 24px;
+      background: var(--primary); color: white;
+      border: none; border-radius: 12px;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(192,57,43,0.35);
+    }
+    .search-submit:hover { background: var(--primary-dark); }
+
+    /* Filters bar */
+    .filters-bar {
+      background: white; border-bottom: 1px solid var(--border);
+      padding: 12px 32px;
+      display: flex; align-items: center; gap: 10px;
+      overflow-x: auto; flex-wrap: nowrap;
+    }
+    .filters-bar::-webkit-scrollbar { display: none; }
+
+    .filter-label { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; margin-right: 4px; }
+
+    .filter-select {
+      padding: 7px 12px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-family: inherit; color: var(--text);
+      background: white; cursor: pointer; outline: none;
+      transition: border-color 0.2s; white-space: nowrap;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e80' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+    .filter-select:focus { border-color: var(--primary); }
+    .filter-select.active { border-color: var(--primary); background-color: var(--primary-light); color: var(--primary); font-weight: 600; }
+
+    .filter-toggle {
+      padding: 7px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-family: inherit; color: var(--muted);
+      background: white; cursor: pointer; white-space: nowrap;
+      transition: all 0.2s; font-weight: 500;
+    }
+    .filter-toggle.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 600; }
+
+    .filter-divider { width: 1px; height: 24px; background: var(--border); flex-shrink: 0; }
+
+    .clear-btn {
+      padding: 7px 14px;
+      border: none; border-radius: 10px;
+      font-size: 13px; font-family: inherit; color: var(--primary);
+      background: var(--primary-light); cursor: pointer;
+      white-space: nowrap; font-weight: 600;
+      transition: all 0.2s; display: none;
+    }
+    .clear-btn:hover { background: var(--primary); color: white; }
+    .clear-btn.show { display: block; }
+
+    /* Results area */
+    .results-area {
+      max-width: 1280px; margin: 0 auto; width: 100%;
+      padding: 24px 32px;
+    }
+
+    .results-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 12px;
+    }
+
+    .results-count { font-size: 14px; color: var(--muted); font-weight: 500; }
+    .results-count strong { color: var(--text); }
+
+    .sort-wrap { display: flex; align-items: center; gap: 8px; }
+    .sort-label { font-size: 13px; color: var(--muted); }
+    .sort-select {
+      padding: 7px 28px 7px 12px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-family: inherit; color: var(--text);
+      background: white; cursor: pointer; outline: none;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e80' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color 0.2s;
+    }
+    .sort-select:focus { border-color: var(--primary); }
+
+    /* Property grid */
+    .prop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    /* Property card */
+    .prop-card {
+      background: white; border-radius: 18px;
+      border: 1px solid var(--border);
+      overflow: hidden; cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .prop-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+      border-color: var(--primary);
+    }
+
+    .prop-img-wrap { position: relative; height: 200px; overflow: hidden; background: var(--bg-tertiary); }
+    .prop-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+    .prop-card:hover .prop-img-wrap img { transform: scale(1.04); }
+    .prop-img-placeholder {
+      width: 100%; height: 100%; display: flex; align-items: center;
+      justify-content: center; font-size: 48px; background: var(--bg-secondary);
+    }
+
+    .prop-badge {
+      position: absolute; top: 12px; left: 12px;
+      padding: 4px 10px; border-radius: 8px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .prop-badge.rent { background: #e3f2fd; color: #1565c0; }
+    .prop-badge.buy  { background: #e8f5e9; color: #2e7d32; }
+
+    .prop-wishlist {
+      position: absolute; top: 12px; right: 12px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(255,255,255,0.9); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; transition: all 0.2s; backdrop-filter: blur(4px);
+    }
+    .prop-wishlist:hover { transform: scale(1.15); }
+    .prop-wishlist.liked { background: var(--primary-light); }
+
+    .prop-body { padding: 16px; }
+
+    .prop-price { font-size: 20px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+    .prop-price span { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+    .prop-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+
+    .prop-location { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+
+    .prop-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .prop-tag {
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 10px; background: var(--bg-secondary);
+      border-radius: 8px; font-size: 12px; color: var(--muted); font-weight: 500;
+    }
+
+    .prop-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 12px; border-top: 1px solid var(--border);
+    }
+    .prop-posted { font-size: 11px; color: var(--muted); }
+    .prop-contact {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; background: var(--primary); color: white;
+      border: none; border-radius: 8px; font-size: 12px; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .prop-contact:hover { background: var(--primary-dark); }
+
+    /* Loading skeleton */
+    .skeleton { animation: shimmer 1.4s infinite; }
+    @keyframes shimmer {
+      0% { background-color: #e5e5e5; }
+      50% { background-color: #f0f0f0; }
+      100% { background-color: #e5e5e5; }
+    }
+    .skel-card { background: white; border-radius: 18px; border: 1px solid var(--border); overflow: hidden; }
+    .skel-img { height: 200px; }
+    .skel-body { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .skel-line { border-radius: 6px; }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center; padding: 80px 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .empty-icon { font-size: 56px; margin-bottom: 8px; }
+    .empty-title { font-size: 20px; font-weight: 700; color: var(--text); }
+    .empty-sub { font-size: 14px; color: var(--muted); max-width: 360px; line-height: 1.6; }
+    .empty-btn {
+      margin-top: 8px; padding: 11px 24px;
+      background: var(--primary); color: white;
+      border: none; border-radius: 12px; font-size: 14px; font-weight: 600;
+      font-family: inherit; cursor: pointer; transition: all 0.2s;
+    }
+    .empty-btn:hover { background: var(--primary-dark); }
+
+    /* Load more */
+    .load-more-wrap { text-align: center; margin-top: 32px; }
+    .load-more-btn {
+      padding: 12px 32px;
+      border: 2px solid var(--primary); border-radius: 12px;
+      background: white; color: var(--primary);
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .load-more-btn:hover { background: var(--primary); color: white; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; z-index: 500; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      nav { padding: 0 16px; }
+      .nav-links { display: none; }
+      .search-hero { padding: 20px 16px 0; }
+      .search-hero-title { font-size: 18px; }
+      .search-hero::before { display: none; }
+      .filters-bar { padding: 10px 16px; }
+      .results-area { padding: 16px; }
+      .prop-grid { grid-template-columns: 1fr; gap: 14px; }
+      .results-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Auth loading -->
+<div class="auth-loading" id="auth-loading">
+  <div class="al-icon">🏠</div>
+  <div class="al-spin"></div>
+  <p class="al-text">Loading...</p>
+</div>
+
+<div class="page" id="page">
+
+  <!-- Navbar -->
+  <nav>
+    <div class="nav-left">
+      <a class="nav-logo" href="/">
+        <div class="nav-logo-icon">🏠</div>
+        <span class="nav-logo-text">Estate49</span>
+      </a>
+      <div class="nav-links">
+        <a class="nav-link" href="/">Home</a>
+        <a class="nav-link active" href="/browse.html">Browse</a>
+        <a class="nav-link" href="/chat.html">AI Chat</a>
+        <a class="nav-link" href="/list-property.html">List Property</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a class="btn-list" href="/list-property.html">+ List Property</a>
+      <div class="nav-avatar" id="nav-avatar" title="Account">👤</div>
+    </div>
+  </nav>
+
+  <!-- Search hero -->
+  <div class="search-hero">
+    <div class="type-tabs">
+      <button class="type-tab active" id="tab-all"  onclick="setType('all')">All</button>
+      <button class="type-tab" id="tab-rent" onclick="setType('rent')">Rent</button>
+      <button class="type-tab" id="tab-buy"  onclick="setType('buy')">Buy</button>
+    </div>
+    <div class="search-hero-title">Find your perfect property</div>
+    <div class="search-hero-sub">Search from thousands of verified listings</div>
+    <div class="search-bar-wrap">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Search by city, area, locality..." onkeydown="if(event.key==='Enter') applyFilters()" />
+      </div>
+      <button class="search-submit" onclick="applyFilters()">Search</button>
+    </div>
+  </div>
+
+  <!-- Filters bar -->
+  <div class="filters-bar">
+    <span class="filter-label">Filters:</span>
+
+    <select class="filter-select" id="f-bhk" onchange="applyFilters()">
+      <option value="">Any BHK</option>
+      <option value="1">1 BHK</option>
+      <option value="2">2 BHK</option>
+      <option value="3">3 BHK</option>
+      <option value="4">4 BHK</option>
+      <option value="5">5+ BHK</option>
+    </select>
+
+    <select class="filter-select" id="f-budget" onchange="applyFilters()">
+      <option value="">Any Budget</option>
+      <option value="0-10000">Under ₹10,000/mo</option>
+      <option value="10000-20000">₹10k – ₹20k/mo</option>
+      <option value="20000-35000">₹20k – ₹35k/mo</option>
+      <option value="35000-60000">₹35k – ₹60k/mo</option>
+      <option value="60000-999999">₹60k+/mo</option>
+      <option value="buy-2500000">Under ₹25L (Buy)</option>
+      <option value="buy-5000000">Under ₹50L (Buy)</option>
+      <option value="buy-10000000">Under ₹1Cr (Buy)</option>
+      <option value="buy-999999999">₹1Cr+ (Buy)</option>
+    </select>
+
+    <select class="filter-select" id="f-city" onchange="applyFilters()">
+      <option value="">Any City</option>
+      <option value="Bengaluru">Bengaluru</option>
+      <option value="Mumbai">Mumbai</option>
+      <option value="Delhi">Delhi</option>
+      <option value="Hyderabad">Hyderabad</option>
+      <option value="Chennai">Chennai</option>
+      <option value="Pune">Pune</option>
+      <option value="Kolkata">Kolkata</option>
+      <option value="Ahmedabad">Ahmedabad</option>
+    </select>
+
+    <select class="filter-select" id="f-furnished" onchange="applyFilters()">
+      <option value="">Any Furnishing</option>
+      <option value="furnished">Fully Furnished</option>
+      <option value="semi">Semi Furnished</option>
+      <option value="unfurnished">Unfurnished</option>
+    </select>
+
+    <div class="filter-divider"></div>
+
+    <button class="filter-toggle" id="t-parking"    onclick="toggleFilter('parking')">🚗 Parking</button>
+    <button class="filter-toggle" id="t-pet"        onclick="toggleFilter('pet')">🐾 Pet Friendly</button>
+    <button class="filter-toggle" id="t-brokerage"  onclick="toggleFilter('brokerage')">✅ No Brokerage</button>
+    <button class="filter-toggle" id="t-gym"        onclick="toggleFilter('gym')">💪 Gym</button>
+    <button class="filter-toggle" id="t-pool"       onclick="toggleFilter('pool')">🏊 Pool</button>
+
+    <div class="filter-divider"></div>
+
+    <button class="clear-btn" id="clear-btn" onclick="clearFilters()">✕ Clear All</button>
+  </div>
+
+  <!-- Results -->
+  <div class="results-area">
+    <div class="results-header">
+      <div class="results-count" id="results-count">Loading properties...</div>
+      <div class="sort-wrap">
+        <span class="sort-label">Sort by:</span>
+        <select class="sort-select" id="sort-select" onchange="applyFilters()">
+          <option value="newest">Newest First</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="area-high">Area: Largest First</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="prop-grid" id="prop-grid">
+      <!-- Skeleton loaders -->
+      ${[1,2,3,4,5,6].map(() => `
+        <div class="skel-card">
+          <div class="skel-img skeleton"></div>
+          <div class="skel-body">
+            <div class="skel-line skeleton" style="height:20px;width:60%"></div>
+            <div class="skel-line skeleton" style="height:16px;width:80%"></div>
+            <div class="skel-line skeleton" style="height:14px;width:50%"></div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+      <button class="load-more-btn" onclick="loadMore()">Load More Properties</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast-el"></div>
+
+<script>
+  let allProperties = [];
+  let filteredProperties = [];
+  let displayedCount = 0;
+  const PAGE_SIZE = 12;
+
+  let activeType = 'all';
+  let activeToggles = { parking: false, pet: false, brokerage: false, gym: false, pool: false };
+  let liked = new Set();
+
+  // ── Auth ──────────────────────────────────────────
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const session = await getSession();
+      if (!session) { window.location.href = '/login.html'; return; }
+
+      const user = session.user;
+      const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
+      const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      document.getElementById('nav-avatar').textContent = initials;
+      document.getElementById('nav-avatar').title = fullName;
+
+      document.getElementById('auth-loading').style.display = 'none';
+      document.getElementById('page').style.display = 'flex';
+      document.getElementById('page').style.flexDirection = 'column';
+
+      // Read URL params
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('type')) setType(params.get('type'), false);
+      if (params.get('q')) document.getElementById('search-input').value = params.get('q');
+
+      await fetchProperties();
+
+    } catch(e) { window.location.href = '/login.html'; }
+  });
+
+  // ── Fetch from API ────────────────────────────────
+  async function fetchProperties() {
+    try {
+      const res = await fetch('/api/properties');
+      const data = await res.json();
+      allProperties = Array.isArray(data) ? data : (data.properties || data.data || []);
+      applyFilters();
+    } catch(e) {
+      allProperties = [];
+      renderDemoProperties();
+    }
+  }
+
+  // ── Demo properties (fallback if API has no data yet) ──
+  function renderDemoProperties() {
+    allProperties = [
+      { id:1, title:'Spacious 2BHK in Koramangala', price:25000, type:'rent', bhk:2, area:1100, city:'Bengaluru', locality:'Koramangala', furnished:'furnished', parking:true, pet_friendly:false, no_brokerage:true, gym:false, pool:false, photos:[], posted_at: new Date().toISOString() },
+      { id:2, title:'Modern 3BHK with Pool in Whitefield', price:45000, type:'rent', bhk:3, area:1650, city:'Bengaluru', locality:'Whitefield', furnished:'furnished', parking:true, pet_friendly:true, no_brokerage:false, gym:true, pool:true, photos:[], posted_at: new Date().toISOString() },
+      { id:3, title:'Affordable 1BHK in HSR Layout', price:12000, type:'rent', bhk:1, area:550, city:'Bengaluru', locality:'HSR Layout', furnished:'semi', parking:false, pet_friendly:false, no_brokerage:true, gym:false, pool:false, photos:[], posted_at: new Date().toISOString() },
+      { id:4, title:'Luxury 4BHK Villa in Sarjapur', price:9500000, type:'buy', bhk:4, area:3200, city:'Bengaluru', locality:'Sarjapur', furnished:'unfurnished', parking:true, pet_friendly:true, no_brokerage:false, gym:true, pool:true, photos:[], posted_at: new Date().toISOString() },
+      { id:5, title:'2BHK Apartment in Indiranagar', price:32000, type:'rent', bhk:2, area:1050, city:'Bengaluru', locality:'Indiranagar', furnished:'semi', parking:true, pet_friendly:false, no_brokerage:false, gym:false, pool:false, photos:[], posted_at: new Date().toISOString() },
+      { id:6, title:'Ready to Move 3BHK in Electronic City', price:7200000, type:'buy', bhk:3, area:1800, city:'Bengaluru', locality:'Electronic City', furnished:'unfurnished', parking:true, pet_friendly:false, no_brokerage:true, gym:true, pool:false, photos:[], posted_at: new Date().toISOString() },
+    ];
+    applyFilters();
+    toast('📌 Showing demo listings — add real properties via List Property');
+  }
+
+  // ── Filters ───────────────────────────────────────
+  function setType(type, doFilter = true) {
+    activeType = type;
+    ['all','rent','buy'].forEach(t => {
+      document.getElementById('tab-' + t).classList.toggle('active', t === type);
+    });
+    if (doFilter) applyFilters();
+  }
+
+  function toggleFilter(key) {
+    activeToggles[key] = !activeToggles[key];
+    document.getElementById('t-' + key).classList.toggle('active', activeToggles[key]);
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const q         = document.getElementById('search-input').value.trim().toLowerCase();
+    const bhk       = document.getElementById('f-bhk').value;
+    const budget    = document.getElementById('f-budget').value;
+    const city      = document.getElementById('f-city').value;
+    const furnished = document.getElementById('f-furnished').value;
+    const sort      = document.getElementById('sort-select').value;
+
+    // Mark selects active
+    ['f-bhk','f-budget','f-city','f-furnished'].forEach(id => {
+      document.getElementById(id).classList.toggle('active', !!document.getElementById(id).value);
+    });
+
+    const hasFilters = q || bhk || budget || city || furnished ||
+      Object.values(activeToggles).some(Boolean) || activeType !== 'all';
+    document.getElementById('clear-btn').classList.toggle('show', hasFilters);
+
+    let result = [...allProperties];
+
+    // Type
+    if (activeType !== 'all') result = result.filter(p => p.type === activeType);
+
+    // Search
+    if (q) result = result.filter(p =>
+      (p.title||'').toLowerCase().includes(q) ||
+      (p.city||'').toLowerCase().includes(q) ||
+      (p.locality||'').toLowerCase().includes(q) ||
+      (p.description||'').toLowerCase().includes(q)
+    );
+
+    // BHK
+    if (bhk) result = result.filter(p => {
+      if (bhk === '5') return p.bhk >= 5;
+      return p.bhk == bhk;
+    });
+
+    // Budget
+    if (budget) {
+      if (budget.startsWith('buy-')) {
+        const max = parseInt(budget.split('-')[1]);
+        result = result.filter(p => p.type === 'buy' && p.price <= max);
+      } else {
+        const [min, max] = budget.split('-').map(Number);
+        result = result.filter(p => p.type === 'rent' && p.price >= min && p.price <= max);
+      }
+    }
+
+    // City
+    if (city) result = result.filter(p => (p.city||'').toLowerCase() === city.toLowerCase());
+
+    // Furnished
+    if (furnished) result = result.filter(p => (p.furnished||'').toLowerCase().includes(furnished));
+
+    // Toggles
+    if (activeToggles.parking)   result = result.filter(p => p.parking);
+    if (activeToggles.pet)       result = result.filter(p => p.pet_friendly);
+    if (activeToggles.brokerage) result = result.filter(p => p.no_brokerage);
+    if (activeToggles.gym)       result = result.filter(p => p.gym);
+    if (activeToggles.pool)      result = result.filter(p => p.pool);
+
+    // Sort
+    if (sort === 'price-low')  result.sort((a,b) => a.price - b.price);
+    if (sort === 'price-high') result.sort((a,b) => b.price - a.price);
+    if (sort === 'area-high')  result.sort((a,b) => (b.area||0) - (a.area||0));
+    if (sort === 'newest')     result.sort((a,b) => new Date(b.posted_at||0) - new Date(a.posted_at||0));
+
+    filteredProperties = result;
+    displayedCount = 0;
+    renderGrid(true);
+  }
+
+  function clearFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('f-bhk').value = '';
+    document.getElementById('f-budget').value = '';
+    document.getElementById('f-city').value = '';
+    document.getElementById('f-furnished').value = '';
+    Object.keys(activeToggles).forEach(k => {
+      activeToggles[k] = false;
+      document.getElementById('t-' + k).classList.remove('active');
+    });
+    setType('all', false);
+    applyFilters();
+  }
+
+  // ── Render ────────────────────────────────────────
+  function renderGrid(reset = false) {
+    const grid = document.getElementById('prop-grid');
+    if (reset) { grid.innerHTML = ''; displayedCount = 0; }
+
+    const slice = filteredProperties.slice(displayedCount, displayedCount + PAGE_SIZE);
+    displayedCount += slice.length;
+
+    if (filteredProperties.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🏚️</div>
+          <div class="empty-title">No properties found</div>
+          <div class="empty-sub">Try adjusting your filters or search query to find more properties.</div>
+          <button class="empty-btn" onclick="clearFilters()">Clear All Filters</button>
+        </div>`;
+    } else {
+      slice.forEach(p => {
+        const card = createCard(p);
+        grid.appendChild(card);
+      });
+    }
+
+    // Results count
+    document.getElementById('results-count').innerHTML =
+      `<strong>${filteredProperties.length}</strong> ${filteredProperties.length === 1 ? 'property' : 'properties'} found`;
+
+    // Load more
+    const lmw = document.getElementById('load-more-wrap');
+    lmw.style.display = displayedCount < filteredProperties.length ? 'block' : 'none';
+  }
+
+  function loadMore() { renderGrid(false); }
+
+  function createCard(p) {
+    const wrap = document.createElement('div');
+    wrap.className = 'prop-card';
+    wrap.onclick = () => openProperty(p.id);
+
+    const isRent = p.type === 'rent';
+    const photo = (p.photos && p.photos.length > 0) ? p.photos[0] : null;
+    const imgHtml = photo
+      ? `<img src="${photo}" alt="${esc(p.title)}" loading="lazy" />`
+      : `<div class="prop-img-placeholder">🏠</div>`;
+
+    const price = isRent
+      ? `₹${Number(p.price).toLocaleString('en-IN')}<span>/month</span>`
+      : `₹${formatPrice(p.price)}`;
+
+    const tags = [];
+    if (p.bhk)       tags.push(`🛏️ ${p.bhk} BHK`);
+    if (p.area)      tags.push(`📐 ${p.area} sq.ft`);
+    if (p.furnished) tags.push(`🪑 ${capitalize(p.furnished)}`);
+    if (p.parking)   tags.push(`🚗 Parking`);
+    if (p.pet_friendly) tags.push(`🐾 Pets OK`);
+    if (p.no_brokerage) tags.push(`✅ No Brokerage`);
+
+    const isLiked = liked.has(p.id);
+    const posted = p.posted_at ? timeAgo(p.posted_at) : 'Recently';
+
+    wrap.innerHTML = `
+      <div class="prop-img-wrap">
+        ${imgHtml}
+        <span class="prop-badge ${isRent ? 'rent' : 'buy'}">${isRent ? 'Rent' : 'Buy'}</span>
+        <button class="prop-wishlist ${isLiked ? 'liked' : ''}" onclick="event.stopPropagation(); toggleLike(${p.id}, this)">${isLiked ? '❤️' : '🤍'}</button>
+      </div>
+      <div class="prop-body">
+        <div class="prop-price">${price}</div>
+        <div class="prop-title">${esc(p.title || 'Property Listing')}</div>
+        <div class="prop-location">📍 ${esc((p.locality ? p.locality + ', ' : '') + (p.city || ''))}</div>
+        <div class="prop-tags">${tags.slice(0,4).map(t => `<span class="prop-tag">${t}</span>`).join('')}</div>
+        <div class="prop-footer">
+          <span class="prop-posted">Posted ${posted}</span>
+          <button class="prop-contact" onclick="event.stopPropagation(); contactOwner(${p.id})">📞 Contact</button>
+        </div>
+      </div>`;
+
+    return wrap;
+  }
+
+  function openProperty(id) {
+    window.location.href = `/property.html?id=${id}`;
+  }
+
+  function toggleLike(id, btn) {
+    if (liked.has(id)) {
+      liked.delete(id);
+      btn.textContent = '🤍';
+      btn.classList.remove('liked');
+      toast('Removed from wishlist');
+    } else {
+      liked.add(id);
+      btn.textContent = '❤️';
+      btn.classList.add('liked');
+      toast('❤️ Added to wishlist');
+    }
+  }
+
+  function contactOwner(id) {
+    toast('📞 Contact feature coming soon!');
+  }
+
+  // ── Helpers ───────────────────────────────────────
+  function formatPrice(n) {
+    n = Number(n);
+    if (n >= 10000000) return (n/10000000).toFixed(1).replace(/\.0$/,'') + ' Cr';
+    if (n >= 100000)   return (n/100000).toFixed(1).replace(/\.0$/,'') + ' L';
+    if (n >= 1000)     return (n/1000).toFixed(0) + 'K';
+    return n.toLocaleString('en-IN');
+  }
+
+  function capitalize(s) {
+    if (!s) return '';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+
+  function esc(t) {
+    return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function timeAgo(dateStr) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return 'today';
+    if (days === 1) return 'yesterday';
+    if (days < 7)  return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days/7)} weeks ago`;
+    return `${Math.floor(days/30)} months ago`;
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('toast-el');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
