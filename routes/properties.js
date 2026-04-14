@@ -142,7 +142,7 @@ router.post('/', async (req, res) => {
 
   } catch (err) {
     console.error('POST /api/properties error:', err.message);
-    res.status(500).json({ error: 'Failed to create property' });
+    res.status(500).json({ error: err.message || 'Failed to create property' });
   }
 });
 
