@@ -66,6 +66,39 @@ app.get('/login', (req, res) => {
 app.get('/login.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
+
+// ─── New Page Routes ──────────────────────────────────────────────────────────
+app.get('/chat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+});
+
+app.get('/chat.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+});
+
+app.get('/browse', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'browse.html'));
+});
+
+app.get('/browse.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'browse.html'));
+});
+
+app.get('/list-property', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'list-property.html'));
+});
+
+app.get('/list-property.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'list-property.html'));
+});
+
+app.get('/property', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'property.html'));
+});
+
+app.get('/property.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'property.html'));
+});
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Test DB connection
