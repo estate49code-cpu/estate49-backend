@@ -20,24 +20,13 @@
       --text-secondary: #6e6e80;
       --text-muted: #acacbe;
       --border: #e5e5e5;
-      --radius: 18px;
       --sidebar-width: 260px;
-      --content-width: 720px;
+      --content-width: 680px;
     }
 
-    html, body {
-      height: 100%;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text-primary);
-      overflow: hidden;
-    }
+    html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); overflow: hidden; }
 
-    .app {
-      display: flex;
-      height: 100dvh;
-      position: relative;
-    }
+    .app { display: flex; height: 100dvh; position: relative; }
 
     /* ── Sidebar ── */
     .sidebar {
@@ -60,43 +49,26 @@
       gap: 10px;
     }
 
-    .sidebar-logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-    }
+    .sidebar-logo { display: flex; align-items: center; gap: 8px; flex: 1; }
 
     .logo-icon {
-      width: 32px;
-      height: 32px;
+      width: 32px; height: 32px;
       background: var(--primary);
       border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 16px;
     }
 
-    .sidebar-logo span {
-      font-weight: 700;
-      font-size: 15px;
-      color: var(--primary);
-    }
+    .sidebar-logo span { font-weight: 700; font-size: 15px; color: var(--primary); }
 
     .icon-btn {
-      width: 32px;
-      height: 32px;
+      width: 32px; height: 32px;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: white;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--text-secondary);
       transition: all 0.2s;
     }
     .icon-btn:hover { background: var(--primary-light); color: var(--primary); }
@@ -104,75 +76,46 @@
     .sidebar-section { padding: 12px 8px; }
 
     .section-title {
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 11px; font-weight: 600;
       color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 4px 8px;
-      margin-bottom: 4px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 4px 8px; margin-bottom: 4px;
     }
 
-    .nav-btns { display: flex; flex-direction: column; gap: 4px; }
+    .nav-btns { display: flex; flex-direction: column; gap: 2px; }
 
     .nav-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      transition: all 0.2s;
-      text-align: left;
-      width: 100%;
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px;
+      border-radius: 10px; border: none; background: transparent;
+      cursor: pointer; font-size: 13px; font-weight: 500;
+      color: var(--text-secondary); transition: all 0.2s;
+      text-align: left; width: 100%;
     }
     .nav-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .nav-btn.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
-    .nav-btn .n-icon { font-size: 16px; }
+    .nav-btn .n-icon { font-size: 15px; flex-shrink: 0; }
 
-    .divider { height: 1px; background: var(--border); margin: 8px 16px; }
+    .divider { height: 1px; background: var(--border); margin: 6px 16px; }
 
-    .sidebar-footer {
-      padding: 12px 16px;
-      border-top: 1px solid var(--border);
-    }
+    .sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); }
 
     .footer-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 13px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s;
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px; border-radius: 8px;
+      font-size: 13px; color: var(--text-secondary);
+      cursor: pointer; transition: all 0.2s;
     }
     .footer-item:hover { background: var(--bg-tertiary); }
 
     .footer-brand {
-      padding: 10px 8px 4px;
-      font-size: 11px;
-      color: var(--text-muted);
-      text-align: center;
-      line-height: 1.5;
+      padding: 10px 8px 2px;
+      font-size: 11px; color: var(--text-muted);
+      text-align: center; line-height: 1.6;
     }
 
     /* ── Main ── */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      overflow: hidden;
-      min-width: 0;
-      background: var(--bg);
-    }
+    .main { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; min-width: 0; }
 
     /* ── Topbar (mobile) ── */
     .topbar {
@@ -181,428 +124,282 @@
       padding: 10px 16px;
       border-bottom: 1px solid var(--border);
       background: var(--bg);
-      gap: 12px;
-      flex-shrink: 0;
-      z-index: 10;
+      gap: 12px; flex-shrink: 0;
     }
 
     .topbar-menu {
-      width: 36px;
-      height: 36px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      font-size: 22px;
-      color: var(--text-secondary);
+      width: 36px; height: 36px;
+      border: none; background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 8px; font-size: 22px; color: var(--text-secondary);
     }
 
-    .topbar-center {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    .topbar-center { flex: 1; display: flex; align-items: center; gap: 8px; }
     .topbar-title { font-weight: 700; font-size: 17px; color: var(--primary); }
 
     .mode-badge {
       font-size: 11px;
-      background: var(--primary-light);
-      color: var(--primary);
-      padding: 3px 8px;
-      border-radius: 20px;
-      font-weight: 600;
+      background: var(--primary-light); color: var(--primary);
+      padding: 3px 8px; border-radius: 20px; font-weight: 600;
     }
 
     /* ── Messages ── */
     .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 32px 16px;
+      flex: 1; overflow-y: auto;
+      padding: 32px 24px;
       scroll-behavior: smooth;
     }
-
     .messages::-webkit-scrollbar { width: 4px; }
     .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-    /* Claude-style: center content column */
-    .msg-inner {
-      max-width: var(--content-width);
-      margin: 0 auto;
-      width: 100%;
-    }
+    /* Claude-style centered column */
+    .msg-inner { max-width: var(--content-width); margin: 0 auto; width: 100%; }
 
     /* Welcome */
     .welcome {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      text-align: center;
-      padding: 24px 16px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 60vh; text-align: center; padding: 24px 16px;
     }
 
     .welcome-icon {
-      width: 72px;
-      height: 72px;
-      background: var(--primary);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 36px;
-      margin-bottom: 20px;
+      width: 72px; height: 72px;
+      background: var(--primary); border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; margin-bottom: 20px;
       box-shadow: 0 4px 24px rgba(192,57,43,0.25);
     }
 
     .welcome h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+    .welcome .sub { font-size: 15px; color: var(--text-secondary); max-width: 440px; line-height: 1.65; margin-bottom: 6px; }
+    .welcome .by { font-size: 12px; color: var(--text-muted); margin-bottom: 32px; }
 
-    .welcome .sub {
-      font-size: 15px;
-      color: var(--text-secondary);
-      max-width: 420px;
-      line-height: 1.6;
-      margin-bottom: 8px;
-    }
-
-    .welcome .by {
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-bottom: 32px;
-    }
-
-    .cards-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      width: 100%;
-      max-width: 480px;
-    }
+    .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px; }
 
     .card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      cursor: pointer;
-      text-align: left;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px; cursor: pointer; text-align: left;
       transition: all 0.2s;
     }
     .card:hover { background: var(--primary-light); border-color: var(--primary); transform: translateY(-1px); }
     .card .c-icon { font-size: 22px; margin-bottom: 8px; display: block; }
-    .card .c-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .card .c-title { font-size: 13px; font-weight: 600; }
     .card .c-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
 
-    /* Message rows — Claude style */
-    .msg-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .msg-row.user {
-      flex-direction: row-reverse;
-    }
+    /* Message rows */
+    .msg-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 28px; }
+    .msg-row.user { flex-direction: row-reverse; }
 
     .avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      margin-top: 2px;
+      width: 32px; height: 32px; border-radius: 50%;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 15px; margin-top: 2px;
     }
     .avatar.ai { background: var(--primary); }
     .avatar.me { background: var(--bg-tertiary); border: 1px solid var(--border); }
 
-    /* Claude: AI bubble is full width, user is pill */
-    .bubble {
-      font-size: 15px;
-      line-height: 1.7;
-      word-break: break-word;
-    }
+       /* Claude style: AI bubble is full-width, user is pill */
+    .bubble { font-size: 15px; line-height: 1.8; word-break: break-word; }
 
-    .bubble.ai {
-      flex: 1;
-      color: var(--text-primary);
-      background: transparent;
-      padding: 0;
-    }
+    .bubble.ai { flex: 1; color: var(--text-primary); background: transparent; padding: 0; }
 
     .bubble.user {
-      background: var(--primary);
-      color: white;
-      padding: 12px 18px;
-      border-radius: 20px;
-      border-bottom-right-radius: 4px;
-      max-width: 75%;
+      background: var(--primary); color: white;
+      padding: 12px 18px; border-radius: 20px;
+      border-bottom-right-radius: 4px; max-width: 75%;
     }
 
-    .bubble p { margin-bottom: 8px; }
-    .bubble p:last-child { margin-bottom: 0; }
-    .price-highlight { color: var(--primary); font-weight: 700; }
+    /* Paragraphs inside AI bubble */
+    .bubble.ai p { margin-bottom: 12px; }
+    .bubble.ai p:last-child { margin-bottom: 0; }
 
-    /* Property card inside bubble */
-    .prop-card {
+    /* Bullet lists inside AI bubble */
+    .bubble.ai ul { margin: 8px 0 12px 4px; display: flex; flex-direction: column; gap: 6px; }
+    .bubble.ai ul li { display: flex; gap: 8px; align-items: flex-start; }
+    .bubble.ai ul li::before { content: '•'; color: var(--primary); font-weight: 700; flex-shrink: 0; }
+
+    /* Section separator */
+    .bubble.ai hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+    /* Property card block inside AI bubble */
+    .prop-block {
       background: var(--bg-secondary);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      margin: 10px 0;
-      transition: box-shadow 0.2s;
+      border-radius: 14px; padding: 16px; margin: 12px 0;
     }
-    .prop-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .prop-block p { margin-bottom: 8px; }
+    .prop-block p:last-child { margin-bottom: 0; }
+
+    /* Price highlight */
+    .price-hl { color: var(--primary); font-weight: 700; }
 
     /* Photo gallery */
     .photo-gallery {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 4px;
-      margin-top: 12px;
-      border-radius: 12px;
-      overflow: hidden;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 4px; margin-top: 12px;
+      border-radius: 12px; overflow: hidden;
     }
     .photo-gallery img {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      cursor: pointer;
-      transition: opacity 0.2s;
+      width: 100%; aspect-ratio: 1; object-fit: cover;
+      cursor: pointer; transition: opacity 0.2s;
     }
     .photo-gallery img:hover { opacity: 0.85; }
     .photo-gallery img:only-child { grid-column: span 3; aspect-ratio: 16/9; }
+    .photo-gallery img:first-child:nth-last-child(2),
+    .photo-gallery img:first-child:nth-last-child(2) ~ img { aspect-ratio: 4/3; }
 
-    /* Typing */
-    .typing-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 24px;
+    /* Searching indicator */
+    .searching-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px 16px; margin: 8px 0;
+      font-size: 13px; color: var(--text-secondary);
     }
-    .typing-dots {
-      display: flex;
-      gap: 5px;
-      padding: 14px 0 4px;
+    .searching-bar .spin {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Typing dots */
+    .typing-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 24px; }
+    .typing-dots { display: flex; gap: 5px; padding: 6px 0; }
     .typing-dots span {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--text-muted);
-      animation: bounce 1.2s infinite;
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--text-muted); animation: bounce 1.2s infinite;
     }
     .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
     .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
 
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-6px); }
-    }
+    /* ── Input Area ── */
+    .input-area { padding: 8px 24px 16px; background: var(--bg); flex-shrink: 0; }
+    .input-inner { max-width: var(--content-width); margin: 0 auto; }
 
-    /* ── Input Area — Claude style centered ── */
-    .input-area {
-      padding: 8px 16px 16px;
-      background: var(--bg);
-      flex-shrink: 0;
-    }
-
-    /* Center input to content-width */
-    .input-inner {
-      max-width: var(--content-width);
-      margin: 0 auto;
-    }
-
-    .chips {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      padding: 4px 0 10px;
-      scrollbar-width: none;
-    }
+    .chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; scrollbar-width: none; }
     .chips::-webkit-scrollbar { display: none; }
 
     .chip {
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      display: flex; align-items: center; gap: 4px;
       padding: 5px 13px;
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 20px; font-size: 12px; font-weight: 500;
+      color: var(--text-secondary); white-space: nowrap; cursor: pointer;
+      transition: all 0.2s; flex-shrink: 0;
     }
     .chip:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
 
+    /* Input box */
     .input-box {
-      display: flex;
-      align-items: flex-end;
-      gap: 6px;
-      background: var(--bg-secondary);
-      border: 1.5px solid var(--border);
-      border-radius: 18px;
-      padding: 10px 10px 10px 16px;
+      background: var(--bg-secondary); border: 1.5px solid var(--border);
+      border-radius: 18px; padding: 10px 10px 10px 16px;
       transition: border-color 0.2s, box-shadow 0.2s;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .input-box:focus-within {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
-    }
+    .input-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
+
+    /* Top row: textarea */
+    .input-top { display: flex; align-items: flex-end; gap: 6px; }
 
     #chat-input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      font-size: 15px;
-      font-family: inherit;
-      color: var(--text-primary);
-      outline: none;
-      resize: none;
-      max-height: 140px;
-      min-height: 24px;
-      line-height: 1.5;
+      flex: 1; border: none; background: transparent;
+      font-size: 15px; font-family: inherit; color: var(--text-primary);
+      outline: none; resize: none; max-height: 140px; min-height: 24px; line-height: 1.5;
     }
     #chat-input::placeholder { color: var(--text-muted); }
 
-    .input-btns {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      flex-shrink: 0;
+    /* Bottom row: tools + send */
+    .input-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 8px; padding-top: 8px;
+      border-top: 1px solid var(--border);
     }
+
+    .input-tools { display: flex; gap: 2px; }
 
     .ibt {
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: 10px;
-      background: transparent;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      color: var(--text-muted);
+      height: 32px; padding: 0 10px;
+      border: none; border-radius: 8px; background: transparent;
+      cursor: pointer; display: flex; align-items: center; gap: 5px;
+      font-size: 13px; color: var(--text-secondary);
       transition: all 0.2s;
     }
-    .ibt:hover { background: var(--bg-tertiary); color: var(--text-secondary); }
+    .ibt:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+    .ibt .ibt-icon { font-size: 16px; }
+
+    .input-right { display: flex; align-items: center; gap: 8px; }
+
+    .char-count { font-size: 11px; color: var(--text-muted); }
 
     .send-btn {
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: 10px;
-      background: var(--primary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      transition: all 0.2s;
-      flex-shrink: 0;
+      width: 36px; height: 36px; border: none; border-radius: 10px;
+      background: var(--primary); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: white; transition: all 0.2s; flex-shrink: 0;
     }
     .send-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
     .send-btn:disabled { background: var(--border); cursor: not-allowed; transform: none; }
 
-    .input-hint {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 8px;
+    /* Photo preview strip */
+    .photo-preview {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      padding: 8px 0 4px;
+    }
+    .photo-thumb {
+      position: relative; width: 64px; height: 64px;
+      border-radius: 8px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-thumb .rm {
+      position: absolute; top: 2px; right: 2px;
+      background: rgba(0,0,0,0.65); color: white;
+      border: none; border-radius: 50%; width: 18px; height: 18px;
+      font-size: 11px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+    }
+
+    .input-hint { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+
+    /* ── Location pill ── */
+    .location-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #e8f5e9; border: 1px solid #a5d6a7;
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 12px; color: #2e7d32; margin-bottom: 8px;
     }
 
     /* ── Overlay ── */
-    .overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 99;
-    }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 99; }
     .overlay.open { display: block; }
 
     /* ── Lightbox ── */
-    .lightbox {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.93);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.93); z-index: 1000; align-items: center; justify-content: center; }
     .lightbox.open { display: flex; }
     .lightbox img { max-width: 95vw; max-height: 90vh; border-radius: 8px; }
-    .lb-close {
-      position: absolute;
-      top: 16px; right: 16px;
-      background: rgba(255,255,255,0.15);
-      border: none;
-      color: white;
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      font-size: 20px;
-      cursor: pointer;
-    }
+    .lb-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.15); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; }
 
     /* ── Toast ── */
-    .toast {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%) translateY(10px);
-      background: #1a1a1a;
-      color: white;
-      padding: 10px 18px;
-      border-radius: 20px;
-      font-size: 13px;
-      opacity: 0;
-      transition: all 0.3s;
-      z-index: 500;
-      pointer-events: none;
-      white-space: nowrap;
-    }
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(10px); background: #1a1a1a; color: white; padding: 10px 18px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; z-index: 500; pointer-events: none; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ── Mobile ── */
     @media (max-width: 768px) {
-      .sidebar {
-        position: fixed;
-        top: 0; left: 0;
-        height: 100%;
-        transform: translateX(-100%);
-        box-shadow: 4px 0 24px rgba(0,0,0,0.15);
-      }
+      .sidebar { position: fixed; top: 0; left: 0; height: 100%; transform: translateX(-100%); box-shadow: 4px 0 24px rgba(0,0,0,0.15); }
       .sidebar.open { transform: translateX(0); }
       .topbar { display: flex; }
-      .messages { padding: 16px 12px; }
+      .messages { padding: 16px 14px; }
+      .input-area { padding: 6px 14px 14px; }
       .bubble.user { max-width: 88%; }
-      .cards-grid { grid-template-columns: 1fr 1fr; }
       .welcome h1 { font-size: 20px; }
+      .cards-grid { grid-template-columns: 1fr 1fr; }
     }
 
-    @media (min-width: 769px) {
-      .topbar { display: none; }
-    }
+    @media (min-width: 769px) { .topbar { display: none; } }
   </style>
 </head>
 <body>
-
 <div class="app">
   <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
 
@@ -633,30 +430,15 @@
     <div class="sidebar-section">
       <div class="section-title">Quick Topics</div>
       <div class="nav-btns">
-        <button class="nav-btn" onclick="quick('Best areas to rent in Bengaluru for IT professionals')">
-          <span class="n-icon">📍</span> Best Areas
-        </button>
-        <button class="nav-btn" onclick="quick('Average rent trends for 2BHK in Whitefield Bengaluru 2025')">
-          <span class="n-icon">💰</span> Rent Trends
-        </button>
-        <button class="nav-btn" onclick="quick('Tips for first-time home buyers in India')">
-          <span class="n-icon">🏡</span> Buyer Guide
-        </button>
-        <button class="nav-btn" onclick="quick('Documents needed to rent a flat in Bengaluru')">
-          <span class="n-icon">📄</span> Documents
-        </button>
-        <button class="nav-btn" onclick="quick('What is RERA and how does it protect home buyers in India?')">
-          <span class="n-icon">⚖️</span> RERA & Legal
-        </button>
-        <button class="nav-btn" onclick="quick('Best real estate investment areas in Bengaluru 2025')">
-          <span class="n-icon">📈</span> Investment
-        </button>
-        <button class="nav-btn" onclick="quick('How to buy property in Dubai as an Indian NRI?')">
-          <span class="n-icon">🌍</span> Global Markets
-        </button>
-        <button class="nav-btn" onclick="quick('How to calculate rental yield and ROI on a property?')">
-          <span class="n-icon">🧮</span> ROI Calculator
-        </button>
+        <button class="nav-btn" onclick="quick('Best areas to rent in Bengaluru for IT professionals 2025')"><span class="n-icon">📍</span> Best Areas</button>
+        <button class="nav-btn" onclick="quick('Current rent trends for 2BHK in Whitefield Bengaluru 2025')"><span class="n-icon">💰</span> Rent Trends</button>
+        <button class="nav-btn" onclick="quick('Tips for first time home buyers in India complete guide')"><span class="n-icon">🏡</span> Buyer Guide</button>
+        <button class="nav-btn" onclick="quick('Documents needed to rent a flat checklist India')"><span class="n-icon">📄</span> Documents</button>
+        <button class="nav-btn" onclick="quick('What is RERA and how does it protect home buyers in India?')"><span class="n-icon">⚖️</span> RERA & Legal</button>
+        <button class="nav-btn" onclick="quick('Best real estate investment areas for 2025 high rental yield')"><span class="n-icon">📈</span> Investment</button>
+        <button class="nav-btn" onclick="quick('Is it safe to invest in Dubai real estate in 2025? Current market analysis')"><span class="n-icon">🌍</span> Global Markets</button>
+        <button class="nav-btn" onclick="quick('How to calculate rental yield ROI on investment property?')"><span class="n-icon">🧮</span> ROI & Yield</button>
+        <button class="nav-btn" onclick="quick('NRI guide to buying property in India rules and taxes')"><span class="n-icon">✈️</span> NRI Guide</button>
       </div>
     </div>
 
@@ -666,7 +448,7 @@
       <div class="footer-item" onclick="toast('Settings coming soon!')">⚙️ Settings</div>
       <div class="footer-item" onclick="toast('Help center coming soon!')">❓ Help & FAQ</div>
       <div class="footer-brand">
-        Estate49 · A Stenkepler Corporation Product<br/>
+        Estate49 · Stenkepler Corporation<br/>
         Founded by Alisten Andrew
       </div>
     </div>
@@ -686,19 +468,19 @@
 
     <!-- Messages -->
     <div class="messages" id="messages">
-      <div class="msg-inner">
-        <div class="welcome" id="welcome">
+      <div class="msg-inner" id="welcome-wrap">
+        <div class="welcome">
           <div class="welcome-icon">🏠</div>
           <h1>Welcome to Estate49</h1>
-          <p class="sub">Your AI-powered real estate assistant — search, rent, buy, list, and get expert advice on properties worldwide.</p>
+          <p class="sub">Your AI-powered real estate assistant. Search, rent, buy, list, and get expert advice on properties anywhere in the world.</p>
           <p class="by">A Stenkepler Corporation product · Founded by Alisten Andrew</p>
           <div class="cards-grid">
-            <div class="card" onclick="quick('I am looking for a 2BHK flat to rent in Bengaluru under ₹25000')">
+            <div class="card" onclick="quick('I am looking for a 2BHK flat to rent under ₹25000')">
               <span class="c-icon">🔍</span>
               <div class="c-title">Find a rental</div>
               <div class="c-sub">2BHK, 3BHK flats</div>
             </div>
-            <div class="card" onclick="quick('I want to buy a flat in Whitefield Bengaluru under 80 lakhs')">
+            <div class="card" onclick="quick('I want to buy a flat under 80 lakhs')">
               <span class="c-icon">🏡</span>
               <div class="c-title">Buy a property</div>
               <div class="c-sub">Apartments, villas</div>
@@ -708,10 +490,10 @@
               <div class="c-title">List your property</div>
               <div class="c-sub">Free listing</div>
             </div>
-            <div class="card" onclick="quick('Best localities in Bengaluru for families with good schools and connectivity')">
-              <span class="c-icon">📍</span>
-              <div class="c-title">Explore areas</div>
-              <div class="c-sub">Locality guide</div>
+            <div class="card" onclick="quick('Is it safe to invest in Dubai real estate in 2025?')">
+              <span class="c-icon">🌍</span>
+              <div class="c-title">Global markets</div>
+              <div class="c-sub">Dubai, UK, USA, SG</div>
             </div>
           </div>
         </div>
@@ -721,35 +503,63 @@
     <!-- Input -->
     <div class="input-area">
       <div class="input-inner">
-        <div class="chips">
-          <div class="chip" onclick="quick('2BHK rent under ₹25,000 in Bengaluru')">🏠 2BHK Rent</div>
-          <div class="chip" onclick="quick('3BHK flat to buy in Whitefield')">🏡 Buy 3BHK</div>
-          <div class="chip" onclick="quick('Fully furnished flat near metro station Bengaluru')">🚇 Near Metro</div>
-          <div class="chip" onclick="quick('No brokerage flats for rent in Bengaluru')">✅ No Brokerage</div>
-          <div class="chip" onclick="quick('Pet friendly rental apartments in Bengaluru')">🐾 Pet Friendly</div>
-          <div class="chip" onclick="quick('1BHK studio apartment rent Bengaluru under ₹15000')">🛏️ 1BHK</div>
-          <div class="chip" onclick="quick('Gated community villas for sale in Bengaluru')">🏘️ Villas</div>
-          <div class="chip" onclick="quick('How to buy property in Dubai as Indian NRI?')">🌍 Dubai</div>
+
+        <!-- Location pill shown after detection -->
+        <div id="location-pill" style="display:none">
+          <span class="location-pill">📍 <span id="loc-text">Detecting...</span> <button onclick="clearLocation()" style="background:none;border:none;cursor:pointer;color:#2e7d32;font-size:13px;margin-left:4px">✕</button></span>
         </div>
 
+        <!-- Photo previews -->
+        <div class="photo-preview" id="photo-preview"></div>
+
+        <!-- Chips -->
+        <div class="chips">
+          <div class="chip" onclick="quick('2BHK rent under ₹25,000')">🏠 2BHK Rent</div>
+          <div class="chip" onclick="quick('3BHK flat to buy under 1 crore')">🏡 Buy 3BHK</div>
+          <div class="chip" onclick="quick('Fully furnished flat near metro station')">🚇 Near Metro</div>
+          <div class="chip" onclick="quick('No brokerage rental flats')">✅ No Brokerage</div>
+          <div class="chip" onclick="quick('Pet friendly rental apartments')">🐾 Pet Friendly</div>
+          <div class="chip" onclick="quick('1BHK studio apartment rent under ₹15000')">🛏️ 1BHK</div>
+          <div class="chip" onclick="quick('Gated community villas for sale')">🏘️ Villas</div>
+          <div class="chip" onclick="quick('Is Dubai real estate safe to invest in 2025?')">🌍 Dubai</div>
+        </div>
+
+        <!-- Input box -->
         <div class="input-box">
-          <textarea
-            id="chat-input"
-            placeholder="Ask about properties, areas, pricing, legal, investments..."
-            rows="1"
-            onkeydown="handleKey(event)"
-            oninput="resize(this)"
-          ></textarea>
-          <div class="input-btns">
-            <button class="ibt" id="voice-btn" onclick="toggleVoice()" title="Voice input">🎙️</button>
-            <button class="send-btn" id="send-btn" onclick="send()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
+          <div class="input-top">
+            <textarea
+              id="chat-input"
+              placeholder="Ask about properties, markets, prices, investments..."
+              rows="1"
+              onkeydown="handleKey(event)"
+              oninput="resize(this); updateCharCount(this)"
+            ></textarea>
+          </div>
+          <div class="input-bottom">
+            <div class="input-tools">
+              <button class="ibt" onclick="triggerPhotoUpload()" title="Attach photos">
+                <span class="ibt-icon">📎</span> <span>Attach</span>
+              </button>
+              <button class="ibt" id="voice-btn" onclick="toggleVoice()" title="Voice input">
+                <span class="ibt-icon">🎙️</span> <span>Voice</span>
+              </button>
+              <button class="ibt" onclick="getLocation()" title="Share location">
+                <span class="ibt-icon">📍</span> <span>Location</span>
+              </button>
+            </div>
+            <div class="input-right">
+              <span class="char-count" id="char-count"></span>
+              <button class="send-btn" id="send-btn" onclick="send()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="input-hint">Estate49 AI · Bengaluru & Global Real Estate · A Stenkepler Corporation Product</div>
+
+        <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(event)" />
+        <div class="input-hint">Estate49 AI · Powered by Stenkepler Corporation</div>
       </div>
     </div>
   </div>
@@ -771,14 +581,18 @@
   let busy = false;
   let recording = false;
   let recog = null;
+  let uploadedPhotos = []; // { url, name }
+  let userLocation = null;
 
+  // ── Boot ──────────────────────────────────────────
   window.addEventListener('DOMContentLoaded', () => {
     initVoice();
     setTimeout(() => {
-      appendAi("👋 Hey! Welcome to Estate49 — your smart real estate assistant.\n\nBuilt by Alisten Andrew and the Stenkepler Corporation team, I can help you:\n\n🔍 Find a flat to rent or buy in Bengaluru\n🌍 Get real estate advice for any market worldwide\n📋 List your property for free\n💡 Understand pricing, legal, ROI, and more\n\nWhat are you looking for today?");
+      appendAi("👋 Hey! Welcome to Estate49 — your smart real estate assistant.\n\nI can help you:\n\n🔍 Find properties to rent or buy — anywhere in the world\n📊 Analyze real estate markets with live insights\n📋 List your property for free\n💡 Get expert advice on pricing, legal, and investment\n\nWhat are you looking for today?");
     }, 400);
   });
 
+  // ── Mode ──────────────────────────────────────────
   function setMode(m) {
     mode = m;
     document.getElementById('btn-client').classList.toggle('active', m === 'client');
@@ -787,66 +601,80 @@
     newChat();
     closeSidebar();
     const msg = m === 'client'
-      ? "Switched to Find mode. Tell me what you are looking for — BHK, budget, area, or any real estate question!"
-      : "Switched to List mode. Let's get your property listed on Estate49! Are you an owner, broker, or builder?";
+      ? "Switched to Find mode. What are you looking for — tell me BHK, budget, and area!"
+      : "Switched to List mode. Let's get your property listed! Are you an owner, broker, or builder?";
     setTimeout(() => appendAi(msg), 200);
   }
 
+  // ── Sidebar ───────────────────────────────────────
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('open');
   }
-
   function closeSidebar() {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('overlay').classList.remove('open');
   }
 
+  // ── New Chat ──────────────────────────────────────
   function newChat() {
     history = [];
-    const m = document.getElementById('messages');
-    m.innerHTML = `<div class="msg-inner">
-      <div class="welcome" id="welcome">
-        <div class="welcome-icon">🏠</div>
-        <h1>How can I help you?</h1>
-        <p class="sub">Search properties, explore markets, or get expert real estate advice — all in one place.</p>
-        <p class="by">Estate49 · A Stenkepler Corporation Product · Founded by Alisten Andrew</p>
-        <div class="cards-grid">
-          <div class="card" onclick="quick('I am looking for a 2BHK flat to rent in Bengaluru under ₹25000')">
-            <span class="c-icon">🔍</span>
-            <div class="c-title">Find a rental</div>
-            <div class="c-sub">2BHK, 3BHK flats</div>
-          </div>
-          <div class="card" onclick="quick('I want to buy a flat in Whitefield Bengaluru')">
-            <span class="c-icon">🏡</span>
-            <div class="c-title">Buy property</div>
-            <div class="c-sub">Apartments, villas</div>
-          </div>
-          <div class="card" onclick="quick('How to invest in real estate in Dubai as an Indian?')">
-            <span class="c-icon">🌍</span>
-            <div class="c-title">Global markets</div>
-            <div class="c-sub">Dubai, UK, USA, SG</div>
-          </div>
-          <div class="card" onclick="quick('Best investment areas in Bengaluru for rental yield 2025')">
-            <span class="c-icon">📈</span>
-            <div class="c-title">Investment advice</div>
-            <div class="c-sub">ROI & rental yield</div>
+    uploadedPhotos = [];
+    renderPhotoPreview();
+    document.getElementById('messages').innerHTML = `
+      <div class="msg-inner" id="welcome-wrap">
+        <div class="welcome">
+          <div class="welcome-icon">🏠</div>
+          <h1>How can I help you?</h1>
+          <p class="sub">Search properties, explore markets, or get expert real estate advice — all in one place.</p>
+          <p class="by">Estate49 · A Stenkepler Corporation Product</p>
+          <div class="cards-grid">
+            <div class="card" onclick="quick('I am looking for a 2BHK flat to rent under ₹25000')">
+              <span class="c-icon">🔍</span><div class="c-title">Find a rental</div><div class="c-sub">2BHK, 3BHK flats</div>
+            </div>
+            <div class="card" onclick="quick('I want to buy a flat under 80 lakhs')">
+              <span class="c-icon">🏡</span><div class="c-title">Buy property</div><div class="c-sub">Apartments, villas</div>
+            </div>
+            <div class="card" onclick="quick('Is it safe to invest in Dubai real estate in 2025?')">
+              <span class="c-icon">🌍</span><div class="c-title">Global markets</div><div class="c-sub">Dubai, UK, USA, SG</div>
+            </div>
+            <div class="card" onclick="quick('How to calculate rental yield and ROI on property?')">
+              <span class="c-icon">📈</span><div class="c-title">Investment advice</div><div class="c-sub">ROI & rental yield</div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>`;
+      </div>`;
   }
 
+  // ── Send ──────────────────────────────────────────
   async function send() {
     const el = document.getElementById('chat-input');
-    const text = el.value.trim();
-    if (!text || busy) return;
+    let text = el.value.trim();
+    if (!text && uploadedPhotos.length === 0) return;
+    if (busy) return;
+
+    // Append photo URLs and location to message if present
+    let fullText = text;
+    if (uploadedPhotos.length > 0) {
+      const urls = uploadedPhotos.map(p => p.url).join(', ');
+      fullText += `\n[PHOTOS: ${urls}]`;
+    }
+    if (userLocation) {
+      fullText += `\n[LOCATION: lat=${userLocation.lat}, lng=${userLocation.lng}, address="${userLocation.address}"]`;
+    }
 
     el.value = '';
     resize(el);
+    updateCharCount(el);
     removeWelcome();
-    appendUser(text);
-    history.push({ role: 'user', content: text });
+
+    // Show user message (without raw photo URLs)
+    appendUser(text || '📸 Photos attached', uploadedPhotos.map(p => p.url));
+
+    history.push({ role: 'user', content: fullText });
+    uploadedPhotos = [];
+    renderPhotoPreview();
+
     showTyping();
     setBusy(true);
 
@@ -883,43 +711,41 @@
   }
 
   function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      send();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   }
 
+  // ── Render ────────────────────────────────────────
   function removeWelcome() {
-    document.getElementById('welcome')?.remove();
+    document.getElementById('welcome-wrap')?.remove();
   }
 
-  function getMsgInner() {
-    let inner = document.querySelector('#messages .msg-inner:last-child');
-    if (!inner || inner.classList.contains('used')) {
-      inner = document.createElement('div');
-      inner.className = 'msg-inner';
-      document.getElementById('messages').appendChild(inner);
-    }
-    return inner;
-  }
-
-  function appendUser(text) {
+  function appendUser(text, photoUrls = []) {
     const m = document.getElementById('messages');
-    let inner = document.createElement('div');
-    inner.className = 'msg-inner';
-    inner.innerHTML = `
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-inner';
+
+    let photosHtml = '';
+    if (photoUrls.length > 0) {
+      const imgs = photoUrls.map(u => `<img src="${u}" alt="Attached photo" onclick="openLb('${u}')" loading="lazy" />`).join('');
+      photosHtml = `<div class="photo-gallery" style="margin-top:8px">${imgs}</div>`;
+    }
+
+    wrap.innerHTML = `
       <div class="msg-row user">
         <div class="avatar me">👤</div>
-        <div class="bubble user">${esc(text)}</div>
+        <div class="bubble user">
+          ${text ? esc(text) : ''}
+          ${photosHtml}
+        </div>
       </div>`;
-    m.appendChild(inner);
+    m.appendChild(wrap);
     scrollDown();
   }
 
   function appendAi(text, toolData) {
     const m = document.getElementById('messages');
-    let inner = document.createElement('div');
-    inner.className = 'msg-inner';
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-inner';
 
     let photosHtml = '';
     if (toolData?.photos?.length) {
@@ -929,23 +755,53 @@
       photosHtml = `<div class="photo-gallery">${imgs}</div>`;
     }
 
-    inner.innerHTML = `
+    wrap.innerHTML = `
       <div class="msg-row">
         <div class="avatar ai">🏠</div>
         <div class="bubble ai">${fmt(text)}${photosHtml}</div>
       </div>`;
-    m.appendChild(inner);
+    m.appendChild(wrap);
     scrollDown();
   }
 
-  function fmt(text) {
-    let h = esc(text);
-    h = '<p>' + h.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br>') + '</p>';
-    h = h.replace(/(₹[\d,]+(?:\/month|\/mo|L|Cr|K)?)/g,
-      '<span class="price-highlight">$1</span>');
-    h = h.replace(/─{3,}/g,
-      '<hr style="border:none;border-top:1px solid var(--border);margin:10px 0">');
-    return h;
+  // ── Formatter ─────────────────────────────────────
+  function fmt(raw) {
+    // Strip any residual markdown bold/italic
+    let t = raw
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*([^*\n]+)\*/g, '$1');
+
+    // Escape HTML
+    t = esc(t);
+
+    // Split into paragraphs on double newlines
+    const blocks = t.split(/\n{2,}/);
+    const parts = blocks.map(block => {
+      const lines = block.split('\n');
+
+      // Check if block is a bullet list (lines starting with •, -, *, numbers)
+      const isList = lines.every(l => /^[•\-\*]|\d+\./.test(l.trim()) || l.trim() === '');
+      if (isList && lines.length > 1) {
+        const items = lines.filter(l => l.trim()).map(l => {
+          const content = l.replace(/^[•\-\*]\s*/, '').replace(/^\d+\.\s*/, '');
+          return `<li>${highlightPrices(content)}</li>`;
+        }).join('');
+        return `<ul>${items}</ul>`;
+      }
+
+      // Separator lines
+      if (/^─{3,}/.test(lines[0].trim())) return '<hr>';
+
+      // Regular paragraph — join lines with <br> for single newlines
+      const content = lines.map(l => highlightPrices(l)).join('<br>');
+      return `<p>${content}</p>`;
+    });
+
+    return parts.join('');
+  }
+
+  function highlightPrices(t) {
+    return t.replace(/(₹[\d,]+(?:\/month|\/mo|L|Cr|K)?)/g, '<span class="price-hl">$1</span>');
   }
 
   function esc(t) {
@@ -956,27 +812,32 @@
       .replace(/"/g, '&quot;');
   }
 
+  // ── Typing ────────────────────────────────────────
   function showTyping() {
     const m = document.getElementById('messages');
-    const inner = document.createElement('div');
-    inner.className = 'msg-inner';
-    inner.id = 'typing-wrap';
-    inner.innerHTML = `
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-inner';
+    wrap.id = 'typing-wrap';
+    wrap.innerHTML = `
       <div class="typing-row">
         <div class="avatar ai">🏠</div>
         <div class="typing-dots"><span></span><span></span><span></span></div>
       </div>`;
-    m.appendChild(inner);
+    m.appendChild(wrap);
     scrollDown();
   }
+  function removeTyping() { document.getElementById('typing-wrap')?.remove(); }
 
-  function removeTyping() {
-    document.getElementById('typing-wrap')?.remove();
-  }
-
+  // ── Helpers ───────────────────────────────────────
   function resize(el) {
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+  }
+
+  function updateCharCount(el) {
+    const len = el.value.length;
+    const el2 = document.getElementById('char-count');
+    el2.textContent = len > 200 ? len : '';
   }
 
   function scrollDown() {
@@ -990,6 +851,95 @@
     document.getElementById('send-btn').disabled = b;
   }
 
+  // ── Photo Upload ──────────────────────────────────
+  function triggerPhotoUpload() { document.getElementById('photo-input').click(); }
+
+  async function handlePhotos(event) {
+    const files = Array.from(event.target.files);
+    if (!files.length) return;
+
+    toast('📤 Uploading photos...');
+
+    for (const file of files) {
+      try {
+        const formData = new FormData();
+        formData.append('photo', file);
+
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.url) {
+          uploadedPhotos.push({ url: data.url, name: file.name });
+        }
+      } catch (e) {
+        toast('Upload failed for ' + file.name);
+      }
+    }
+
+    renderPhotoPreview();
+    event.target.value = '';
+
+    if (uploadedPhotos.length > 0) toast(`✅ ${uploadedPhotos.length} photo(s) ready to send`);
+  }
+
+  function renderPhotoPreview() {
+    const container = document.getElementById('photo-preview');
+    container.innerHTML = '';
+    uploadedPhotos.forEach((p, i) => {
+      const thumb = document.createElement('div');
+      thumb.className = 'photo-thumb';
+      thumb.innerHTML = `
+        <img src="${p.url}" alt="${p.name}" />
+        <button class="rm" onclick="removePhoto(${i})">✕</button>`;
+      container.appendChild(thumb);
+    });
+  }
+
+  function removePhoto(i) {
+    uploadedPhotos.splice(i, 1);
+    renderPhotoPreview();
+  }
+
+  // ── Location ──────────────────────────────────────
+  function getLocation() {
+    if (!navigator.geolocation) { toast('Geolocation not supported on this device'); return; }
+
+    toast('📍 Getting your location...');
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+
+        let address = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+
+        // Try reverse geocoding
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const geo = await res.json();
+          if (geo.display_name) {
+            const parts = geo.display_name.split(',');
+            address = parts.slice(0, 3).join(',').trim();
+          }
+        } catch (e) {}
+
+        userLocation = { lat, lng, address };
+        document.getElementById('loc-text').textContent = address;
+        document.getElementById('location-pill').style.display = 'block';
+        toast('📍 Location set: ' + address);
+      },
+      (err) => {
+        toast('Could not get location. Please allow location access.');
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  }
+
+  function clearLocation() {
+    userLocation = null;
+    document.getElementById('location-pill').style.display = 'none';
+  }
+
+  // ── Voice ─────────────────────────────────────────
   function initVoice() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { document.getElementById('voice-btn').style.display = 'none'; return; }
@@ -1012,7 +962,8 @@
     if (!recog) return;
     recording = true;
     recog.start();
-    document.getElementById('voice-btn').textContent = '🔴';
+    const b = document.getElementById('voice-btn');
+    b.innerHTML = '<span class="ibt-icon">🔴</span> <span>Stop</span>';
     toast('🎙️ Listening...');
   }
 
@@ -1020,20 +971,20 @@
     if (!recog) return;
     recording = false;
     try { recog.stop(); } catch(e) {}
-    document.getElementById('voice-btn').textContent = '🎙️';
+    const b = document.getElementById('voice-btn');
+    b.innerHTML = '<span class="ibt-icon">🎙️</span> <span>Voice</span>';
   }
 
-  function openLb(url) {
-    document.getElementById('lb-img').src = url;
-    document.getElementById('lightbox').classList.add('open');
-  }
+  // ── Lightbox ──────────────────────────────────────
+  function openLb(url) { document.getElementById('lb-img').src = url; document.getElementById('lightbox').classList.add('open'); }
   function closeLb() { document.getElementById('lightbox').classList.remove('open'); }
 
+  // ── Toast ─────────────────────────────────────────
   function toast(msg) {
     const el = document.getElementById('toast-el');
     el.textContent = msg;
     el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 2500);
+    setTimeout(() => el.classList.remove('show'), 2800);
   }
 </script>
 </body>

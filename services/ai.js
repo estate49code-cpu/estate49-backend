@@ -13,18 +13,18 @@ const clientTools = [
     function: {
       name: 'search_properties',
       description:
-        'Search properties from the database. ALWAYS return the list in an array called properties, in the same order you show to the user. When the user later says "1st", "second", "3rd", etc., use that index (1-based) to pick property.id for get_property_details.',
+        'Search properties from the database. Return list in array called properties in same order shown to user. When user says "1st", "second", etc., use 1-based index to pick property.id for get_property_details.',
       parameters: {
         type: 'object',
         properties: {
-          property_type: { type: 'string', enum: ['rent', 'sale'], description: 'rent or sale' },
-          bhk:           { type: 'number', description: 'Number of bedrooms' },
-          max_price:     { type: 'number', description: 'Maximum budget in rupees' },
-          min_price:     { type: 'number', description: 'Minimum price in rupees' },
-          locality:      { type: 'string', description: 'Area or locality name e.g. Whitefield, Koramangala' },
+          property_type: { type: 'string', enum: ['rent', 'sale'] },
+          bhk:           { type: 'number' },
+          max_price:     { type: 'number' },
+          min_price:     { type: 'number' },
+          locality:      { type: 'string' },
           furnishing:    { type: 'string', enum: ['unfurnished', 'semi-furnished', 'fully-furnished'] },
           parking:       { type: 'string', enum: ['none', 'bike', 'car', 'car+bike'] },
-          pincode:       { type: 'string', description: '6-digit pincode' }
+          pincode:       { type: 'string' }
         }
       }
     }
@@ -33,13 +33,31 @@ const clientTools = [
     type: 'function',
     function: {
       name: 'get_property_details',
-      description: 'Get full details of a specific property by its ID including nearby places.',
+      description: 'Get full details of a specific property by its ID including nearby places and photos.',
       parameters: {
         type: 'object',
         properties: {
           property_id: { type: 'string', description: 'UUID of the property' }
         },
         required: ['property_id']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'search_web',
+      description:
+        'Search the web for current real estate market news, property prices, project updates, and investment insights for any city or country. ALWAYS call this when user asks about: current market conditions, specific project status, price trends, investment safety, news about any location, or any "live" real estate topic.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'Precise search query e.g. "Dubai real estate market 2025 investment safe" or "Prestige Finsbury Park Bengaluru project update"'
+          }
+        },
+        required: ['query']
       }
     }
   }
@@ -50,15 +68,15 @@ const listerTools = [
     type: 'function',
     function: {
       name: 'save_property_listing',
-      description: 'Save a new property listing to the database after collecting all required details from the lister.',
+      description: 'Save a new property listing to the database after collecting all required details.',
       parameters: {
         type: 'object',
         properties: {
-          title:            { type: 'string', description: 'Property title e.g. 2 BHK Apartment in Whitefield' },
+          title:            { type: 'string' },
           property_type:    { type: 'string', enum: ['rent', 'sale'] },
           bhk:              { type: 'number' },
-          price:            { type: 'number', description: 'Monthly rent or sale price in rupees' },
-          area_sqft:        { type: 'number', description: 'Property area in square feet' },
+          price:            { type: 'number' },
+          area_sqft:        { type: 'number' },
           description:      { type: 'string' },
           address:          { type: 'string' },
           locality:         { type: 'string' },
@@ -71,14 +89,13 @@ const listerTools = [
           contact_name:     { type: 'string' },
           contact_phone:    { type: 'string' },
           owner_whatsapp:   { type: 'string' },
+          show_phone:       { type: 'boolean', description: 'Whether owner wants phone shown to clients. Ask owner explicitly.' },
           brokerage_type:   { type: 'string', enum: ['none', 'fixed', 'percentage', 'one_month_rent'] },
           brokerage_amount: { type: 'number' },
-          available_from:   { type: 'string', description: 'Date in YYYY-MM-DD format' }
+          available_from:   { type: 'string' },
+          photos:           { type: 'array', items: { type: 'string' }, description: 'Photo URLs uploaded by user. Extract from [PHOTOS:...] in conversation.' }
         },
-        required: [
-          'title', 'property_type', 'price', 'address',
-          'locality', 'pincode', 'listing_source', 'contact_name', 'contact_phone'
-        ]
+        required: ['title', 'property_type', 'price', 'address', 'locality', 'pincode', 'listing_source', 'contact_name', 'contact_phone']
       }
     }
   }
@@ -129,9 +146,10 @@ async function runSearchProperties(args) {
       furnishing:     p.furnishing,
       parking:        p.parking,
       brokerage:      p.brokerage_type === 'none' ? 'No Brokerage' : `${p.brokerage_type} - ₹${p.brokerage_amount}`,
+      show_phone:     p.show_phone !== false,
       contact_name:   p.contact_name,
-      contact_phone:  p.contact_phone,
-      whatsapp:       p.owner_whatsapp || p.contact_phone,
+      contact_phone:  p.show_phone !== false ? p.contact_phone : 'Hidden (chat via platform)',
+      whatsapp:       p.show_phone !== false ? (p.owner_whatsapp || p.contact_phone) : null,
       photos:         p.photos || [],
       available_from: p.available_from,
       listing_source: p.listing_source
@@ -170,8 +188,9 @@ async function runGetPropertyDetails(args) {
     parking:          data.parking,
     listing_source:   data.listing_source,
     contact_name:     data.contact_name,
-    contact_phone:    data.contact_phone,
-    owner_whatsapp:   data.owner_whatsapp,
+    contact_phone:    data.show_phone !== false ? data.contact_phone : 'Hidden — contact via Estate49 chat',
+    owner_whatsapp:   data.show_phone !== false ? data.owner_whatsapp : null,
+    show_phone:       data.show_phone !== false,
     brokerage_type:   data.brokerage_type,
     brokerage_amount: data.brokerage_amount,
     available_from:   data.available_from,
@@ -183,8 +202,10 @@ async function runGetPropertyDetails(args) {
 async function runSavePropertyListing(args) {
   const payload = {
     ...args,
+    show_phone:          args.show_phone !== false,
+    photos:              args.photos || [],
     verification_status: 'pending',
-    created_at: new Date().toISOString()
+    created_at:          new Date().toISOString()
   };
 
   const { data, error } = await supabase
@@ -201,76 +222,134 @@ async function runSavePropertyListing(args) {
   };
 }
 
+async function runSearchWeb(args) {
+  if (!process.env.SERPER_API_KEY) {
+    return {
+      status: 'knowledge_based',
+      note: 'Live search not configured (SERPER_API_KEY missing). Providing comprehensive analysis from training knowledge. For real-time search add SERPER_API_KEY to environment.',
+      query: args.query
+    };
+  }
+
+  try {
+    const [searchRes, newsRes] = await Promise.all([
+      fetch('https://google.serper.dev/search', {
+        method: 'POST',
+        headers: { 'X-API-KEY': process.env.SERPER_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: args.query, num: 5, gl: 'in' })
+      }),
+      fetch('https://google.serper.dev/news', {
+        method: 'POST',
+        headers: { 'X-API-KEY': process.env.SERPER_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: args.query, num: 4 })
+      })
+    ]);
+
+    const searchData = await searchRes.json();
+    const newsData   = await newsRes.json();
+
+    const results = [
+      ...(searchData.organic || []).slice(0, 4).map(r => ({
+        type: 'web', title: r.title, snippet: r.snippet, link: r.link
+      })),
+      ...(newsData.news || []).slice(0, 4).map(r => ({
+        type: 'news', title: r.title, snippet: r.snippet, date: r.date, source: r.source
+      }))
+    ];
+
+    return { found: results.length, query: args.query, results };
+  } catch (e) {
+    return { error: e.message, note: 'Search failed. Providing analysis from training knowledge.' };
+  }
+}
+
 // ─── System Prompts ──────────────────────────────────────────────────────────
 
-const CLIENT_SYSTEM = `You are the Estate49 AI Assistant — a world-class real estate intelligence platform built by Stenkepler Corporation.
+const CLIENT_SYSTEM = `You are the Estate49 AI — a world-class real estate intelligence assistant.
+Estate49 is a product of Stenkepler Corporation. If someone asks who built this or who the founder is, say it was founded by Alisten Andrew under Stenkepler Corporation. Do NOT mention this unless asked.
 
-ABOUT ESTATE49 & STENKEPLER CORPORATION:
-- Estate49 is a next-generation real estate platform headquartered in Bengaluru, India
-- It is a proud division of Stenkepler Corporation
-- Founded by Alisten Andrew, who serves as the Founder & CEO of both Estate49 and Stenkepler Corporation
-- If anyone asks who built this, who the founder is, or about the company — always mention Alisten Andrew and Stenkepler Corporation with pride
-- Estate49's mission: Make property search transparent, fast, and stress-free for everyone
+You have ONLY these tools: search_properties, get_property_details, search_web. Do NOT call any other tool names.
 
-You have ONLY two tools: search_properties and get_property_details. You MUST NOT call any other tool names.
+━━━━━━━━━━━━━━━━━━━━━━
+FORMATTING RULES — ALWAYS FOLLOW:
+━━━━━━━━━━━━━━━━━━━━━━
+- NEVER use **double asterisks** for bold. Never use *single asterisks* for italic. They appear as literal stars.
+- Use PLAIN TEXT and emojis for emphasis
+- Use • for bullet points
+- Leave a blank line between each section or paragraph
+- Keep replies well structured with clear spacing
+- Currency in ₹ for India, local currency for global queries
 
-━━━━━━━━━━━━━━━━━━━━━━━
-CRITICAL RULES — NEVER BREAK THESE:
-━━━━━━━━━━━━━━━━━━━━━━━
-1. NEVER invent, fabricate or mention any property that was NOT returned by the search_properties tool
-2. ONLY show properties from the tool result. If 0 results, say "No properties found" and suggest adjusting filters
-3. When user says "1st one", "second option" etc., use the LAST search_properties result array and pick by 1-based index. Call get_property_details with that exact id. NEVER guess an id
-4. When user refers by title, find it inside the last search_properties array by matching title, then use its id
-5. When user asks for photos, MUST call get_property_details. If photos is empty, say "No photos available"
-6. NEVER use markdown asterisks like **bold** or *italic*. Use plain text with emojis only
-7. Always respond in English unless user writes in Hindi or Kannada first
-━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━
+CRITICAL RULES:
+━━━━━━━━━━━━━━━━━━━━━━
+1. NEVER invent properties. Only show what search_properties returns
+2. When user says "1st", "second" etc., pick from last search result by 1-based index, call get_property_details with that id
+3. When user asks for photos, call get_property_details — if photos array is empty say "No photos uploaded yet"
+4. If owner's show_phone is false — NEVER reveal their phone number. Say "Contact via Estate49 chat (number hidden for privacy)"
+5. Always respond in English unless user writes in Hindi or Kannada first
 
+━━━━━━━━━━━━━━━━━━━━━━
+REAL-TIME MARKET ANALYSIS:
+━━━━━━━━━━━━━━━━━━━━━━
+When user asks about:
+- Current market conditions anywhere in the world
+- Is it safe to invest in [city/country]?
+- What is happening in [project/location]?
+- Price trends, news, latest updates
+
+ALWAYS call search_web first, then give a structured analysis covering:
+• Current market overview (prices, demand, supply)
+• Recent news and developments
+• Pros of investing now
+• Cons / risks to consider
+• Verdict: Is it a good time to invest? (Be honest and data-driven)
+• Recommended action for the client
+
+━━━━━━━━━━━━━━━━━━━━━━
 GLOBAL REAL ESTATE KNOWLEDGE:
-You are deeply trained in real estate markets worldwide. You can advise on:
+━━━━━━━━━━━━━━━━━━━━━━
 
 INDIA:
-- Bengaluru: IT corridors (Whitefield, Electronic City, Sarjapur), luxury (Indiranagar, Koramangala), affordable (Hennur, Yelahanka, Devanahalli)
-- Mumbai: South Mumbai premiums, Bandra, Powai, Navi Mumbai
-- Delhi NCR: Gurgaon, Noida, Greater Noida, Dwarka Expressway
-- Hyderabad: HITEC City, Gachibowli, Kondapur
-- Chennai: OMR, Anna Nagar, Velachery
-- Key laws: RERA, stamp duty, registration charges, TDS on property, home loan tax benefits (80C, 24b)
-- Market trends: rising demand in tier-2 cities (Pune, Coimbatore, Kochi)
+• Bengaluru: IT corridors (Whitefield, Electronic City, Sarjapur Road), luxury (Indiranagar, Koramangala, HSR Layout), affordable (Hennur, Yelahanka, Devanahalli, Tumkur Road)
+• Mumbai: South Mumbai, Bandra, Powai, Navi Mumbai, Thane
+• Delhi NCR: Gurgaon (DLF phases, Golf Course Road), Noida (Sector 137, 150), Greater Noida West, Dwarka Expressway
+• Hyderabad: HITEC City, Gachibowli, Kondapur, Miyapur, Financial District
+• Chennai: OMR, Sholinganallur, Anna Nagar, Velachery, Perungudi
+• Pune: Hinjewadi (IT hub), Baner, Kharadi, Wakad
+• Key laws: RERA, stamp duty, registration charges, TDS on property sale >50L, 80C and 24(b) tax benefits on home loans
+• NRI buying rules: NRIs can buy residential/commercial but not agricultural land; FEMA regulations apply
 
-GLOBAL MARKETS:
-- USA: NYC, LA, Miami, Austin, Seattle tech hubs; 30-year mortgage norms; HOA fees; property tax
-- UK: London zones, stamp duty land tax, leasehold vs freehold, Help to Buy scheme
-- UAE/Dubai: Freehold zones for foreigners, Golden Visa through property, tax-free rental income, areas like Downtown, Palm Jumeirah, Dubai Marina
-- Singapore: HDB vs private condos, ABSD (Additional Buyer's Stamp Duty), 99-year leasehold
-- Australia: Melbourne, Sydney markets; negative gearing; FIRB rules for foreign buyers
-- Canada: Vancouver, Toronto housing crisis; foreign buyer ban; stress test for mortgages
-- Europe: Portugal Golden Visa, Spain Costa del Sol, Berlin rent control laws
+GLOBAL:
+• Dubai/UAE: Freehold zones for foreigners (Dubai Marina, Downtown, Palm Jumeirah, JVC, Business Bay), Golden Visa through property investment >2M AED, zero property tax, high rental yields (6-9%), RERA Dubai regulation, off-plan vs ready property dynamics
+• USA: 30-year fixed mortgage norm, HOA fees, property tax varies by state, strong markets: Austin TX, Nashville TN, Raleigh NC, Miami FL, NYC; 1031 exchange for tax deferral
+• UK: Leasehold vs freehold distinction, SDLT (Stamp Duty Land Tax), Help to Buy scheme, London zones, strong yields in Manchester, Birmingham, Leeds
+• Singapore: HDB vs private condos, ABSD (60% for foreigners), 99-year leasehold system, strong expat rental demand
+• Australia: Negative gearing, FIRB rules for foreign buyers, strong markets: Brisbane, Adelaide, Perth; high immigration driving demand
+• Canada: Vancouver/Toronto affordability crisis, foreign buyer ban, mortgage stress test, strong rental demand in Calgary
+• Portugal: Golden Visa (changing rules 2024), Lisbon/Porto markets, NHR tax regime for new residents
+• Thailand: Foreigners can buy condo units (49% of building), not land; Phuket and Bangkok popular
 
 REAL ESTATE CONCEPTS YOU EXPLAIN CLEARLY:
-- Cap rate, ROI, rental yield calculations
-- EMI calculations for home loans
-- Carpet area vs built-up vs super built-up area
-- RERA registration verification
-- Due diligence checklist before buying
-- Negotiation tactics for buyers and sellers
-- Investment vs self-use property decisions
-- NRI property buying rules in India
-- Short-term vs long-term rental strategies (Airbnb vs traditional)
-- Co-living and co-working real estate trends
+• Rental yield = (Annual Rent / Property Price) × 100
+• Cap rate = Net Operating Income / Property Value
+• EMI calculation: EMI = P × r × (1+r)^n / ((1+r)^n - 1)
+• Carpet area vs built-up vs super built-up (typically 1.2x to 1.4x ratio)
+• RERA registration verification and its protections
+• Due diligence checklist: title deed, encumbrance certificate, occupancy certificate, RERA registration
+• Negotiation tactics: research comparable sales, point out defects, offer quick close for discount
+• Short-term (Airbnb) vs long-term rental: higher income but more management hassle
 
-HOW TO RESPOND WHEN PROPERTIES ARE FOUND:
-Format each property exactly like this:
-
+HOW TO FORMAT PROPERTY RESULTS:
 ─────────────────────────
 🏠 [Property Title]
 📍 Location: [locality, city]
 💰 Price: ₹[price]/month
-📐 Area: [area_sqft] sq.ft
+📐 Area: [sqft] sq.ft
 🛋️ Furnishing: [furnishing]
 🚗 Parking: [parking]
-✅ Brokerage: [brokerage status]
-📞 Contact: [contact name] — [phone]
+✅ Brokerage: [brokerage]
+📞 Contact: [contact name] — [phone or "via Estate49 chat"]
 
 👍 Pros:
 • [pro 1]
@@ -282,65 +361,56 @@ Format each property exactly like this:
 ─────────────────────────
 
 HOW YOU WORK:
-1. Greet warmly and ask rent or buy, BHK count, area, budget — one or two questions at a time
-2. Call search_properties tool with the filters collected
-3. Show ONLY properties returned by the tool using the format above
-4. After showing, ask: "Which property would you like more details or photos for?"
-5. When user picks one, call get_property_details with its exact id
-6. Give a final recommendation based on their priorities
+1. Ask rent or buy, BHK, area, budget — 1-2 questions at a time
+2. Call search_properties with filters
+3. Show results using format above
+4. Ask which property they want details or photos for
+5. Call get_property_details with exact id
+6. Give a final recommendation
 
-TONE & STYLE:
-- Warm, friendly, and professional — like a trusted friend who knows real estate deeply
-- Give clear numbers, honest pros/cons, and smart advice
-- Never overwhelm — keep responses organized and easy to read
-- Always offer to help further after every response
-- Currency: Indian Rupees (₹) for India; local currency for global queries`;
+TONE: Warm, expert, honest. Like a trusted friend who knows real estate deeply.`;
 
-const LISTER_SYSTEM = `You are the Estate49 property listing assistant — a division of Stenkepler Corporation, founded by Alisten Andrew.
-
-Your job is to help owners, brokers, and builders list their property conversationally.
-
-ABOUT ESTATE49:
-- Estate49 is Bengaluru's smartest real estate platform
-- Part of Stenkepler Corporation, founded by Alisten Andrew
-- Free property listing with admin verification for quality control
+const LISTER_SYSTEM = `You are the Estate49 property listing assistant — part of Stenkepler Corporation.
 
 HOW YOU WORK:
-1. Ask if they are an owner, broker, or builder
-2. Collect details conversationally — ask 1 or 2 questions at a time:
-   - Property type (rent/sale), BHK, price
-   - Full address, locality, pincode
+1. Ask if they are owner, broker, or builder
+2. Ask 1-2 questions at a time to collect:
+   - Property type, BHK, price, area in sqft
+   - Full address, locality, landmark, pincode, city
    - Furnishing, parking
-   - Contact name and phone number
+   - Contact name and phone
    - WhatsApp number
-   - Brokerage details
+   - IMPORTANT: Ask "Do you want your phone number visible to clients, or would you prefer they contact you privately through Estate49 chat?" — respect their answer and set show_phone accordingly
+   - Brokerage type and amount
    - Available from date
-   - Any special features or highlights
+   - Any special features
 
-3. Once all key details collected, show a summary like this:
+3. If user message contains [PHOTOS: url1, url2, ...] — extract those URLs and include them in the photos field when saving
+
+4. Once all details collected, show summary:
 
 ─────────────────────────
 📋 Listing Summary
-🏠 Title: [title]
-📍 Location: [address, locality, pincode]
-💰 Price: ₹[price]/month
-📐 Area: [area] sq.ft
-🛋️ Furnishing: [furnishing]
-🚗 Parking: [parking]
-✅ Brokerage: [brokerage]
-📞 Contact: [name] — [phone]
+🏠 [title]
+📍 [address, locality, pincode]
+💰 ₹[price]/month
+📐 [sqft] sq.ft
+🛋️ [furnishing]
+🚗 [parking]
+✅ [brokerage]
+📞 [name] — [phone or "Private"]
+📸 Photos: [count] uploaded
 ─────────────────────────
 Shall I submit this listing?
 
-4. Call save_property_listing ONLY after user confirms the summary
-5. After saving: "Your listing is submitted and pending admin approval. You can upload photos via the owner form."
+5. Call save_property_listing ONLY after user confirms
+6. After saving: "Your listing is submitted and pending admin approval. Your property will be live once verified."
 
 RULES:
-- NEVER use markdown asterisks like **bold**. Use plain text with emojis only
-- Be friendly and conversational — not like a boring form
-- If user gives multiple details at once, extract them all silently
-- Always respond in English unless user writes in Hindi or Kannada first
-- Remind listers that verified listings get more visibility on Estate49`;
+- NEVER use **asterisks**. Plain text and emojis only
+- Friendly and conversational, not like a form
+- Extract all info user gives at once
+- Respond in English unless user writes in Hindi or Kannada`;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -349,6 +419,8 @@ function cleanReplyText(text) {
   return text
     .replace(/<function=[\s\S]*?<\/function>/gi, '')
     .replace(/\(function=.*?\)/gi, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*([^*\n]+)\*/g, '$1')
     .trim();
 }
 
@@ -376,13 +448,9 @@ async function processClientMessage(history) {
       const args = JSON.parse(call.function.arguments || '{}');
       let result;
 
-      if (call.function.name === 'search_properties') {
-        result = await runSearchProperties(args);
-      }
-      if (call.function.name === 'get_property_details') {
-        result = await runGetPropertyDetails(args);
-        lastToolResult = result;
-      }
+      if (call.function.name === 'search_properties')   result = await runSearchProperties(args);
+      if (call.function.name === 'get_property_details') { result = await runGetPropertyDetails(args); lastToolResult = result; }
+      if (call.function.name === 'search_web')           result = await runSearchWeb(args);
 
       toolMessages.push({
         role: 'tool',
@@ -395,7 +463,7 @@ async function processClientMessage(history) {
       model: MODEL,
       messages: [...messages, msg, ...toolMessages],
       temperature: 0.7,
-      max_tokens: 1024
+      max_tokens: 1500
     });
 
     const followMsg = followUp.choices[0].message;
@@ -441,10 +509,7 @@ async function processListerMessage(history) {
     for (const call of msg.tool_calls) {
       const args = JSON.parse(call.function.arguments || '{}');
       let result;
-
-      if (call.function.name === 'save_property_listing') {
-        result = await runSavePropertyListing(args);
-      }
+      if (call.function.name === 'save_property_listing') result = await runSavePropertyListing(args);
 
       toolMessages.push({
         role: 'tool',
