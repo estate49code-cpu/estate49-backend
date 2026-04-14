@@ -1,75 +1,50 @@
 const express = require('express');
-const router = express.Router();
-const multer = require('multer');
+const router  = express.Router();
+const multer  = require('multer');
+const { createClient } = require('@supabase/supabase-js');
 const path = require('path');
-const storageClient = require('../storageClient');
 
-const storage = multer.memoryStorage();
-
+// Use memory storage — no local disk needed
 const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|webp/;
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.test(ext) && allowed.test(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only JPEG, PNG, and WebP images are allowed.'));
-    }
-  }
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
 });
 
-const BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'property-photos';
+// Use service role key for storage uploads
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY
+);
 
-router.post('/', (req, res) => {
-  upload.array('photos', 10)(req, res, async (err) => {
-    if (err) {
-      console.error('Multer error:', err.message);
-      return res.status(400).json({ error: err.message });
+router.post('/', upload.single('photo'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file provided' });
     }
 
-    try {
-      if (!req.files || req.files.length === 0) {
-        return res.status(400).json({ error: 'No files uploaded.' });
-      }
+    const ext      = path.extname(req.file.originalname) || '.jpg';
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
 
-      const uploadedUrls = [];
-
-      for (const file of req.files) {
-        const ext = path.extname(file.originalname).toLowerCase();
-        const fileName = `uploads/${Date.now()}-${Math.random().toString(36).substring(2, 9)}${ext}`;
-
-        const { error: uploadError } = await storageClient.storage
-          .from(BUCKET)
-          .upload(fileName, file.buffer, {
-            contentType: file.mimetype,
-            upsert: false
-          });
-
-        if (uploadError) {
-          console.error('Supabase upload error:', uploadError.message);
-          return res.status(500).json({ error: `Upload failed: ${uploadError.message}` });
-        }
-
-        const { data: publicData } = storageClient.storage
-          .from(BUCKET)
-          .getPublicUrl(fileName);
-
-        uploadedUrls.push(publicData.publicUrl);
-      }
-
-      res.json({
-        success: true,
-        urls: uploadedUrls,
-        count: uploadedUrls.length
+    const { error } = await supabase.storage
+      .from('property-photos')
+      .upload(filename, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: false
       });
 
-    } catch (error) {
-      console.error('Upload route error:', error.message);
-      res.status(500).json({ error: 'Server error during upload.' });
-    }
-  });
+    if (error) throw error;
+
+    // Get public URL
+    const { data } = supabase.storage
+      .from('property-photos')
+      .getPublicUrl(filename);
+
+    res.json({ url: data.publicUrl });
+
+  } catch (err) {
+    console.error('Upload error:', err.message);
+    res.status(500).json({ error: 'Upload failed: ' + err.message });
+  }
 });
 
 module.exports = router;
