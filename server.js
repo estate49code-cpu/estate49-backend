@@ -26,7 +26,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/properties', propertiesRoute);
 app.use('/api/upload', uploadRoute);
 
-// ─── NEW: REST Chat Route (for index.html) ───────────────────────────────────
+// ─── REST Chat Route ──────────────────────────────────────────────────────────
 app.post('/api/chat', async (req, res) => {
   try {
     const { history, mode } = req.body;
@@ -53,6 +53,19 @@ app.post('/api/chat', async (req, res) => {
     });
   }
 });
+
+// ─── Auth Routes ──────────────────────────────────────────────────────────────
+app.get('/auth/callback', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'auth', 'callback.html'));
+});
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+app.get('/login.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Test DB connection
@@ -61,23 +74,21 @@ supabase.from('properties').select('id').limit(1).then(({ error }) => {
   else console.log('Database connected successfully! ✅');
 });
 
-// Home chat page → now serves new index.html
+// Page routes
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Old test chat still accessible at /test-chat
 app.get('/test-chat', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'test-chat.html'));
 });
 
-// Owner form page
 app.get('/owner', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'owner', 'owner-form.html'));
 });
 
-// ─── Session Store ───────────────────────────────────────────────────────────
-const sessions = new Map(); // socketId → { mode, history }
+// ─── Session Store ────────────────────────────────────────────────────────────
+const sessions = new Map();
 
 function detectMode(text) {
   const lower = text.toLowerCase();
@@ -90,13 +101,12 @@ function detectMode(text) {
   return listerKeywords.some(k => lower.includes(k)) ? 'lister' : 'client';
 }
 
-// ─── Socket.io AI Chat (for test-chat.html) ──────────────────────────────────
+// ─── Socket.io AI Chat ────────────────────────────────────────────────────────
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   sessions.set(socket.id, { mode: null, history: [] });
 
-  // Welcome message
   socket.emit('bot_reply', {
     message: `🏠 Welcome to Estate49!\n\nI'm your AI real estate assistant for Bengaluru.\n\nAre you:\n👉 Looking for a property to rent or buy?\n👉 Listing a property you own or manage?\n\nJust tell me what you need!`,
     timestamp: new Date()
