@@ -26,13 +26,11 @@
 
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* Auth loading */
     .auth-loading { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 9999; }
     .al-icon { width: 56px; height: 56px; background: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 16px rgba(192,57,43,0.25); }
     .al-spin { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Navbar */
     nav { background: white; border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
     .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
     .nav-logo-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
@@ -43,7 +41,6 @@
     .nav-link.active { color: var(--primary); background: var(--primary-light); }
     .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; position: relative; }
 
-    /* User dropdown */
     .nav-user-wrap { position: relative; }
     .nav-dropdown {
       display: none; position: absolute; top: calc(100% + 8px); right: 0;
@@ -66,10 +63,8 @@
     .nav-dropdown-item.signout { color: var(--primary); }
     .nav-dropdown-item.signout:hover { background: var(--primary-light); }
 
-    /* Page */
     .page { display: none; }
 
-    /* Progress bar */
     .progress-wrap { background: white; border-bottom: 1px solid var(--border); padding: 16px 32px; }
     .progress-steps { display: flex; align-items: center; max-width: 700px; margin: 0 auto; gap: 0; }
     .step { display: flex; align-items: center; gap: 8px; flex: 1; cursor: default; }
@@ -88,15 +83,12 @@
     .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 8px; transition: background 0.3s; min-width: 20px; }
     .step-line.done { background: var(--success); }
 
-    /* Main content */
     .main-content { max-width: 760px; margin: 0 auto; padding: 32px 24px 60px; }
 
-    /* Section title */
     .section-header { margin-bottom: 24px; }
     .section-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
     .section-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
 
-    /* Card */
     .form-card {
       background: var(--card); border: 1px solid var(--border);
       border-radius: 20px; padding: 28px; margin-bottom: 20px;
@@ -105,11 +97,9 @@
     .card-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
     .card-title-icon { width: 30px; height: 30px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
 
-    /* Form elements */
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
     .form-row.single { grid-template-columns: 1fr; }
     .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
-
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group:last-child { margin-bottom: 0; }
 
@@ -139,7 +129,6 @@
     .field-error { font-size: 11px; color: #e53935; margin-top: 2px; display: none; }
     .field-error.show { display: block; }
 
-    /* Amenity toggles */
     .amenity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
     .amenity-btn {
       display: flex; align-items: center; gap: 8px;
@@ -153,7 +142,6 @@
     .amenity-check { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; transition: all 0.2s; }
     .amenity-btn.active .amenity-check { background: var(--primary); border-color: var(--primary); color: white; }
 
-    /* Photo upload */
     .photo-drop {
       border: 2px dashed var(--border); border-radius: 16px;
       padding: 36px 24px; text-align: center;
@@ -174,7 +162,6 @@
     .photo-progress .pbar-wrap { width: 70%; height: 4px; background: rgba(255,255,255,0.3); border-radius: 4px; }
     .photo-progress .pbar { height: 100%; background: white; border-radius: 4px; transition: width 0.3s; }
 
-    /* Navigation buttons */
     .nav-btns {
       display: flex; align-items: center; justify-content: space-between;
       margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border);
@@ -198,11 +185,9 @@
     .btn-next:hover { background: var(--primary-dark); transform: translateY(-1px); }
     .btn-next:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    /* Step panels */
     .step-panel { display: none; }
     .step-panel.active { display: block; }
 
-    /* Success screen */
     .success-screen { text-align: center; padding: 60px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
     .success-icon { width: 80px; height: 80px; background: var(--success-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; border: 3px solid #a5d6a7; }
     .success-title { font-size: 24px; font-weight: 800; color: var(--text); }
@@ -214,11 +199,9 @@
     .success-btn.outline { background: white; color: var(--text); border: 1.5px solid var(--border); }
     .success-btn.outline:hover { border-color: var(--primary); color: var(--primary); }
 
-    /* Toast */
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; z-index: 500; pointer-events: none; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Mobile */
     @media (max-width: 640px) {
       nav { padding: 0 16px; }
       .progress-wrap { padding: 12px 16px; }
@@ -241,7 +224,6 @@
 
 <div class="page" id="page">
 
-  <!-- Navbar -->
   <nav>
     <a class="nav-logo" href="/">
       <div class="nav-logo-icon">🏠</div>
@@ -252,7 +234,6 @@
       <a class="nav-link" href="/browse.html">Browse</a>
       <a class="nav-link active" href="/list-property.html">List Property</a>
       <a class="nav-link" href="/chat.html">AI Chat</a>
-      <!-- ✅ User avatar with dropdown (signOut from nav.js) -->
       <div class="nav-user-wrap">
         <div class="nav-avatar" id="nav-avatar" onclick="toggleNavDropdown()">👤</div>
         <div class="nav-dropdown" id="nav-dropdown">
@@ -264,7 +245,6 @@
     </div>
   </nav>
 
-  <!-- Progress -->
   <div class="progress-wrap">
     <div class="progress-steps">
       <div class="step active" id="ps-1">
@@ -296,7 +276,7 @@
 
   <div class="main-content">
 
-    <!-- ── STEP 1: Basic Info ── -->
+    <!-- STEP 1 -->
     <div class="step-panel active" id="panel-1">
       <div class="section-header">
         <div class="section-title">📋 Basic Information</div>
@@ -392,7 +372,7 @@
       </div>
     </div>
 
-    <!-- ── STEP 2: Details ── -->
+    <!-- STEP 2 -->
     <div class="step-panel" id="panel-2">
       <div class="section-header">
         <div class="section-title">📐 Property Details</div>
@@ -508,7 +488,7 @@
       </div>
     </div>
 
-    <!-- ── STEP 3: Amenities ── -->
+    <!-- STEP 3 -->
     <div class="step-panel" id="panel-3">
       <div class="section-header">
         <div class="section-title">✨ Amenities & Features</div>
@@ -553,7 +533,7 @@
       </div>
     </div>
 
-    <!-- ── STEP 4: Photos ── -->
+    <!-- STEP 4 -->
     <div class="step-panel" id="panel-4">
       <div class="section-header">
         <div class="section-title">📸 Property Photos</div>
@@ -585,7 +565,7 @@
       </div>
     </div>
 
-    <!-- ── STEP 5: Contact & Submit ── -->
+    <!-- STEP 5 -->
     <div class="step-panel" id="panel-5">
       <div class="section-header">
         <div class="section-title">📞 Contact Information</div>
@@ -639,7 +619,6 @@
         </div>
       </div>
 
-      <!-- Summary card -->
       <div class="form-card" id="summary-card">
         <div class="card-title"><div class="card-title-icon">📋</div> Listing Summary</div>
         <div id="summary-content" style="font-size:14px;color:var(--muted);line-height:2"></div>
@@ -653,7 +632,7 @@
       </div>
     </div>
 
-    <!-- ── SUCCESS ── -->
+    <!-- SUCCESS -->
     <div class="step-panel" id="panel-success">
       <div class="success-screen">
         <div class="success-icon">✅</div>
@@ -667,8 +646,8 @@
       </div>
     </div>
 
-  </div><!-- end main-content -->
-</div><!-- end page -->
+  </div>
+</div>
 
 <div class="toast" id="toast-el"></div>
 
@@ -678,7 +657,6 @@
   let amenities = {};
   let currentUser = null;
 
-  // ── Auth ──────────────────────────────────────────
   window.addEventListener('DOMContentLoaded', async () => {
     try {
       const session = await getSession();
@@ -688,19 +666,16 @@
       const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
       const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
-      // Populate nav avatar + dropdown
       document.getElementById('nav-avatar').textContent = initials;
       document.getElementById('nav-dropdown-name').textContent = fullName;
       document.getElementById('nav-dropdown-email').textContent = currentUser.email;
 
-      // Pre-fill contact info
       document.getElementById('contact-name').value = fullName;
       document.getElementById('contact-email').value = currentUser.email || '';
 
       document.getElementById('auth-loading').style.display = 'none';
       document.getElementById('page').style.display = 'block';
 
-      // Update price hint when listing type changes
       document.getElementById('listing-type').addEventListener('change', function() {
         const hint = document.getElementById('price-hint');
         const dep = document.getElementById('deposit-group');
@@ -713,10 +688,11 @@
         }
       });
 
-    } catch(e) { window.location.href = '/login.html'; }
+    } catch(e) {
+      window.location.href = '/login.html';
+    }
   });
 
-  // ── Nav Dropdown ──────────────────────────────────
   function toggleNavDropdown() {
     document.getElementById('nav-dropdown').classList.toggle('open');
   }
@@ -727,7 +703,6 @@
     }
   });
 
-  // ── Step Navigation ───────────────────────────────
   function goStep(n) {
     if (n > currentStep && !validateStep(currentStep)) return;
 
@@ -750,7 +725,6 @@
     if (n === 5) buildSummary();
   }
 
-  // ── Validation ────────────────────────────────────
   function validateStep(step) {
     let valid = true;
     const check = (id, errId, condition) => {
@@ -789,14 +763,12 @@
     return valid;
   }
 
-  // ── Amenities ─────────────────────────────────────
   function toggleAmenity(el) {
     const key = el.dataset.key;
     el.classList.toggle('active');
     amenities[key] = el.classList.contains('active');
   }
 
-  // ── Photos ────────────────────────────────────────
   function handleDrop(e) {
     e.preventDefault();
     document.getElementById('photo-drop').classList.remove('dragover');
@@ -827,8 +799,13 @@
         formData.append('photo', file);
         const res = await fetch('/api/upload', { method: 'POST', body: formData });
         const data = await res.json();
-        if (data.url) { uploadedPhotos[idx].serverUrl = data.url; uploadedPhotos[idx].url = data.url; }
-      } catch(e) { toast('Upload failed for ' + file.name); }
+        if (data.url) {
+          uploadedPhotos[idx].serverUrl = data.url;
+          uploadedPhotos[idx].url = data.url;
+        }
+      } catch(e) {
+        toast('Upload failed for ' + file.name);
+      }
 
       uploadedPhotos[idx].uploading = false;
       renderPhotoGrid();
@@ -852,9 +829,11 @@
     });
   }
 
-  function removePhoto(i) { uploadedPhotos.splice(i, 1); renderPhotoGrid(); }
+  function removePhoto(i) {
+    uploadedPhotos.splice(i, 1);
+    renderPhotoGrid();
+  }
 
-  // ── Summary ───────────────────────────────────────
   function buildSummary() {
     const lines = [
       ['📋 Type', `${document.getElementById('listing-type').options[document.getElementById('listing-type').selectedIndex]?.text} — ${document.getElementById('property-type').options[document.getElementById('property-type').selectedIndex]?.text}`],
@@ -871,7 +850,6 @@
       .join('');
   }
 
-  // ── Submit ────────────────────────────────────────
   async function submitListing() {
     if (!validateStep(5)) return;
 
@@ -929,7 +907,6 @@
     }
   }
 
-  // ── Toast ─────────────────────────────────────────
   function toast(msg) {
     const el = document.getElementById('toast-el');
     el.textContent = msg;

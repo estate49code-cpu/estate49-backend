@@ -17,13 +17,11 @@
     }
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-    /* Auth loading */
     .auth-loading { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 9999; }
     .al-icon { width: 56px; height: 56px; background: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
     .al-spin { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Navbar */
     nav { background: white; border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
     .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
     .nav-logo-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
@@ -42,11 +40,9 @@
     .nav-dropdown-item.signout { color: var(--primary); }
     .nav-dropdown-item.signout:hover { background: var(--primary-light); }
 
-    /* Layout */
     .page { display: none; }
     .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
 
-    /* Sidebar card */
     .profile-sidebar { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px 20px; height: fit-content; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
     .profile-avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 20px; }
     .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; position: relative; }
@@ -66,7 +62,6 @@
     .sidebar-nav-item.signout-btn { color: var(--primary); }
     .sidebar-nav-item.signout-btn:hover { background: var(--primary-light); }
 
-    /* Main content */
     .profile-main { display: flex; flex-direction: column; gap: 20px; }
     .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
     .section-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -74,7 +69,6 @@
     .btn-add { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; }
     .btn-add:hover { background: var(--primary-dark); }
 
-    /* Listing cards */
     .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
     .listing-card { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--bg); transition: all 0.2s; }
     .listing-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-1px); }
@@ -93,13 +87,11 @@
     .lbtn-delete { background: var(--primary-light); color: var(--primary); border: 1.5px solid #f1948a; }
     .lbtn-delete:hover { background: #f1948a; color: white; }
 
-    /* Empty state */
     .empty-state { text-align: center; padding: 48px 20px; }
     .empty-icon { font-size: 48px; margin-bottom: 12px; }
     .empty-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
     .empty-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
 
-    /* Edit modal */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.open { display: flex; }
     .modal { background: white; border-radius: 20px; padding: 28px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; position: relative; }
@@ -120,7 +112,6 @@
     .btn-cancel { padding: 11px 20px; background: white; color: var(--text); border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; }
     .btn-cancel:hover { border-color: var(--text); }
 
-    /* Favorites & notifications */
     .fav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
     .fav-card { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: all 0.2s; text-decoration: none; color: inherit; display: block; }
     .fav-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-1px); }
@@ -131,7 +122,6 @@
     .fav-title { font-size: 12px; font-weight: 600; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .fav-loc { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-    /* Notification items */
     .notif-list { display: flex; flex-direction: column; gap: 2px; }
     .notif-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border-radius: 12px; transition: background 0.2s; cursor: pointer; }
     .notif-item:hover { background: var(--bg); }
@@ -142,18 +132,15 @@
     .notif-time { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); flex-shrink: 0; margin-top: 6px; }
 
-    /* Tab system */
     .tab-bar { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
     .tab-btn { padding: 8px 16px; font-size: 13px; font-weight: 500; border: none; background: none; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: inherit; transition: all 0.2s; }
     .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* Toast */
     .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; z-index: 1000; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Confirm dialog */
     .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 600; align-items: center; justify-content: center; }
     .confirm-overlay.open { display: flex; }
     .confirm-box { background: white; border-radius: 20px; padding: 28px; max-width: 380px; width: 90%; text-align: center; }
@@ -185,7 +172,6 @@
 
 <div class="page" id="page">
 
-  <!-- Navbar -->
   <nav>
     <a class="nav-logo" href="/">
       <div class="nav-logo-icon">🏠</div>
@@ -211,7 +197,6 @@
 
   <div class="container">
 
-    <!-- Sidebar -->
     <aside class="profile-sidebar">
       <div class="profile-avatar-wrap">
         <div class="profile-avatar" id="profile-avatar">
@@ -244,10 +229,8 @@
       </div>
     </aside>
 
-    <!-- Main -->
     <main class="profile-main">
 
-      <!-- Edit Profile -->
       <div class="section-card tab-panel" id="tab-edit-profile">
         <div class="section-card-header">
           <div class="section-card-title">✏️ Edit Profile</div>
@@ -271,7 +254,6 @@
         </div>
       </div>
 
-      <!-- My Listings -->
       <div class="section-card tab-panel active" id="tab-my-listings">
         <div class="section-card-header">
           <div class="section-card-title">🏠 My Listings</div>
@@ -285,7 +267,6 @@
         </div>
       </div>
 
-      <!-- Favorites -->
       <div class="section-card tab-panel" id="tab-favorites">
         <div class="section-card-header">
           <div class="section-card-title">❤️ My Favorites</div>
@@ -298,7 +279,6 @@
         </div>
       </div>
 
-      <!-- Notifications -->
       <div class="section-card tab-panel" id="tab-notifications">
         <div class="section-card-header">
           <div class="section-card-title">🔔 Notifications</div>
@@ -316,7 +296,6 @@
   </div>
 </div>
 
-<!-- Edit Listing Modal -->
 <div class="modal-overlay" id="edit-modal">
   <div class="modal">
     <div class="modal-header">
@@ -372,7 +351,6 @@
   </div>
 </div>
 
-<!-- Confirm Delete -->
 <div class="confirm-overlay" id="confirm-overlay">
   <div class="confirm-box">
     <div class="confirm-icon">🗑️</div>
@@ -415,10 +393,11 @@
       document.getElementById('page').style.display = 'block';
 
       loadListings();
-    } catch(e) { window.location.href = '/login.html'; }
+    } catch(e) {
+      window.location.href = '/login.html';
+    }
   });
 
-  // ── Tab system ──
   function showTab(name) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.sidebar-nav-item').forEach(b => b.classList.remove('active'));
@@ -427,14 +406,14 @@
     if (name === 'notifications') loadNotifications();
   }
 
-  // ── Load Listings (Supabase direct) ──
   async function loadListings() {
-    document.getElementById('listings-container').innerHTML = `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading your listings...</div></div>`;
+    document.getElementById('listings-container').innerHTML =
+      `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading your listings...</div></div>`;
     try {
       const { data, error } = await sb.from('properties')
         .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
+        .eq('listed_by', currentUser.id)
+        .order('posted_at', { ascending: false });
 
       if (error) throw error;
       document.getElementById('stat-listings').textContent = data.length;
@@ -474,10 +453,14 @@
 
   function listingCardHtml(p) {
     const type = p.listing_type || p.type || 'rent';
-    const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (type === 'rent' ? '/mo' : '') : '—';
+    const price = p.price
+      ? '₹' + Number(p.price).toLocaleString('en-IN') + (type === 'rent' ? '/mo' : '')
+      : '—';
     const imgUrl = safeImg(p.photos);
     const imgHtml = imgUrl
-      ? `<img class="listing-card-img" src="${imgUrl}" alt="${p.title || ''}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="listing-card-img-placeholder" style="display:none">🏠</div>`
+      ? `<img class="listing-card-img" src="${imgUrl}" alt="${p.title || ''}" loading="lazy"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+         <div class="listing-card-img-placeholder" style="display:none">🏠</div>`
       : `<div class="listing-card-img-placeholder">🏠</div>`;
 
     return `
@@ -496,13 +479,18 @@
       </div>`;
   }
 
-  function viewListing(id) { window.location.href = '/property.html?id=' + id; }
+  function viewListing(id) {
+    window.location.href = '/property.html?id=' + id;
+  }
 
-  // ── Edit Modal (Supabase direct) ──
   async function openEditModal(id) {
     editingListingId = id;
     try {
-      const { data: p, error } = await sb.from('properties').select('*').eq('id', id).single();
+      const { data: p, error } = await sb.from('properties')
+        .select('*')
+        .eq('id', id)
+        .eq('listed_by', currentUser.id)
+        .single();
       if (!error && p) {
         document.getElementById('em-title').value = p.title || '';
         document.getElementById('em-price').value = p.price || '';
@@ -534,7 +522,7 @@
       const { error } = await sb.from('properties')
         .update(payload)
         .eq('id', editingListingId)
-        .eq('user_id', currentUser.id);
+        .eq('listed_by', currentUser.id);
       if (error) throw error;
       toast('✅ Listing updated!');
       closeEditModal();
@@ -544,7 +532,6 @@
     }
   }
 
-  // ── Delete (Supabase direct) ──
   function askDelete(id) {
     deletingListingId = id;
     document.getElementById('confirm-overlay').classList.add('open');
@@ -561,7 +548,7 @@
       const { error } = await sb.from('properties')
         .delete()
         .eq('id', deletingListingId)
-        .eq('user_id', currentUser.id);
+        .eq('listed_by', currentUser.id);
       if (error) throw error;
       toast('🗑️ Listing deleted');
       closeConfirm();
@@ -572,13 +559,13 @@
     }
   }
 
-  // ── Load Favorites (Supabase direct) ──
   async function loadFavorites() {
-    document.getElementById('favorites-container').innerHTML = `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading...</div></div>`;
+    document.getElementById('favorites-container').innerHTML =
+      `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading...</div></div>`;
     try {
-      // Step 1: get favorite property IDs
       const { data: favRows, error: favErr } = await sb.from('favorites')
-        .select('property_id').eq('user_id', currentUser.id);
+        .select('property_id')
+        .eq('user_id', currentUser.id);
       if (favErr) throw favErr;
 
       if (!favRows || !favRows.length) {
@@ -587,10 +574,10 @@
         return;
       }
 
-      // Step 2: get property details
       const ids = favRows.map(f => f.property_id).filter(Boolean);
       const { data: props, error: propsErr } = await sb.from('properties')
-        .select('*').in('id', ids);
+        .select('*')
+        .in('id', ids);
       if (propsErr) throw propsErr;
 
       document.getElementById('stat-saved').textContent = (props || []).length;
@@ -609,21 +596,31 @@
   function renderFavorites(favs) {
     const c = document.getElementById('favorites-container');
     if (!favs || !favs.length) {
-      c.innerHTML = `<div class="empty-state"><div class="empty-icon">❤️</div><div class="empty-title">No saved properties</div><div class="empty-sub">Browse listings and save ones you love</div><a class="btn-add" href="/browse.html">Browse Properties</a></div>`;
+      c.innerHTML =
+        `<div class="empty-state"><div class="empty-icon">❤️</div><div class="empty-title">No saved properties</div><div class="empty-sub">Browse listings and save ones you love</div><a class="btn-add" href="/browse.html">Browse Properties</a></div>`;
       return;
     }
     c.innerHTML = `<div class="fav-grid">${favs.map(p => {
       const imgUrl = safeImg(p.photos);
       const imgHtml = imgUrl
-        ? `<img class="fav-img" src="${imgUrl}" alt="${p.title || ''}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="fav-img-placeholder" style="display:none">🏠</div>`
+        ? `<img class="fav-img" src="${imgUrl}" alt="${p.title || ''}" loading="lazy"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+           <div class="fav-img-placeholder" style="display:none">🏠</div>`
         : `<div class="fav-img-placeholder">🏠</div>`;
-      return `<a class="fav-card" href="/property.html?id=${p.id}">${imgHtml}<div class="fav-body"><div class="fav-price">₹${Number(p.price || 0).toLocaleString('en-IN')}</div><div class="fav-title">${p.title || 'Untitled'}</div><div class="fav-loc">📍 ${p.locality || ''}, ${p.city || ''}</div></div></a>`;
+      return `<a class="fav-card" href="/property.html?id=${p.id}">
+        ${imgHtml}
+        <div class="fav-body">
+          <div class="fav-price">₹${Number(p.price || 0).toLocaleString('en-IN')}</div>
+          <div class="fav-title">${p.title || 'Untitled'}</div>
+          <div class="fav-loc">📍 ${p.locality || ''}, ${p.city || ''}</div>
+        </div>
+      </a>`;
     }).join('')}</div>`;
   }
 
-  // ── Load Notifications (Supabase direct) ──
   async function loadNotifications() {
-    document.getElementById('notifications-container').innerHTML = `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading...</div></div>`;
+    document.getElementById('notifications-container').innerHTML =
+      `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading...</div></div>`;
     try {
       const { data, error } = await sb.from('notifications')
         .select('*')
@@ -644,7 +641,8 @@
   function renderNotifications(notifs) {
     const c = document.getElementById('notifications-container');
     if (!notifs.length) {
-      c.innerHTML = `<div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-title">No notifications</div><div class="empty-sub">You're all caught up!</div></div>`;
+      c.innerHTML =
+        `<div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-title">No notifications</div><div class="empty-sub">You're all caught up!</div></div>`;
       return;
     }
     c.innerHTML = `<div class="notif-list">${notifs.map(n => `
@@ -664,12 +662,14 @@
   }
 
   async function markAllRead() {
-    await sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false);
+    await sb.from('notifications')
+      .update({ read: true })
+      .eq('user_id', currentUser.id)
+      .eq('read', false);
     loadNotifications();
     toast('✓ All notifications marked as read');
   }
 
-  // ── Save Profile (Supabase direct) ──
   async function saveProfile() {
     const name = document.getElementById('edit-name').value.trim();
     const phone = document.getElementById('edit-phone').value.trim();
@@ -679,7 +679,7 @@
         data: { full_name: name, phone, bio }
       });
       if (error) throw error;
-      // Also update profiles table if it exists
+
       await sb.from('profiles').upsert({
         id: currentUser.id,
         full_name: name,
@@ -687,6 +687,7 @@
         bio,
         updated_at: new Date().toISOString()
       }).eq('id', currentUser.id);
+
       toast('✅ Profile updated!');
       document.getElementById('profile-name').textContent = name;
     } catch(e) {
@@ -694,7 +695,6 @@
     }
   }
 
-  // ── Helpers ──
   function timeAgo(dateStr) {
     if (!dateStr) return '';
     const diff = (Date.now() - new Date(dateStr)) / 1000;
@@ -704,15 +704,21 @@
     return Math.floor(diff/86400) + 'd ago';
   }
 
-  function toggleNavDropdown() { document.getElementById('nav-dropdown').classList.toggle('open'); }
+  function toggleNavDropdown() {
+    document.getElementById('nav-dropdown').classList.toggle('open');
+  }
+
   document.addEventListener('click', e => {
     const wrap = document.querySelector('.nav-user-wrap');
-    if (wrap && !wrap.contains(e.target)) document.getElementById('nav-dropdown')?.classList.remove('open');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('nav-dropdown')?.classList.remove('open');
+    }
   });
 
   function toast(msg) {
     const el = document.getElementById('toast-el');
-    el.textContent = msg; el.classList.add('show');
+    el.textContent = msg;
+    el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2800);
   }
 </script>

@@ -1,8 +1,8 @@
-const express = require('express');
-const router  = express.Router();
+const express  = require('express');
+const router   = express.Router();
 const supabase = require('../db');
 
-// ── GET all properties (with optional filters) ────────────────────────────────
+// GET /api/properties (optional filters)
 router.get('/', async (req, res) => {
   try {
     const { type, city, bhk, min_price, max_price, furnished, q } = req.query;
@@ -18,20 +18,23 @@ router.get('/', async (req, res) => {
     if (furnished) query = query.ilike('furnished', `%${furnished}%`);
     if (min_price) query = query.gte('price', parseFloat(min_price));
     if (max_price) query = query.lte('price', parseFloat(max_price));
-    if (q)         query = query.or(`title.ilike.%${q}%,locality.ilike.%${q}%,city.ilike.%${q}%,description.ilike.%${q}%`);
+    if (q) {
+      query = query.or(
+        `title.ilike.%${q}%,locality.ilike.%${q}%,city.ilike.%${q}%,description.ilike.%${q}%`
+      );
+    }
 
     const { data, error } = await query;
     if (error) throw error;
 
     res.json(data || []);
-
   } catch (err) {
     console.error('GET /api/properties error:', err.message);
     res.status(500).json({ error: 'Failed to fetch properties' });
   }
 });
 
-// ── GET single property by ID ─────────────────────────────────────────────────
+// GET /api/properties/:id
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -47,19 +50,17 @@ router.get('/:id', async (req, res) => {
     }
 
     res.json(data);
-
   } catch (err) {
     console.error('GET /api/properties/:id error:', err.message);
     res.status(500).json({ error: 'Failed to fetch property' });
   }
 });
 
-// ── POST create new property ──────────────────────────────────────────────────
+// POST /api/properties
 router.post('/', async (req, res) => {
   try {
     const body = req.body;
 
-    // Required field check
     if (!body.title || !body.type || !body.price) {
       return res.status(400).json({ error: 'title, type and price are required' });
     }
@@ -139,17 +140,17 @@ router.post('/', async (req, res) => {
     if (error) throw error;
 
     res.status(201).json(data);
-
   } catch (err) {
     console.error('POST /api/properties error:', err.message);
     res.status(500).json({ error: err.message || 'Failed to create property' });
   }
 });
 
-// ── PUT update property ───────────────────────────────────────────────────────
+// PUT /api/properties/:id
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
     const { data, error } = await supabase
       .from('properties')
       .update({ ...req.body, updated_at: new Date().toISOString() })
@@ -159,17 +160,17 @@ router.put('/:id', async (req, res) => {
 
     if (error) throw error;
     res.json(data);
-
   } catch (err) {
     console.error('PUT /api/properties/:id error:', err.message);
     res.status(500).json({ error: 'Failed to update property' });
   }
 });
 
-// ── DELETE property ───────────────────────────────────────────────────────────
+// DELETE /api/properties/:id
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
     const { error } = await supabase
       .from('properties')
       .delete()
@@ -177,7 +178,6 @@ router.delete('/:id', async (req, res) => {
 
     if (error) throw error;
     res.json({ success: true });
-
   } catch (err) {
     console.error('DELETE /api/properties/:id error:', err.message);
     res.status(500).json({ error: 'Failed to delete property' });
