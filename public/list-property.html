@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/auth.js"></script>
+  <script src="/nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -39,25 +40,39 @@
     .nav-right { display: flex; align-items: center; gap: 10px; }
     .nav-link { padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; transition: all 0.2s; }
     .nav-link:hover { background: var(--bg); color: var(--text); }
-    .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+    .nav-link.active { color: var(--primary); background: var(--primary-light); }
+    .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; position: relative; }
+
+    /* User dropdown */
+    .nav-user-wrap { position: relative; }
+    .nav-dropdown {
+      display: none; position: absolute; top: calc(100% + 8px); right: 0;
+      background: white; border: 1px solid var(--border); border-radius: 14px;
+      padding: 8px; min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 200;
+    }
+    .nav-dropdown.open { display: block; }
+    .nav-dropdown-name { padding: 8px 12px 4px; font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nav-dropdown-email { padding: 0 12px 8px; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+    .nav-dropdown-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 8px;
+      font-size: 13px; color: var(--muted);
+      cursor: pointer; transition: all 0.2s;
+      border: none; background: none; width: 100%; text-align: left;
+      text-decoration: none;
+    }
+    .nav-dropdown-item:hover { background: var(--bg); color: var(--text); }
+    .nav-dropdown-item.signout { color: var(--primary); }
+    .nav-dropdown-item.signout:hover { background: var(--primary-light); }
 
     /* Page */
     .page { display: none; }
 
     /* Progress bar */
-    .progress-wrap {
-      background: white; border-bottom: 1px solid var(--border);
-      padding: 16px 32px;
-    }
-    .progress-steps {
-      display: flex; align-items: center;
-      max-width: 700px; margin: 0 auto;
-      gap: 0;
-    }
-    .step {
-      display: flex; align-items: center; gap: 8px;
-      flex: 1; cursor: default;
-    }
+    .progress-wrap { background: white; border-bottom: 1px solid var(--border); padding: 16px 32px; }
+    .progress-steps { display: flex; align-items: center; max-width: 700px; margin: 0 auto; gap: 0; }
+    .step { display: flex; align-items: center; gap: 8px; flex: 1; cursor: default; }
     .step-circle {
       width: 32px; height: 32px; border-radius: 50%;
       border: 2px solid var(--border);
@@ -74,10 +89,7 @@
     .step-line.done { background: var(--success); }
 
     /* Main content */
-    .main-content {
-      max-width: 760px; margin: 0 auto;
-      padding: 32px 24px 60px;
-    }
+    .main-content { max-width: 760px; margin: 0 auto; padding: 32px 24px 60px; }
 
     /* Section title */
     .section-header { margin-bottom: 24px; }
@@ -87,19 +99,11 @@
     /* Card */
     .form-card {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 20px; padding: 28px;
-      margin-bottom: 20px;
+      border-radius: 20px; padding: 28px; margin-bottom: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .card-title {
-      font-size: 15px; font-weight: 700; color: var(--text);
-      margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
-    }
-    .card-title-icon {
-      width: 30px; height: 30px; background: var(--primary-light);
-      border-radius: 8px; display: flex; align-items: center; justify-content: center;
-      font-size: 15px;
-    }
+    .card-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .card-title-icon { width: 30px; height: 30px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
 
     /* Form elements */
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
@@ -159,46 +163,21 @@
     .photo-drop-icon { font-size: 36px; margin-bottom: 10px; }
     .photo-drop-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
     .photo-drop-sub { font-size: 13px; color: var(--muted); }
-    .photo-drop-btn {
-      display: inline-block; margin-top: 12px;
-      padding: 8px 20px; background: var(--primary); color: white;
-      border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer;
-    }
+    .photo-drop-btn { display: inline-block; margin-top: 12px; padding: 8px 20px; background: var(--primary); color: white; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
 
     .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 16px; }
-    .photo-thumb {
-      position: relative; aspect-ratio: 1;
-      border-radius: 12px; overflow: hidden;
-      border: 2px solid var(--border);
-    }
+    .photo-thumb { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); }
     .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-thumb.uploading::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; }
-    .photo-rm {
-      position: absolute; top: 4px; right: 4px;
-      background: rgba(0,0,0,0.6); color: white; border: none;
-      border-radius: 50%; width: 22px; height: 22px;
-      font-size: 12px; cursor: pointer; display: flex;
-      align-items: center; justify-content: center;
-    }
-    .photo-main-badge {
-      position: absolute; bottom: 4px; left: 4px;
-      background: var(--primary); color: white;
-      font-size: 9px; font-weight: 700; padding: 2px 6px;
-      border-radius: 6px; text-transform: uppercase;
-    }
-    .photo-progress {
-      position: absolute; inset: 0; background: rgba(0,0,0,0.4);
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 6px; color: white; font-size: 12px;
-    }
+    .photo-rm { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .photo-main-badge { position: absolute; bottom: 4px; left: 4px; background: var(--primary); color: white; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
+    .photo-progress { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; color: white; font-size: 12px; }
     .photo-progress .pbar-wrap { width: 70%; height: 4px; background: rgba(255,255,255,0.3); border-radius: 4px; }
     .photo-progress .pbar { height: 100%; background: white; border-radius: 4px; transition: width 0.3s; }
 
     /* Navigation buttons */
     .nav-btns {
       display: flex; align-items: center; justify-content: space-between;
-      margin-top: 28px; padding-top: 20px;
-      border-top: 1px solid var(--border);
+      margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border);
     }
     .btn-back {
       display: flex; align-items: center; gap: 6px;
@@ -224,25 +203,12 @@
     .step-panel.active { display: block; }
 
     /* Success screen */
-    .success-screen {
-      text-align: center; padding: 60px 24px;
-      display: flex; flex-direction: column; align-items: center; gap: 16px;
-    }
-    .success-icon {
-      width: 80px; height: 80px; background: var(--success-light);
-      border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; font-size: 40px;
-      border: 3px solid #a5d6a7;
-    }
+    .success-screen { text-align: center; padding: 60px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .success-icon { width: 80px; height: 80px; background: var(--success-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; border: 3px solid #a5d6a7; }
     .success-title { font-size: 24px; font-weight: 800; color: var(--text); }
     .success-sub { font-size: 15px; color: var(--muted); max-width: 400px; line-height: 1.6; }
     .success-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
-    .success-btn {
-      padding: 12px 24px; border-radius: 12px;
-      font-size: 14px; font-weight: 600; font-family: inherit;
-      cursor: pointer; transition: all 0.2s; text-decoration: none;
-      display: inline-block;
-    }
+    .success-btn { padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
     .success-btn.primary { background: var(--primary); color: white; border: none; }
     .success-btn.primary:hover { background: var(--primary-dark); }
     .success-btn.outline { background: white; color: var(--text); border: 1.5px solid var(--border); }
@@ -262,6 +228,7 @@
       .form-row { grid-template-columns: 1fr; }
       .form-row.triple { grid-template-columns: 1fr 1fr; }
       .amenity-grid { grid-template-columns: 1fr 1fr; }
+      .nav-dropdown-name, .nav-dropdown-email { display: none; }
     }
   </style>
 </head>
@@ -281,9 +248,19 @@
       <span class="nav-logo-text">Estate49</span>
     </a>
     <div class="nav-right">
+      <a class="nav-link" href="/">Home</a>
       <a class="nav-link" href="/browse.html">Browse</a>
+      <a class="nav-link active" href="/list-property.html">List Property</a>
       <a class="nav-link" href="/chat.html">AI Chat</a>
-      <div class="nav-avatar" id="nav-avatar">👤</div>
+      <!-- ✅ User avatar with dropdown (signOut from nav.js) -->
+      <div class="nav-user-wrap">
+        <div class="nav-avatar" id="nav-avatar" onclick="toggleNavDropdown()">👤</div>
+        <div class="nav-dropdown" id="nav-dropdown">
+          <div class="nav-dropdown-name" id="nav-dropdown-name">Loading...</div>
+          <div class="nav-dropdown-email" id="nav-dropdown-email"></div>
+          <button class="nav-dropdown-item signout" onclick="signOut()">🚪 Sign Out</button>
+        </div>
+      </div>
     </div>
   </nav>
 
@@ -598,9 +575,7 @@
         </div>
 
         <input type="file" id="photo-file" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(event)" />
-
         <div class="photo-grid" id="photo-grid"></div>
-
         <p class="field-hint" style="margin-top:12px">💡 Tip: First photo is your cover image. You can reorder by removing and re-adding.</p>
       </div>
 
@@ -712,9 +687,13 @@
       currentUser = session.user;
       const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
       const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-      document.getElementById('nav-avatar').textContent = initials;
 
-      // Pre-fill contact name and email
+      // Populate nav avatar + dropdown
+      document.getElementById('nav-avatar').textContent = initials;
+      document.getElementById('nav-dropdown-name').textContent = fullName;
+      document.getElementById('nav-dropdown-email').textContent = currentUser.email;
+
+      // Pre-fill contact info
       document.getElementById('contact-name').value = fullName;
       document.getElementById('contact-email').value = currentUser.email || '';
 
@@ -737,21 +716,29 @@
     } catch(e) { window.location.href = '/login.html'; }
   });
 
+  // ── Nav Dropdown ──────────────────────────────────
+  function toggleNavDropdown() {
+    document.getElementById('nav-dropdown').classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    const wrap = document.querySelector('.nav-user-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('nav-dropdown')?.classList.remove('open');
+    }
+  });
+
   // ── Step Navigation ───────────────────────────────
   function goStep(n) {
     if (n > currentStep && !validateStep(currentStep)) return;
 
-    // Update panels
     document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
     document.getElementById('panel-' + n).classList.add('active');
 
-    // Update progress
     for (let i = 1; i <= 5; i++) {
       const ps = document.getElementById('ps-' + i);
       ps.classList.remove('active', 'done');
       if (i < n) ps.classList.add('done');
       if (i === n) ps.classList.add('active');
-
       if (i < 5) {
         const pl = document.getElementById('pl-' + i);
         pl.classList.toggle('done', i < n);
@@ -760,14 +747,12 @@
 
     currentStep = n;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
     if (n === 5) buildSummary();
   }
 
   // ── Validation ────────────────────────────────────
   function validateStep(step) {
     let valid = true;
-
     const check = (id, errId, condition) => {
       const el = document.getElementById(id);
       const err = document.getElementById(errId);
@@ -784,17 +769,14 @@
       check('prop-city', 'err-city', true);
       check('prop-locality', 'err-locality', true);
     }
-
     if (step === 2) {
       check('prop-bhk', 'err-bhk', true);
       check('prop-price', 'err-price', true);
       check('prop-furnished', 'err-furnished', true);
     }
-
     if (step === 5) {
       check('contact-name', 'err-contact-name', true);
       check('contact-role', 'err-contact-role', true);
-
       const phone = document.getElementById('contact-phone').value.trim();
       const phoneErr = document.getElementById('err-contact-phone');
       const phoneInvalid = !phone || phone.replace(/\D/g,'').length < 10;
@@ -830,9 +812,7 @@
 
   async function uploadFiles(files) {
     if (!files.length) return;
-    if (uploadedPhotos.length + files.length > 15) {
-      toast('Maximum 15 photos allowed'); return;
-    }
+    if (uploadedPhotos.length + files.length > 15) { toast('Maximum 15 photos allowed'); return; }
 
     for (const file of files) {
       if (file.size > 10 * 1024 * 1024) { toast(`${file.name} is too large (max 10MB)`); continue; }
@@ -847,13 +827,8 @@
         formData.append('photo', file);
         const res = await fetch('/api/upload', { method: 'POST', body: formData });
         const data = await res.json();
-        if (data.url) {
-          uploadedPhotos[idx].serverUrl = data.url;
-          uploadedPhotos[idx].url = data.url;
-        }
-      } catch(e) {
-        toast('Upload failed for ' + file.name);
-      }
+        if (data.url) { uploadedPhotos[idx].serverUrl = data.url; uploadedPhotos[idx].url = data.url; }
+      } catch(e) { toast('Upload failed for ' + file.name); }
 
       uploadedPhotos[idx].uploading = false;
       renderPhotoGrid();
@@ -877,10 +852,7 @@
     });
   }
 
-  function removePhoto(i) {
-    uploadedPhotos.splice(i, 1);
-    renderPhotoGrid();
-  }
+  function removePhoto(i) { uploadedPhotos.splice(i, 1); renderPhotoGrid(); }
 
   // ── Summary ───────────────────────────────────────
   function buildSummary() {
@@ -894,7 +866,6 @@
       ['📸 Photos', uploadedPhotos.length + ' uploaded'],
       ['✨ Amenities', Object.keys(amenities).filter(k => amenities[k]).length + ' selected'],
     ];
-
     document.getElementById('summary-content').innerHTML = lines
       .map(([k, v]) => `<div style="display:flex;gap:12px"><span style="font-weight:600;color:var(--text);min-width:110px">${k}</span><span>${v || '—'}</span></div>`)
       .join('');
@@ -909,7 +880,6 @@
     btn.textContent = '⏳ Publishing...';
 
     const payload = {
-      // Step 1
       type: document.getElementById('listing-type').value,
       property_type: document.getElementById('property-type').value,
       title: document.getElementById('prop-title').value.trim(),
@@ -917,7 +887,6 @@
       city: document.getElementById('prop-city').value,
       locality: document.getElementById('prop-locality').value.trim(),
       address: document.getElementById('prop-address').value.trim(),
-      // Step 2
       bhk: parseInt(document.getElementById('prop-bhk').value) || null,
       bathrooms: parseInt(document.getElementById('prop-bath').value) || null,
       floor: document.getElementById('prop-floor').value,
@@ -929,17 +898,13 @@
       deposit: parseFloat(document.getElementById('prop-deposit').value) || null,
       maintenance: parseFloat(document.getElementById('prop-maintenance').value) || null,
       no_brokerage: document.getElementById('prop-brokerage').value === 'true',
-      // Step 3
       ...amenities,
-      // Step 4
       photos: uploadedPhotos.filter(p => p.serverUrl).map(p => p.serverUrl),
-      // Step 5
       contact_name: document.getElementById('contact-name').value.trim(),
       contact_role: document.getElementById('contact-role').value,
       contact_phone: document.getElementById('contact-phone').value.trim(),
       contact_email: document.getElementById('contact-email').value.trim(),
       contact_time: document.getElementById('contact-time').value,
-      // Meta
       listed_by: currentUser?.id || null,
       posted_at: new Date().toISOString(),
     };
@@ -953,7 +918,6 @@
 
       if (!res.ok) throw new Error('Server error');
 
-      // Show success
       document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
       document.getElementById('panel-success').classList.add('active');
       window.scrollTo({ top: 0, behavior: 'smooth' });

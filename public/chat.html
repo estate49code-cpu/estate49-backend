@@ -8,6 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/auth.js"></script>
+  <script src="/nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -32,54 +33,39 @@
 
     /* ── Sidebar ── */
     .sidebar {
-      width: var(--sidebar-width);
-      height: 100%;
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      transition: transform 0.3s ease;
-      z-index: 100;
+      width: var(--sidebar-width); height: 100%;
+      background: var(--bg-secondary); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; flex-shrink: 0;
+      transition: transform 0.3s ease; z-index: 100;
     }
 
     .sidebar-header {
-      padding: 16px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      padding: 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
     }
 
     .sidebar-logo { display: flex; align-items: center; gap: 8px; flex: 1; }
 
     .logo-icon {
-      width: 32px; height: 32px;
-      background: var(--primary);
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 16px;
+      width: 32px; height: 32px; background: var(--primary);
+      border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; color: white; font-size: 16px;
     }
 
     .sidebar-logo span { font-weight: 700; font-size: 15px; color: var(--primary); }
 
     .icon-btn {
-      width: 32px; height: 32px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: white;
-      cursor: pointer;
+      width: 32px; height: 32px; border: 1px solid var(--border);
+      border-radius: 8px; background: white; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px; color: var(--text-secondary);
-      transition: all 0.2s;
+      font-size: 16px; color: var(--text-secondary); transition: all 0.2s;
     }
     .icon-btn:hover { background: var(--primary-light); color: var(--primary); }
 
     .sidebar-section { padding: 12px 8px; }
 
     .section-title {
-      font-size: 11px; font-weight: 600;
-      color: var(--text-muted);
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.5px;
       padding: 4px 8px; margin-bottom: 4px;
     }
@@ -88,8 +74,7 @@
 
     .nav-btn {
       display: flex; align-items: center; gap: 10px;
-      padding: 9px 12px;
-      border-radius: 10px; border: none; background: transparent;
+      padding: 9px 12px; border-radius: 10px; border: none; background: transparent;
       cursor: pointer; font-size: 13px; font-weight: 500;
       color: var(--text-secondary); transition: all 0.2s;
       text-align: left; width: 100%;
@@ -136,17 +121,13 @@
 
     /* ── Topbar (mobile) ── */
     .topbar {
-      display: none;
-      align-items: center;
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg);
-      gap: 12px; flex-shrink: 0;
+      display: none; align-items: center;
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+      background: var(--bg); gap: 12px; flex-shrink: 0;
     }
 
     .topbar-menu {
-      width: 36px; height: 36px;
-      border: none; background: none; cursor: pointer;
+      width: 36px; height: 36px; border: none; background: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       border-radius: 8px; font-size: 22px; color: var(--text-secondary);
     }
@@ -155,23 +136,17 @@
     .topbar-title { font-weight: 700; font-size: 17px; color: var(--primary); }
 
     .mode-badge {
-      font-size: 11px;
-      background: var(--primary-light); color: var(--primary);
+      font-size: 11px; background: var(--primary-light); color: var(--primary);
       padding: 3px 8px; border-radius: 20px; font-weight: 600;
     }
 
     /* ── Messages ── */
-    .messages {
-      flex: 1; overflow-y: auto;
-      padding: 32px 24px;
-      scroll-behavior: smooth;
-    }
+    .messages { flex: 1; overflow-y: auto; padding: 32px 24px; scroll-behavior: smooth; }
     .messages::-webkit-scrollbar { width: 4px; }
     .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
     .msg-inner { max-width: var(--content-width); margin: 0 auto; width: 100%; }
 
-    /* Welcome */
     .welcome {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
@@ -179,8 +154,7 @@
     }
 
     .welcome-icon {
-      width: 72px; height: 72px;
-      background: var(--primary); border-radius: 20px;
+      width: 72px; height: 72px; background: var(--primary); border-radius: 20px;
       display: flex; align-items: center; justify-content: center;
       font-size: 36px; margin-bottom: 20px;
       box-shadow: 0 4px 24px rgba(192,57,43,0.25);
@@ -202,7 +176,6 @@
     .card .c-title { font-size: 13px; font-weight: 600; }
     .card .c-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
 
-    /* Message rows */
     .msg-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 28px; }
     .msg-row.user { flex-direction: row-reverse; }
 
@@ -230,8 +203,7 @@
     .bubble.ai hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
 
     .prop-block {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
+      background: var(--bg-secondary); border: 1px solid var(--border);
       border-radius: 14px; padding: 16px; margin: 12px 0;
     }
     .prop-block p { margin-bottom: 8px; }
@@ -241,13 +213,9 @@
 
     .photo-gallery {
       display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 4px; margin-top: 12px;
-      border-radius: 12px; overflow: hidden;
+      gap: 4px; margin-top: 12px; border-radius: 12px; overflow: hidden;
     }
-    .photo-gallery img {
-      width: 100%; aspect-ratio: 1; object-fit: cover;
-      cursor: pointer; transition: opacity 0.2s;
-    }
+    .photo-gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; cursor: pointer; transition: opacity 0.2s; }
     .photo-gallery img:hover { opacity: 0.85; }
     .photo-gallery img:only-child { grid-column: span 3; aspect-ratio: 16/9; }
     .photo-gallery img:first-child:nth-last-child(2),
@@ -285,8 +253,7 @@
 
     .chip {
       display: flex; align-items: center; gap: 4px;
-      padding: 5px 13px;
-      background: var(--bg-secondary); border: 1px solid var(--border);
+      padding: 5px 13px; background: var(--bg-secondary); border: 1px solid var(--border);
       border-radius: 20px; font-size: 12px; font-weight: 500;
       color: var(--text-secondary); white-space: nowrap; cursor: pointer;
       transition: all 0.2s; flex-shrink: 0;
@@ -312,18 +279,15 @@
 
     .input-bottom {
       display: flex; align-items: center; justify-content: space-between;
-      margin-top: 8px; padding-top: 8px;
-      border-top: 1px solid var(--border);
+      margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
     }
 
     .input-tools { display: flex; gap: 2px; }
 
     .ibt {
-      height: 32px; padding: 0 10px;
-      border: none; border-radius: 8px; background: transparent;
+      height: 32px; padding: 0 10px; border: none; border-radius: 8px; background: transparent;
       cursor: pointer; display: flex; align-items: center; gap: 5px;
-      font-size: 13px; color: var(--text-secondary);
-      transition: all 0.2s;
+      font-size: 13px; color: var(--text-secondary); transition: all 0.2s;
     }
     .ibt:hover { background: var(--bg-tertiary); color: var(--text-primary); }
     .ibt .ibt-icon { font-size: 16px; }
@@ -374,10 +338,8 @@
     .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(10px); background: #1a1a1a; color: white; padding: 10px 18px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; z-index: 500; pointer-events: none; white-space: nowrap; }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Auth loading screen */
     .auth-loading {
-      position: fixed; inset: 0;
-      background: var(--bg);
+      position: fixed; inset: 0; background: var(--bg);
       display: flex; align-items: center; justify-content: center;
       flex-direction: column; gap: 16px; z-index: 9999;
     }
@@ -410,7 +372,6 @@
 </head>
 <body>
 
-<!-- Auth loading overlay — shown while checking session -->
 <div class="auth-loading" id="auth-loading">
   <div class="al-icon">🏠</div>
   <div class="al-spin"></div>
@@ -445,6 +406,17 @@
     <div class="divider"></div>
 
     <div class="sidebar-section">
+      <div class="section-title">Navigate</div>
+      <div class="nav-btns">
+        <button class="nav-btn" onclick="window.location.href='/'"><span class="n-icon">🏠</span> Home</button>
+        <button class="nav-btn" onclick="window.location.href='/browse.html'"><span class="n-icon">🔍</span> Browse</button>
+        <button class="nav-btn" onclick="window.location.href='/list-property.html'"><span class="n-icon">📋</span> List Property</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="sidebar-section">
       <div class="section-title">Quick Topics</div>
       <div class="nav-btns">
         <button class="nav-btn" onclick="quick('Best areas to rent in Bengaluru for IT professionals 2025')"><span class="n-icon">📍</span> Best Areas</button>
@@ -462,7 +434,6 @@
     <div style="flex:1"></div>
 
     <div class="sidebar-footer">
-      <!-- User profile card -->
       <div class="user-card">
         <div class="user-avatar" id="user-avatar">👤</div>
         <div class="user-info">
@@ -470,6 +441,7 @@
           <div class="user-email-text" id="user-email"></div>
         </div>
       </div>
+      <!-- ✅ signOut() comes from nav.js -->
       <div class="footer-item" onclick="signOut()">🚪 Sign Out</div>
       <div class="footer-item" onclick="toast('Settings coming soon!')">⚙️ Settings</div>
       <div class="footer-item" onclick="toast('Help center coming soon!')">❓ Help & FAQ</div>
@@ -482,7 +454,6 @@
 
   <!-- ── Main ── -->
   <div class="main">
-    <!-- Mobile topbar -->
     <div class="topbar">
       <button class="topbar-menu" onclick="toggleSidebar()">☰</button>
       <div class="topbar-center">
@@ -492,7 +463,6 @@
       <button class="topbar-menu" onclick="newChat()">✏️</button>
     </div>
 
-    <!-- Messages -->
     <div class="messages" id="messages">
       <div class="msg-inner" id="welcome-wrap">
         <div class="welcome">
@@ -526,7 +496,6 @@
       </div>
     </div>
 
-    <!-- Input -->
     <div class="input-area">
       <div class="input-inner">
 
@@ -589,13 +558,11 @@
   </div>
 </div>
 
-<!-- Lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLb()">
   <button class="lb-close">✕</button>
   <img id="lb-img" src="" alt="" />
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast-el"></div>
 
 <script>
@@ -609,31 +576,23 @@
   let userLocation = null;
   let currentUser = null;
 
-  // ── Auth Guard + Boot ─────────────────────────────
   window.addEventListener('DOMContentLoaded', async () => {
     try {
       const session = await getSession();
-
-      if (!session) {
-        window.location.href = '/login.html';
-        return;
-      }
+      if (!session) { window.location.href = '/login.html'; return; }
 
       currentUser = session.user;
       const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
       const firstName = fullName.split(' ')[0];
       const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
-      // Populate sidebar user card
       document.getElementById('user-name').textContent = fullName;
       document.getElementById('user-email').textContent = currentUser.email;
       document.getElementById('user-avatar').textContent = initials;
 
-      // Update welcome title
       const wt = document.getElementById('welcome-title');
       if (wt) wt.textContent = `Hey, ${firstName} 👋`;
 
-      // Hide loading, show app
       document.getElementById('auth-loading').style.display = 'none';
       document.getElementById('app').style.display = 'flex';
 
@@ -647,7 +606,6 @@
     }
   });
 
-  // ── Mode ──────────────────────────────────────────
   function setMode(m) {
     mode = m;
     document.getElementById('btn-client').classList.toggle('active', m === 'client');
@@ -661,7 +619,6 @@
     setTimeout(() => appendAi(msg), 200);
   }
 
-  // ── Sidebar ───────────────────────────────────────
   function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('overlay').classList.toggle('open');
@@ -671,7 +628,6 @@
     document.getElementById('overlay').classList.remove('open');
   }
 
-  // ── New Chat ──────────────────────────────────────
   function newChat() {
     history = [];
     uploadedPhotos = [];
@@ -704,7 +660,6 @@
       </div>`;
   }
 
-  // ── Send ──────────────────────────────────────────
   async function send() {
     const el = document.getElementById('chat-input');
     let text = el.value.trim();
@@ -759,30 +714,20 @@
     document.getElementById('chat-input').focus();
   }
 
-  function quick(text) {
-    document.getElementById('chat-input').value = text;
-    send();
-    closeSidebar();
-  }
+  function quick(text) { document.getElementById('chat-input').value = text; send(); closeSidebar(); }
+  function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }
 
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-  }
-
-  // ── Render ────────────────────────────────────────
   function removeWelcome() { document.getElementById('welcome-wrap')?.remove(); }
 
   function appendUser(text, photoUrls = []) {
     const m = document.getElementById('messages');
     const wrap = document.createElement('div');
     wrap.className = 'msg-inner';
-
     let photosHtml = '';
     if (photoUrls.length > 0) {
       const imgs = photoUrls.map(u => `<img src="${u}" alt="Attached photo" onclick="openLb('${u}')" loading="lazy" />`).join('');
       photosHtml = `<div class="photo-gallery" style="margin-top:8px">${imgs}</div>`;
     }
-
     wrap.innerHTML = `
       <div class="msg-row user">
         <div class="avatar me">👤</div>
@@ -796,15 +741,11 @@
     const m = document.getElementById('messages');
     const wrap = document.createElement('div');
     wrap.className = 'msg-inner';
-
     let photosHtml = '';
     if (toolData?.photos?.length) {
-      const imgs = toolData.photos
-        .map(u => `<img src="${u}" alt="Property photo" onclick="openLb('${u}')" loading="lazy" />`)
-        .join('');
+      const imgs = toolData.photos.map(u => `<img src="${u}" alt="Property photo" onclick="openLb('${u}')" loading="lazy" />`).join('');
       photosHtml = `<div class="photo-gallery">${imgs}</div>`;
     }
-
     wrap.innerHTML = `
       <div class="msg-row">
         <div class="avatar ai">🏠</div>
@@ -814,18 +755,14 @@
     scrollDown();
   }
 
-  // ── Formatter ─────────────────────────────────────
   function fmt(raw) {
     let t = raw
       .replace(/\*\*(.*?)\*\*/g, '$1')
       .replace(/\*([^*\n]+)\*/g, '$1');
-
     t = esc(t);
-
     const blocks = t.split(/\n{2,}/);
     const parts = blocks.map(block => {
       const lines = block.split('\n');
-
       const isList = lines.every(l => /^[•\-\*]|\d+\./.test(l.trim()) || l.trim() === '');
       if (isList && lines.length > 1) {
         const items = lines.filter(l => l.trim()).map(l => {
@@ -834,13 +771,10 @@
         }).join('');
         return `<ul>${items}</ul>`;
       }
-
       if (/^─{3,}/.test(lines[0].trim())) return '<hr>';
-
       const content = lines.map(l => highlightPrices(l)).join('<br>');
       return `<p>${content}</p>`;
     });
-
     return parts.join('');
   }
 
@@ -849,14 +783,9 @@
   }
 
   function esc(t) {
-    return t
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── Typing ────────────────────────────────────────
   function showTyping() {
     const m = document.getElementById('messages');
     const wrap = document.createElement('div');
@@ -872,21 +801,14 @@
   }
   function removeTyping() { document.getElementById('typing-wrap')?.remove(); }
 
-  // ── Helpers ───────────────────────────────────────
-  function resize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
-  }
+  function resize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 140) + 'px'; }
 
   function updateCharCount(el) {
     const len = el.value.length;
     document.getElementById('char-count').textContent = len > 200 ? len : '';
   }
 
-  function scrollDown() {
-    const m = document.getElementById('messages');
-    m.scrollTop = m.scrollHeight;
-  }
+  function scrollDown() { const m = document.getElementById('messages'); m.scrollTop = m.scrollHeight; }
 
   function setBusy(b) {
     busy = b;
@@ -894,14 +816,12 @@
     document.getElementById('send-btn').disabled = b;
   }
 
-  // ── Photo Upload ──────────────────────────────────
   function triggerPhotoUpload() { document.getElementById('photo-input').click(); }
 
   async function handlePhotos(event) {
     const files = Array.from(event.target.files);
     if (!files.length) return;
     toast('📤 Uploading photos...');
-
     for (const file of files) {
       try {
         const formData = new FormData();
@@ -909,11 +829,8 @@
         const res = await fetch('/api/upload', { method: 'POST', body: formData });
         const data = await res.json();
         if (data.url) uploadedPhotos.push({ url: data.url, name: file.name });
-      } catch (e) {
-        toast('Upload failed for ' + file.name);
-      }
+      } catch (e) { toast('Upload failed for ' + file.name); }
     }
-
     renderPhotoPreview();
     event.target.value = '';
     if (uploadedPhotos.length > 0) toast(`✅ ${uploadedPhotos.length} photo(s) ready to send`);
@@ -930,29 +847,20 @@
     });
   }
 
-  function removePhoto(i) {
-    uploadedPhotos.splice(i, 1);
-    renderPhotoPreview();
-  }
+  function removePhoto(i) { uploadedPhotos.splice(i, 1); renderPhotoPreview(); }
 
-  // ── Location ──────────────────────────────────────
   function getLocation() {
     if (!navigator.geolocation) { toast('Geolocation not supported on this device'); return; }
     toast('📍 Getting your location...');
-
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;
         let address = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
           const geo = await res.json();
-          if (geo.display_name) {
-            address = geo.display_name.split(',').slice(0, 3).join(',').trim();
-          }
+          if (geo.display_name) address = geo.display_name.split(',').slice(0, 3).join(',').trim();
         } catch (e) {}
-
         userLocation = { lat, lng, address };
         document.getElementById('loc-text').textContent = address;
         document.getElementById('location-pill').style.display = 'block';
@@ -963,12 +871,8 @@
     );
   }
 
-  function clearLocation() {
-    userLocation = null;
-    document.getElementById('location-pill').style.display = 'none';
-  }
+  function clearLocation() { userLocation = null; document.getElementById('location-pill').style.display = 'none'; }
 
-  // ── Voice ─────────────────────────────────────────
   function initVoice() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { document.getElementById('voice-btn').style.display = 'none'; return; }
@@ -1002,11 +906,9 @@
     document.getElementById('voice-btn').innerHTML = '<span class="ibt-icon">🎙️</span> <span>Voice</span>';
   }
 
-  // ── Lightbox ──────────────────────────────────────
   function openLb(url) { document.getElementById('lb-img').src = url; document.getElementById('lightbox').classList.add('open'); }
   function closeLb() { document.getElementById('lightbox').classList.remove('open'); }
 
-  // ── Toast ─────────────────────────────────────────
   function toast(msg) {
     const el = document.getElementById('toast-el');
     el.textContent = msg;
