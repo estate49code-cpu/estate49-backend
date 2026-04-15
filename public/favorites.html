@@ -1,159 +1,317 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Favorites — Estate49</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/auth.js"></script>
   <script src="/nav.js"></script>
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--primary:#c0392b;--primary-dark:#a93226;--primary-light:#fadbd8;--bg:#f7f7f8;--card:#fff;--border:#e5e5e5;--text:#0d0d0d;--muted:#6e6e80}
-    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
-    .auth-loading{position:fixed;inset:0;background:white;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:9999}
-    .al-icon{width:56px;height:56px;background:var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px}
-    .al-spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .page{display:none}
-    .wrap{max-width:1100px;margin:0 auto;padding:32px 20px 60px}
-    .page-header{margin-bottom:28px}
-    .page-title{font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
-    .page-sub{font-size:14px;color:var(--muted)}
-    .prop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
-    .prop-card{background:var(--card);border-radius:18px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all 0.25s;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
-    .prop-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.1);border-color:var(--primary)}
-    .prop-img-wrap{position:relative;height:200px;overflow:hidden;background:#ececf1}
-    .prop-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s}
-    .prop-card:hover .prop-img-wrap img{transform:scale(1.04)}
-    .prop-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px;background:var(--bg)}
-    .prop-badge{position:absolute;top:12px;left:12px;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700;text-transform:uppercase}
-    .prop-badge.rent{background:#e3f2fd;color:#1565c0}
-    .prop-badge.buy{background:#e8f5e9;color:#2e7d32}
-    .remove-btn{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s}
-    .remove-btn:hover{background:#fadbd8;transform:scale(1.15)}
-    .prop-body{padding:16px}
-    .prop-price{font-size:20px;font-weight:800;color:var(--primary);margin-bottom:4px}
-    .prop-price span{font-size:13px;font-weight:500;color:var(--muted)}
-    .prop-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px}
-    .prop-location{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);margin-bottom:10px}
-    .prop-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-    .prop-tag{padding:4px 10px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--muted);font-weight:500}
-    .prop-footer{display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border)}
-    .prop-contact{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--primary);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all 0.2s}
-    .prop-contact:hover{background:var(--primary-dark)}
-    .empty-state{text-align:center;padding:80px 24px;display:flex;flex-direction:column;align-items:center;gap:12px}
-    .empty-icon{font-size:56px;margin-bottom:8px}
-    .empty-title{font-size:20px;font-weight:700}
-    .empty-sub{font-size:14px;color:var(--muted);max-width:360px;line-height:1.6}
-    .empty-btn{margin-top:8px;padding:11px 24px;background:var(--primary);color:white;border:none;border-radius:12px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer}
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1a1a;color:white;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all 0.3s;z-index:500;pointer-events:none;white-space:nowrap}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    @media(max-width:600px){.wrap{padding:16px 14px 60px}.prop-grid{grid-template-columns:1fr}}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --primary:#c0392b; --primary-dark:#a93226; --primary-light:#fadbd8; --bg:#f7f7f8; --card:#ffffff; --border:#e5e5e5; --text:#0d0d0d; --muted:#6e6e80; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .auth-loading { position:fixed; inset:0; background:white; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; z-index:9999; }
+    .al-spin { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    nav { background:white; border-bottom:1px solid var(--border); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 1px 8px rgba(0,0,0,0.04); }
+    .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
+    .nav-logo-icon { width:32px; height:32px; background:var(--primary); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+    .nav-logo-text { font-size:17px; font-weight:800; color:var(--primary); }
+    .nav-right { display:flex; align-items:center; gap:10px; }
+    .nav-link { padding:6px 12px; border-radius:8px; font-size:13px; font-weight:500; color:var(--muted); text-decoration:none; transition:all 0.2s; }
+    .nav-link:hover { background:var(--bg); color:var(--text); }
+    .nav-user-wrap { position:relative; }
+    .nav-avatar { width:32px; height:32px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; cursor:pointer; }
+    .nav-dropdown { display:none; position:absolute; top:calc(100% + 8px); right:0; background:white; border:1px solid var(--border); border-radius:14px; padding:8px; min-width:180px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:200; }
+    .nav-dropdown.open { display:block; }
+    .nav-dropdown-name { padding:8px 12px 4px; font-size:13px; font-weight:600; }
+    .nav-dropdown-email { padding:0 12px 8px; font-size:11px; color:var(--muted); border-bottom:1px solid var(--border); margin-bottom:6px; }
+    .nav-dropdown-item { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; font-size:13px; color:var(--muted); cursor:pointer; transition:all 0.2s; border:none; background:none; width:100%; text-align:left; text-decoration:none; }
+    .nav-dropdown-item:hover { background:var(--bg); color:var(--text); }
+    .nav-dropdown-item.signout { color:var(--primary); }
+    .nav-dropdown-item.signout:hover { background:var(--primary-light); }
+
+    .page { display:none; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+
+    .page-header { margin-bottom: 24px; }
+    .page-title { font-size:22px; font-weight:800; display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+    .page-sub { font-size:14px; color:var(--muted); }
+
+    /* Filter bar */
+    .filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+    .filter-chip { padding:7px 16px; border:1.5px solid var(--border); border-radius:20px; font-size:13px; font-weight:500; color:var(--muted); background:white; cursor:pointer; transition:all 0.2s; font-family:inherit; }
+    .filter-chip:hover { border-color:var(--primary); color:var(--primary); }
+    .filter-chip.active { background:var(--primary); color:white; border-color:var(--primary); }
+
+    /* Grid */
+    .favs-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:20px; }
+
+    /* Fav card */
+    .fav-card { background:var(--card); border:1px solid var(--border); border-radius:18px; overflow:hidden; transition:all 0.2s; position:relative; }
+    .fav-card:hover { box-shadow:0 6px 24px rgba(0,0,0,0.1); transform:translateY(-2px); }
+    .fav-img-wrap { position:relative; }
+    .fav-img { width:100%; height:180px; object-fit:cover; display:block; background:#f0f0f0; }
+    .fav-img-placeholder { width:100%; height:180px; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:48px; }
+    .fav-unsave-btn { position:absolute; top:10px; right:10px; width:34px; height:34px; background:white; border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; box-shadow:0 2px 8px rgba(0,0,0,0.15); transition:all 0.2s; }
+    .fav-unsave-btn:hover { background:var(--primary-light); transform:scale(1.1); }
+    .fav-type-badge { position:absolute; top:10px; left:10px; background:var(--primary); color:white; font-size:10px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; }
+    .fav-body { padding:16px; }
+    .fav-price { font-size:18px; font-weight:800; color:var(--primary); margin-bottom:4px; }
+        .fav-title { font-size:14px; font-weight:600; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .fav-loc { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:4px; margin-bottom:10px; }
+    .fav-tags { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+    .fav-tag { font-size:11px; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:3px 8px; color:var(--muted); }
+    .fav-actions { display:flex; gap:8px; }
+    .fav-btn { flex:1; padding:8px; border-radius:10px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer; transition:all 0.2s; border:none; text-align:center; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:4px; }
+    .fav-btn-view { background:var(--primary); color:white; }
+    .fav-btn-view:hover { background:var(--primary-dark); }
+    .fav-btn-msg { background:var(--bg); color:var(--text); border:1.5px solid var(--border); }
+    .fav-btn-msg:hover { border-color:var(--primary); color:var(--primary); }
+
+    /* Empty & loading */
+    .empty-state { text-align:center; padding:80px 20px; }
+    .empty-icon { font-size:64px; margin-bottom:16px; }
+    .empty-title { font-size:18px; font-weight:700; margin-bottom:8px; }
+    .empty-sub { font-size:14px; color:var(--muted); margin-bottom:24px; line-height:1.6; }
+    .btn-browse { display:inline-flex; align-items:center; gap:8px; padding:12px 24px; background:var(--primary); color:white; border-radius:12px; text-decoration:none; font-size:14px; font-weight:600; transition:all 0.2s; }
+    .btn-browse:hover { background:var(--primary-dark); }
+
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(10px); background:#1a1a1a; color:white; padding:10px 20px; border-radius:20px; font-size:13px; opacity:0; transition:all 0.3s; z-index:1000; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    @media (max-width:640px) {
+      nav { padding:0 16px; }
+      .container { padding:20px 14px; }
+      .favs-grid { grid-template-columns:1fr 1fr; gap:12px; }
+    }
+    @media (max-width:420px) {
+      .favs-grid { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
-<div class="auth-loading" id="auth-loading"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
+
+<div class="auth-loading" id="auth-loading">
+  <div style="width:56px;height:56px;background:var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;">🏠</div>
+  <div class="al-spin"></div>
+</div>
+
 <div class="page" id="page">
-  <div id="navbar-root"></div>
-  <div class="wrap">
+  <nav>
+    <a class="nav-logo" href="/">
+      <div class="nav-logo-icon">🏠</div>
+      <span class="nav-logo-text">Estate49</span>
+    </a>
+    <div class="nav-right">
+      <a class="nav-link" href="/">Home</a>
+      <a class="nav-link" href="/browse.html">Browse</a>
+      <a class="nav-link" href="/list-property.html">List Property</a>
+      <a class="nav-link" href="/chat.html">AI Chat</a>
+      <div class="nav-user-wrap">
+        <div class="nav-avatar" id="nav-avatar" onclick="toggleNavDropdown()">👤</div>
+        <div class="nav-dropdown" id="nav-dropdown">
+          <div class="nav-dropdown-name" id="nav-dropdown-name">Loading...</div>
+          <div class="nav-dropdown-email" id="nav-dropdown-email"></div>
+          <a class="nav-dropdown-item" href="/profile.html">👤 My Profile</a>
+          <a class="nav-dropdown-item" href="/messages.html">💬 Messages</a>
+          <button class="nav-dropdown-item signout" onclick="signOut()">🚪 Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
     <div class="page-header">
       <div class="page-title">❤️ My Favorites</div>
-      <div class="page-sub" id="fav-sub">Loading your saved properties...</div>
+      <div class="page-sub" id="fav-count-sub">Loading your saved properties...</div>
     </div>
-    <div class="prop-grid" id="fav-grid">
-      <div class="empty-state"><div class="al-spin" style="margin:0 auto"></div></div>
+
+    <div class="filter-bar">
+      <button class="filter-chip active" id="fc-all" onclick="filterFavs('all')">All</button>
+      <button class="filter-chip" id="fc-rent" onclick="filterFavs('rent')">🏠 For Rent</button>
+      <button class="filter-chip" id="fc-buy" onclick="filterFavs('buy')">🏡 For Sale</button>
+    </div>
+
+    <div id="favs-container">
+      <div class="empty-state">
+        <div class="al-spin" style="margin:0 auto 16px"></div>
+        <div class="empty-sub">Loading your saved properties...</div>
+      </div>
     </div>
   </div>
 </div>
+
 <div class="toast" id="toast-el"></div>
+
 <script>
   let currentUser = null;
+  let token = null;
+  let allFavs = [];
+  let activeFilter = 'all';
 
   window.addEventListener('DOMContentLoaded', async () => {
     try {
       const session = await getSession();
       if (!session) { window.location.href = '/login.html'; return; }
       currentUser = session.user;
+      token = session.access_token;
+
+      const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+      const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      document.getElementById('nav-avatar').textContent = initials;
+      document.getElementById('nav-dropdown-name').textContent = fullName;
+      document.getElementById('nav-dropdown-email').textContent = currentUser.email;
+
       document.getElementById('auth-loading').style.display = 'none';
       document.getElementById('page').style.display = 'block';
-      await initNavbar({ active: 'favorites' });
-      await loadFavorites();
+
+      loadFavorites();
     } catch(e) { window.location.href = '/login.html'; }
   });
 
+  // ── Load Favorites ──
   async function loadFavorites() {
+    document.getElementById('favs-container').innerHTML = `
+      <div class="empty-state">
+        <div class="al-spin" style="margin:0 auto 16px"></div>
+        <div class="empty-sub">Loading your saved properties...</div>
+      </div>`;
     try {
-      const res  = await fetch(`/api/favorites/${currentUser.id}`);
-      const data = await res.json();
-      const grid = document.getElementById('fav-grid');
-      document.getElementById('fav-sub').textContent = `${data.length} saved ${data.length === 1 ? 'property' : 'properties'}`;
-
-      if (!data.length) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
-          <div class="empty-icon">💔</div>
-          <div class="empty-title">No favorites yet</div>
-          <div class="empty-sub">Browse properties and tap ❤️ to save ones you love.</div>
-          <button class="empty-btn" onclick="window.location.href='/browse.html'">Browse Properties</button>
-        </div>`;
-        return;
-      }
-
-      grid.innerHTML = data.map(f => {
-        const p = f.properties;
-        if (!p) return '';
-        const isRent = p.type === 'rent';
-        const photo  = p.photos?.[0];
-        const price  = isRent
-          ? `₹${Number(p.price).toLocaleString('en-IN')}<span>/month</span>`
-          : `₹${formatPrice(p.price)}`;
-        const tags = [
-          p.bhk ? `🛏️ ${p.bhk} BHK` : '',
-          p.area ? `📐 ${p.area} sq.ft` : '',
-          p.furnished ? `🪑 ${capitalize(p.furnished)}` : ''
-        ].filter(Boolean);
-
-        return `<div class="prop-card" onclick="window.location.href='/property.html?id=${p.id}'">
-          <div class="prop-img-wrap">
-            ${photo ? `<img src="${photo}" alt="${esc(p.title)}" loading="lazy"/>` : `<div class="prop-img-placeholder">🏠</div>`}
-            <span class="prop-badge ${isRent?'rent':'buy'}">${isRent?'Rent':'Buy'}</span>
-            <button class="remove-btn" title="Remove from favorites" onclick="event.stopPropagation();removeFav(${p.id},this)">❤️</button>
-          </div>
-          <div class="prop-body">
-            <div class="prop-price">${price}</div>
-            <div class="prop-title">${esc(p.title)}</div>
-            <div class="prop-location">📍 ${esc((p.locality?p.locality+', ':'')+( p.city||''))}</div>
-            <div class="prop-tags">${tags.map(t=>`<span class="prop-tag">${t}</span>`).join('')}</div>
-            <div class="prop-footer">
-              <span style="font-size:11px;color:var(--muted)">Saved</span>
-              <button class="prop-contact" onclick="event.stopPropagation();window.location.href='/property.html?id=${p.id}'">View Details →</button>
-            </div>
-          </div>
-        </div>`;
-      }).join('');
+      const res = await fetch('/api/favorites', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      allFavs = await res.json();
+      document.getElementById('fav-count-sub').textContent =
+        allFavs.length ? `${allFavs.length} saved propert${allFavs.length === 1 ? 'y' : 'ies'}` : 'No saved properties yet';
+      renderFavs(allFavs);
     } catch(e) {
-      toast('❌ Failed to load favorites');
+      document.getElementById('fav-count-sub').textContent = '';
+      document.getElementById('favs-container').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">❤️</div>
+          <div class="empty-title">No favorites yet</div>
+          <div class="empty-sub">Browse listings and tap ❤️ to save properties you love. They'll appear here.</div>
+          <a class="btn-browse" href="/browse.html">🔍 Browse Properties</a>
+        </div>`;
     }
   }
 
-  async function removeFav(propertyId, btn) {
-    btn.textContent = '🤍';
-    try {
-      await fetch('/api/favorites', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: currentUser.id, property_id: propertyId })
-      });
-      toast('Removed from favorites');
-      setTimeout(() => loadFavorites(), 600);
-    } catch(e) { toast('Failed to remove'); btn.textContent = '❤️'; }
+  // ── Filter ──
+  function filterFavs(type) {
+    activeFilter = type;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('fc-' + type).classList.add('active');
+    const filtered = type === 'all' ? allFavs : allFavs.filter(p => p.listing_type === type || p.type === type);
+    renderFavs(filtered);
   }
 
-  function formatPrice(n){ n=Number(n); if(n>=10000000) return (n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr'; if(n>=100000) return (n/100000).toFixed(1).replace(/\.0$/,'')+'L'; return n.toLocaleString('en-IN'); }
-  function capitalize(s){ return s?s.charAt(0).toUpperCase()+s.slice(1):''; }
-  function esc(t){ return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
-  function toast(msg){ const el=document.getElementById('toast-el'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
+  // ── Render ──
+  function renderFavs(favs) {
+    const c = document.getElementById('favs-container');
+    if (!favs.length) {
+      c.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">❤️</div>
+          <div class="empty-title">No saved properties</div>
+          <div class="empty-sub">Browse listings and tap ❤️ to save properties you love.</div>
+          <a class="btn-browse" href="/browse.html">🔍 Browse Properties</a>
+        </div>`;
+      return;
+    }
+
+    c.innerHTML = `<div class="favs-grid">${favs.map(p => favCardHtml(p)).join('')}</div>`;
+  }
+
+  function safeImg(url) {
+    if (!url) return null;
+    return url.replace(/^http:\/\//i, 'https://');
+  }
+
+  function favCardHtml(p) {
+    const imgRaw = Array.isArray(p.photos) ? p.photos[0] : p.photos;
+    const imgUrl = safeImg(imgRaw);
+    const imgHtml = imgUrl
+      ? `<img class="fav-img" src="${imgUrl}" alt="${p.title || ''}" loading="lazy"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+         <div class="fav-img-placeholder" style="display:none">🏠</div>`
+      : `<div class="fav-img-placeholder">🏠</div>`;
+
+    const price = p.price
+      ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.listing_type === 'rent' || p.type === 'rent' ? '/mo' : '')
+      : '—';
+
+    const tags = [
+      p.bhk ? p.bhk + ' BHK' : null,
+      p.furnished ? (p.furnished === 'furnished' ? 'Furnished' : p.furnished === 'semi' ? 'Semi' : 'Unfurnished') : null,
+      p.area ? p.area + ' sq.ft' : null
+    ].filter(Boolean);
+
+    const typeLabel = (p.listing_type || p.type) === 'buy' ? 'FOR SALE' : 'FOR RENT';
+
+    return `
+      <div class="fav-card" id="fav-${p.id}">
+        <div class="fav-img-wrap">
+          ${imgHtml}
+          <span class="fav-type-badge">${typeLabel}</span>
+          <button class="fav-unsave-btn" onclick="unsaveFavorite('${p.id}')" title="Remove from favorites">❤️</button>
+        </div>
+        <div class="fav-body">
+          <div class="fav-price">${price}</div>
+          <div class="fav-title">${p.title || 'Untitled Property'}</div>
+          <div class="fav-loc">📍 ${p.locality || ''}, ${p.city || ''}</div>
+          ${tags.length ? `<div class="fav-tags">${tags.map(t => `<span class="fav-tag">${t}</span>`).join('')}</div>` : ''}
+          <div class="fav-actions">
+            <a class="fav-btn fav-btn-view" href="/property.html?id=${p.id}">👁 View</a>
+            <button class="fav-btn fav-btn-msg" onclick="messageOwner('${p.id}', '${p.user_id || p.owner_id || ''}')">💬 Message</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // ── Unsave ──
+  async function unsaveFavorite(propertyId) {
+    try {
+      const res = await fetch('/api/favorites/' + propertyId, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      if (!res.ok) throw new Error('Failed');
+      // Animate removal
+      const card = document.getElementById('fav-' + propertyId);
+      if (card) { card.style.opacity = '0'; card.style.transform = 'scale(0.9)'; card.style.transition = 'all 0.3s'; setTimeout(() => card.remove(), 300); }
+      allFavs = allFavs.filter(p => p.id !== propertyId);
+      document.getElementById('fav-count-sub').textContent =
+        allFavs.length ? `${allFavs.length} saved propert${allFavs.length === 1 ? 'y' : 'ies'}` : 'No saved properties yet';
+      toast('💔 Removed from favorites');
+    } catch(e) {
+      toast('❌ Could not remove. Please try again.');
+    }
+  }
+
+  // ── Message Owner ──
+  function messageOwner(listingId, ownerId) {
+    if (!ownerId) { toast('Owner info not available'); return; }
+    window.location.href = `/messages.html?to=${ownerId}&listing=${listingId}`;
+  }
+
+  // ── Helpers ──
+  function toggleNavDropdown() { document.getElementById('nav-dropdown').classList.toggle('open'); }
+  document.addEventListener('click', e => {
+    const wrap = document.querySelector('.nav-user-wrap');
+    if (wrap && !wrap.contains(e.target)) document.getElementById('nav-dropdown')?.classList.remove('open');
+  });
+
+  function toast(msg) {
+    const el = document.getElementById('toast-el');
+    el.textContent = msg; el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2800);
+  }
 </script>
 </body>
 </html>
