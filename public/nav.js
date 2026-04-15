@@ -1,6 +1,3 @@
-// nav.js — inject navbar into any page
-// Usage: <div id="navbar-root"></div> <script src="/nav.js"></script>
-
 async function initNavbar({ active = '' } = {}) {
   const root = document.getElementById('navbar-root');
   if (!root) return;
@@ -13,25 +10,22 @@ async function initNavbar({ active = '' } = {}) {
           <span class="nav-logo-text">Estate49</span>
         </a>
         <div class="nav-links">
-          <a class="nav-link ${active==='browse'?'active':''}"        href="/browse.html">Browse</a>
-          <a class="nav-link ${active==='chat'?'active':''}"          href="/chat.html">AI Chat</a>
-          <a class="nav-link ${active==='list'?'active':''}"          href="/list-property.html">List Property</a>
+          <a class="nav-link ${active==='browse'?'active':''}" href="/browse.html">Browse</a>
+          <a class="nav-link ${active==='chat'?'active':''}" href="/chat.html">AI Chat</a>
+          <a class="nav-link ${active==='list'?'active':''}" href="/list-property.html">List Property</a>
         </div>
       </div>
       <div class="nav-right">
         <a class="nav-icon-btn ${active==='favorites'?'active':''}" href="/favorites.html" title="Favorites">
-          ❤️
-          <span class="nav-badge" id="fav-count" style="display:none"></span>
+          ❤️<span class="nav-badge" id="fav-badge" style="display:none"></span>
         </a>
         <a class="nav-icon-btn ${active==='messages'?'active':''}" href="/messages.html" title="Messages">
-          💬
-          <span class="nav-badge" id="msg-count" style="display:none"></span>
+          💬<span class="nav-badge" id="msg-badge" style="display:none"></span>
         </a>
         <a class="nav-icon-btn ${active==='notifications'?'active':''}" href="/notifications.html" title="Notifications">
-          🔔
-          <span class="nav-badge" id="notif-count" style="display:none"></span>
+          🔔<span class="nav-badge" id="notif-badge" style="display:none"></span>
         </a>
-        <a class="nav-avatar-btn ${active==='profile'?'active':''}" href="/profile.html" id="nav-avatar-btn" title="Profile">
+        <a class="nav-avatar-btn ${active==='profile'?'active':''}" href="/profile.html" title="Profile">
           <div class="nav-avatar" id="nav-avatar">👤</div>
         </a>
       </div>
@@ -46,7 +40,7 @@ async function initNavbar({ active = '' } = {}) {
         font-family: 'Inter', sans-serif;
       }
       .nav-left  { display: flex; align-items: center; gap: 24px; }
-      .nav-right { display: flex; align-items: center; gap: 6px; }
+      .nav-right { display: flex; align-items: center; gap: 4px; }
       .nav-logo  { display: flex; align-items: center; gap: 8px; text-decoration: none; }
       .nav-logo-icon { width: 32px; height: 32px; background: #c0392b; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
       .nav-logo-text { font-size: 17px; font-weight: 800; color: #c0392b; }
@@ -58,47 +52,43 @@ async function initNavbar({ active = '' } = {}) {
         position: relative; width: 38px; height: 38px;
         display: flex; align-items: center; justify-content: center;
         border-radius: 10px; text-decoration: none; font-size: 18px;
-        transition: background 0.2s; cursor: pointer;
+        transition: background 0.2s;
       }
       .nav-icon-btn:hover  { background: #f7f7f8; }
       .nav-icon-btn.active { background: #fadbd8; }
       .nav-badge {
-        position: absolute; top: 4px; right: 4px;
+        position: absolute; top: 3px; right: 3px;
         min-width: 16px; height: 16px; padding: 0 4px;
         background: #c0392b; color: white;
         border-radius: 10px; font-size: 10px; font-weight: 700;
         display: flex; align-items: center; justify-content: center;
-        border: 2px solid white; line-height: 1;
+        border: 2px solid white;
       }
-      .nav-avatar-btn { text-decoration: none; border-radius: 50%; }
+      .nav-avatar-btn { text-decoration: none; }
       .nav-avatar {
         width: 34px; height: 34px; border-radius: 50%;
         background: #c0392b; color: white;
         display: flex; align-items: center; justify-content: center;
-        font-size: 13px; font-weight: 700; cursor: pointer;
+        font-size: 13px; font-weight: 700;
         border: 2px solid transparent; transition: border-color 0.2s;
       }
-      .nav-avatar-btn:hover .nav-avatar { border-color: #c0392b; }
-      .nav-avatar-btn.active .nav-avatar { border-color: #c0392b; background: #a93226; }
+      .nav-avatar-btn:hover .nav-avatar,
+      .nav-avatar-btn.active .nav-avatar { border-color: #c0392b; }
       @media (max-width: 768px) {
         #main-nav { padding: 0 14px; }
         .nav-links { display: none; }
       }
     </style>`;
 
-  // Load user + badge counts
+  // Set user initials
   try {
     const session = await getSession();
     if (!session) return;
-
     const user = session.user;
     const name = user.user_metadata?.full_name || user.email.split('@')[0];
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     document.getElementById('nav-avatar').textContent = initials;
-
-    // Load notification + message counts
-    const userId = user.id;
-    loadBadges(userId);
+    loadBadges(user.id);
   } catch(e) {}
 }
 
@@ -106,15 +96,25 @@ async function loadBadges(userId) {
   try {
     // Unread notifications
     const nr = await fetch(`/api/notifications/${userId}/unread`);
-    const nd = await nr.json();
-    const nc = document.getElementById('notif-count');
-    if (nd.count > 0) { nc.textContent = nd.count > 9 ? '9+' : nd.count; nc.style.display = 'flex'; }
+    if (nr.ok) {
+      const nd = await nr.json();
+      if (nd.count > 0) {
+        const el = document.getElementById('notif-badge');
+        if (el) { el.textContent = nd.count > 9 ? '9+' : nd.count; el.style.display = 'flex'; }
+      }
+    }
+  } catch(e) {}
 
+  try {
     // Unread messages
     const mr = await fetch(`/api/messages/inbox/${userId}`);
-    const md = await mr.json();
-    const unreadMsgs = (md || []).reduce((a, t) => a + (t.unread || 0), 0);
-    const mc = document.getElementById('msg-count');
-    if (unreadMsgs > 0) { mc.textContent = unreadMsgs > 9 ? '9+' : unreadMsgs; mc.style.display = 'flex'; }
+    if (mr.ok) {
+      const md = await mr.json();
+      const unread = (md || []).reduce((a, t) => a + (t.unread || 0), 0);
+      if (unread > 0) {
+        const el = document.getElementById('msg-badge');
+        if (el) { el.textContent = unread > 9 ? '9+' : unread; el.style.display = 'flex'; }
+      }
+    }
   } catch(e) {}
 }

@@ -2,7 +2,39 @@ const express  = require('express');
 const router   = express.Router();
 const supabase = require('../db');
 
-// GET conversation for a property between two users
+// ── INBOX must be FIRST before /:propertyId ──────────────────────────────────
+router.get('/inbox/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*, properties(id, title, photos, city, locality, listed_by, contact_name)')
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Group into threads — one per property+otherUser combo
+    const threads = {};
+    (data || []).forEach(m => {
+      const otherId = m.sender_id === userId ? m.receiver_id : m.sender_id;
+      const key = `${m.property_id}_${otherId}`;
+      if (!threads[key]) {
+        threads[key] = { ...m, otherId, unread: 0 };
+      }
+      if (!m.is_read && m.receiver_id === userId) {
+        threads[key].unread++;
+      }
+    });
+
+    res.json(Object.values(threads));
+  } catch (err) {
+    console.error('GET /inbox error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── GET conversation ─────────────────────────────────────────────────────────
 router.get('/:propertyId', async (req, res) => {
   try {
     const { propertyId } = req.params;
@@ -24,38 +56,12 @@ router.get('/:propertyId', async (req, res) => {
     if (error) throw error;
     res.json(data || []);
   } catch (err) {
+    console.error('GET /:propertyId error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET all conversations for a user
-router.get('/inbox/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*, properties(id, title, photos, city, locality)')
-      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    // Group by property + other user → latest message per thread
-    const threads = {};
-    (data || []).forEach(m => {
-      const otherId = m.sender_id === userId ? m.receiver_id : m.sender_id;
-      const key = `${m.property_id}_${otherId}`;
-      if (!threads[key]) threads[key] = { ...m, otherId, unread: 0 };
-      if (!m.is_read && m.receiver_id === userId) threads[key].unread++;
-    });
-
-    res.json(Object.values(threads));
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// POST send message
+// ── POST send message ────────────────────────────────────────────────────────
 router.post('/', async (req, res) => {
   try {
     const { property_id, sender_id, receiver_id, sender_name, message } = req.body;
@@ -78,15 +84,16 @@ router.post('/', async (req, res) => {
       title:   `New message from ${sender_name || 'someone'}`,
       body:    message.slice(0, 80),
       link:    `/messages.html?property=${property_id}&with=${sender_id}`
-    }]);
+    }]).catch(() => {});
 
     res.status(201).json(data);
   } catch (err) {
+    console.error('POST /messages error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// PATCH mark messages as read
+// ── PATCH mark as read ───────────────────────────────────────────────────────
 router.patch('/read', async (req, res) => {
   try {
     const { property_id, receiver_id, sender_id } = req.body;
