@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/auth.js"></script>
+  <script src="/nav.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -25,25 +26,11 @@
 
     body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
 
-    /* Auth loading */
     .auth-loading { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 9999; }
     .al-icon { width: 56px; height: 56px; background: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 16px rgba(192,57,43,0.25); }
     .al-spin { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Navbar */
-    nav { background: white; border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
-    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .nav-logo-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-    .nav-logo-text { font-size: 17px; font-weight: 800; color: var(--primary); }
-    .nav-right { display: flex; align-items: center; gap: 10px; }
-    .nav-link { padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; transition: all 0.2s; }
-    .nav-link:hover { background: var(--bg); color: var(--text); }
-    .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
-    .btn-back-nav { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: white; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; color: var(--muted); transition: all 0.2s; text-decoration: none; }
-    .btn-back-nav:hover { border-color: var(--primary); color: var(--primary); }
-
-    /* Page */
     .page { display: none; min-height: 100vh; }
 
     /* Layout */
@@ -79,7 +66,7 @@
     .detail-card-icon { width: 28px; height: 28px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
     /* Key stats row */
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 0; }
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .stat-box { background: var(--bg); border-radius: 14px; padding: 16px 12px; text-align: center; border: 1px solid var(--border); }
     .stat-box-val { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
     .stat-box-label { font-size: 11px; color: var(--muted); font-weight: 500; }
@@ -109,7 +96,7 @@
     .map-placeholder:hover { border-color: var(--primary); color: var(--primary); }
     .map-placeholder .map-icon { font-size: 32px; }
 
-    /* ── RIGHT COLUMN (sticky) ── */
+    /* ── RIGHT COLUMN ── */
     .right-col { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 16px; }
 
     /* Contact card */
@@ -123,13 +110,16 @@
     .owner-name { font-size: 14px; font-weight: 600; color: var(--text); }
     .owner-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .owner-time { font-size: 11px; color: var(--muted); }
+    .owner-rera { font-size: 11px; color: var(--success); font-weight: 600; margin-top: 3px; background: var(--success-light); padding: 2px 8px; border-radius: 6px; display: inline-block; }
 
     .contact-btns { display: flex; flex-direction: column; gap: 10px; }
     .btn-call { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; }
     .btn-call:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(192,57,43,0.3); }
     .btn-whatsapp { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: #25d366; color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; }
     .btn-whatsapp:hover { background: #128c7e; transform: translateY(-1px); }
-    .btn-email-contact { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: white; color: var(--text); border: 1.5px solid var(--border); border-radius: 14px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+    .btn-message { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: white; color: var(--text); border: 1.5px solid var(--border); border-radius: 14px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .btn-message:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .btn-email-contact { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: white; color: var(--text); border: 1.5px solid var(--border); border-radius: 14px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; }
     .btn-email-contact:hover { border-color: var(--primary); color: var(--primary); }
     .contact-note { text-align: center; font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
 
@@ -179,7 +169,6 @@
       .content-wrap { grid-template-columns: 1fr; }
       .right-col { position: static; }
       .similar-grid { grid-template-columns: 1fr 1fr; }
-      nav { padding: 0 16px; }
     }
     @media (max-width: 600px) {
       .content-wrap { padding: 16px 14px 60px; gap: 16px; }
@@ -200,17 +189,8 @@
 
 <div class="page" id="page">
 
-  <!-- Navbar -->
-  <nav>
-    <a class="nav-logo" href="/">
-      <div class="nav-logo-icon">🏠</div>
-      <span class="nav-logo-text">Estate49</span>
-    </a>
-    <div class="nav-right">
-      <a class="btn-back-nav" href="/browse.html">← Back to Browse</a>
-      <div class="nav-avatar" id="nav-avatar">👤</div>
-    </div>
-  </nav>
+  <!-- Shared Navbar -->
+  <div id="navbar-root"></div>
 
   <!-- Content -->
   <div class="content-wrap" id="content-wrap">
@@ -225,33 +205,33 @@
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox">
   <button class="lb-close" onclick="closeLb()">✕</button>
-  <button class="lb-prev" onclick="lbNav(-1)">‹</button>
+  <button class="lb-prev"  onclick="lbNav(-1)">‹</button>
   <img id="lb-img" src="" alt="" />
-  <button class="lb-next" onclick="lbNav(1)">›</button>
+  <button class="lb-next"  onclick="lbNav(1)">›</button>
   <div class="lb-counter" id="lb-counter"></div>
 </div>
 
 <div class="toast" id="toast-el"></div>
 
 <script>
-  let property = null;
+  let property    = null;
+  let currentUser = null;
   let currentPhoto = 0;
   let lbIndex = 0;
   let isSaved = false;
+  let ownerProfile = null;
 
-  // ── Auth + Boot ───────────────────────────────────
+  // ── Auth + Boot ──────────────────────────────────
   window.addEventListener('DOMContentLoaded', async () => {
     try {
       const session = await getSession();
       if (!session) { window.location.href = '/login.html'; return; }
-
-      const user = session.user;
-      const fullName = user.user_metadata?.full_name || user.email.split('@')[0];
-      const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-      document.getElementById('nav-avatar').textContent = initials;
+      currentUser = session.user;
 
       document.getElementById('auth-loading').style.display = 'none';
       document.getElementById('page').style.display = 'block';
+
+      await initNavbar({ active: '' });
 
       const params = new URLSearchParams(window.location.search);
       const id = params.get('id');
@@ -262,37 +242,57 @@
     } catch(e) { window.location.href = '/login.html'; }
   });
 
-  // ── Load property ─────────────────────────────────
+  // ── Load Property ────────────────────────────────
   async function loadProperty(id) {
     try {
       const res = await fetch('/api/properties/' + id);
       if (!res.ok) throw new Error('Not found');
       property = await res.json();
+      await loadOwnerProfile();
+      await checkIfSaved();
       renderProperty();
       loadSimilar();
     } catch(e) {
-      // Fallback: try to get from list
       try {
         const res2 = await fetch('/api/properties');
-        const all = await res2.json();
+        const all  = await res2.json();
         const list = Array.isArray(all) ? all : (all.properties || all.data || []);
-        property = list.find(p => String(p.id) === String(id));
+        property   = list.find(p => String(p.id) === String(id));
         if (!property) throw new Error('Not found');
+        await loadOwnerProfile();
+        await checkIfSaved();
         renderProperty();
         loadSimilar();
-      } catch(e2) {
-        showNotFound();
-      }
+      } catch(e2) { showNotFound(); }
     }
   }
 
-  // ── Render ────────────────────────────────────────
+  // ── Load owner profile (for RERA etc.) ──────────
+  async function loadOwnerProfile() {
+    if (!property?.listed_by) return;
+    try {
+      const res = await fetch(`/api/profiles/${property.listed_by}`);
+      ownerProfile = await res.json();
+    } catch(e) {}
+  }
+
+  // ── Check if already saved ───────────────────────
+  async function checkIfSaved() {
+    if (!currentUser || !property) return;
+    try {
+      const res  = await fetch(`/api/favorites/${currentUser.id}`);
+      const favs = await res.json();
+      isSaved = favs.some(f => String(f.property_id) === String(property.id));
+    } catch(e) {}
+  }
+
+  // ── Render ───────────────────────────────────────
   function renderProperty() {
     const p = property;
-    const photos = (p.photos && p.photos.length > 0) ? p.photos : [];
-    const isRent = p.type === 'rent';
+    const photos  = (p.photos && p.photos.length > 0) ? p.photos : [];
+    const isRent  = p.type === 'rent';
+    const isOwnListing = currentUser && p.listed_by === currentUser.id;
 
-    // Update page title
     document.title = `${p.title || 'Property'} — Estate49`;
 
     const amenityMap = {
@@ -313,17 +313,16 @@
       ? `₹${Number(p.price).toLocaleString('en-IN')}<span>/month</span>`
       : `₹${formatPrice(p.price)}`;
 
-    // Gallery HTML
+    // Gallery
     const mainImgHtml = photos.length > 0
       ? `<img src="${photos[0]}" alt="${esc(p.title)}" id="main-photo" onclick="openLb(0)" />`
       : `<div class="gallery-main-placeholder">🏠</div>`;
 
     const thumbsHtml = photos.length > 1
       ? `<div class="gallery-thumbs">${photos.map((ph, i) => `
-          <div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="setPhoto(${i})" id="thumb-${i}">
-            <img src="${ph}" alt="Photo ${i+1}" loading="lazy" />
-          </div>`).join('')}
-        </div>` : '';
+          <div class="gallery-thumb ${i===0?'active':''}" onclick="setPhoto(${i})" id="thumb-${i}">
+            <img src="${ph}" alt="Photo ${i+1}" loading="lazy"/>
+          </div>`).join('')}</div>` : '';
 
     const navBtns = photos.length > 1
       ? `<button class="gallery-nav prev" onclick="changePhoto(-1)">‹</button>
@@ -332,21 +331,33 @@
     // Info items
     const infoItems = [
       ['Property Type', capitalize(p.property_type || 'Apartment')],
-      ['BHK', p.bhk ? p.bhk + ' BHK' : '—'],
-      ['Bathrooms', p.bathrooms || '—'],
-      ['Area', p.area ? p.area + ' sq.ft' : '—'],
-      ['Carpet Area', p.carpet_area ? p.carpet_area + ' sq.ft' : '—'],
-      ['Floor', p.floor || '—'],
-      ['Furnished', capitalize(p.furnished || '—')],
-      ['Available', p.available_from || 'Immediately'],
-      ['Deposit', p.deposit ? '₹' + Number(p.deposit).toLocaleString('en-IN') : '—'],
-      ['Maintenance', p.maintenance ? '₹' + Number(p.maintenance).toLocaleString('en-IN') + '/mo' : 'Included'],
+      ['BHK',          p.bhk ? p.bhk + ' BHK' : '—'],
+      ['Bathrooms',    p.bathrooms || '—'],
+      ['Area',         p.area ? p.area + ' sq.ft' : '—'],
+      ['Carpet Area',  p.carpet_area ? p.carpet_area + ' sq.ft' : '—'],
+      ['Floor',        p.floor || '—'],
+      ['Furnished',    capitalize(p.furnished || '—')],
+      ['Available',    p.available_from || 'Immediately'],
+      ['Deposit',      p.deposit ? '₹' + Number(p.deposit).toLocaleString('en-IN') : '—'],
+      ['Maintenance',  p.maintenance ? '₹' + Number(p.maintenance).toLocaleString('en-IN') + '/mo' : 'Included'],
     ].filter(([,v]) => v && v !== '—');
 
-    // Contact
+    // Owner info
     const ownerInitials = (p.contact_name || 'O').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
-    const whatsappMsg = encodeURIComponent(`Hi, I'm interested in your property "${p.title}" listed on Estate49. Please share more details.`);
-    const whatsappNum = (p.contact_phone || '').replace(/\D/g, '');
+    const whatsappMsg   = encodeURIComponent(`Hi, I'm interested in your property "${p.title}" listed on Estate49.`);
+    const whatsappNum   = (p.contact_phone || '').replace(/\D/g, '');
+
+    // RERA badge
+    const reraBadge = ownerProfile?.rera_number
+      ? `<div class="owner-rera">✅ RERA: ${esc(ownerProfile.rera_number)}</div>` : '';
+
+    // Agency name
+    const agencyLine = ownerProfile?.agency_name
+      ? `<div class="owner-role">${esc(ownerProfile.agency_name)}</div>` : '';
+
+    // Message button — only show if not own listing
+    const msgBtn = !isOwnListing && p.listed_by
+      ? `<button class="btn-message" onclick="openMessages()">💬 Send Message</button>` : '';
 
     const wrap = document.getElementById('content-wrap');
     wrap.innerHTML = `
@@ -357,21 +368,20 @@
         <div class="gallery-wrap">
           <div class="gallery-main" id="gallery-main">
             ${mainImgHtml}
-            <span class="gallery-badge ${isRent ? 'rent' : 'buy'}">${isRent ? 'For Rent' : 'For Sale'}</span>
+            <span class="gallery-badge ${isRent?'rent':'buy'}">${isRent?'For Rent':'For Sale'}</span>
             ${photos.length > 1 ? `<span class="gallery-count" onclick="openLb(0)">📸 ${photos.length} Photos</span>` : ''}
             ${navBtns}
           </div>
           ${thumbsHtml}
         </div>
 
-        <!-- Header + Key stats -->
+        <!-- Header + Stats -->
         <div class="detail-card">
           <div class="prop-header">
             <div class="prop-main-price">${price}</div>
             <div class="prop-main-title">${esc(p.title || 'Property Listing')}</div>
             <div class="prop-location-row">📍 ${esc((p.locality ? p.locality + ', ' : '') + (p.city || ''))}</div>
           </div>
-
           <div class="stats-row">
             <div class="stat-box">
               <div class="stat-box-val">${p.bhk || '—'}</div>
@@ -432,7 +442,7 @@
           </div>
         </div>
 
-        <!-- Posted info -->
+        <!-- Footer meta -->
         <div style="font-size:12px;color:var(--muted);padding:0 4px">
           Listed by <strong>${esc(p.contact_name || 'Owner')}</strong>
           ${p.posted_at ? '· ' + timeAgo(p.posted_at) : ''}
@@ -451,61 +461,67 @@
 
           <div class="contact-owner">
             <div class="owner-avatar">${ownerInitials}</div>
-            <div>
+            <div style="flex:1;min-width:0">
               <div class="owner-name">${esc(p.contact_name || 'Property Owner')}</div>
-              <div class="owner-role">${capitalize(p.contact_role || 'Owner')}</div>
-              ${p.contact_time ? `<div class="owner-time">⏰ Available: ${capitalize(p.contact_time)}</div>` : ''}
+              <div class="owner-role">${capitalize(p.contact_role || ownerProfile?.role || 'Owner')}</div>
+              ${agencyLine}
+              ${p.contact_time ? `<div class="owner-time">⏰ ${capitalize(p.contact_time)}</div>` : ''}
+              ${reraBadge}
             </div>
           </div>
 
           <div class="contact-btns">
             ${p.contact_phone ? `
-              <a class="btn-call" href="tel:${p.contact_phone.replace(/\D/g,'')}">
-                📞 Call Owner
-              </a>
+              <a class="btn-call" href="tel:${p.contact_phone.replace(/\D/g,'')}">📞 Call Owner</a>
               ${whatsappNum ? `
-              <a class="btn-whatsapp" href="https://wa.me/${whatsappNum.startsWith('91') ? whatsappNum : '91' + whatsappNum}?text=${whatsappMsg}" target="_blank">
-                💬 WhatsApp
-              </a>` : ''}
+              <a class="btn-whatsapp"
+                href="https://wa.me/${whatsappNum.startsWith('91') ? whatsappNum : '91'+whatsappNum}?text=${whatsappMsg}"
+                target="_blank">💬 WhatsApp</a>` : ''}
             ` : `<button class="btn-call" onclick="toast('Contact info not available')">📞 Request Contact</button>`}
+            ${msgBtn}
             ${p.contact_email ? `
-              <a class="btn-email-contact" href="mailto:${p.contact_email}?subject=Enquiry: ${encodeURIComponent(p.title || '')}">
+              <a class="btn-email-contact"
+                href="mailto:${p.contact_email}?subject=Enquiry: ${encodeURIComponent(p.title||'')}">
                 ✉️ Send Email
               </a>` : ''}
           </div>
-          <div class="contact-note">🔒 Your information is safe. Estate49 never shares your data.</div>
+          <div class="contact-note">🔒 Your info is safe. Estate49 never shares your data.</div>
         </div>
 
-        <!-- Save / Share -->
+        <!-- Save / Share / AI -->
         <div class="action-card">
-          <button class="action-btn" id="save-btn" onclick="toggleSave()">🤍 Save</button>
+          <button class="action-btn ${isSaved ? 'saved' : ''}" id="save-btn" onclick="toggleSave()">
+            ${isSaved ? '❤️ Saved' : '🤍 Save'}
+          </button>
           <button class="action-btn" onclick="shareProperty()">🔗 Share</button>
-          <button class="action-btn" onclick="window.location.href='/chat.html?q=Tell me about ${encodeURIComponent(p.title || 'this property')}'">💬 Ask AI</button>
+          <button class="action-btn" onclick="window.location.href='/chat.html?q=Tell me about ${encodeURIComponent(p.title||'this property')}'">🤖 Ask AI</button>
         </div>
 
-        <!-- EMI calculator (for buy) -->
+        <!-- EMI Calculator (buy only) -->
         ${!isRent ? `
         <div class="detail-card">
           <div class="detail-card-title"><div class="detail-card-icon">🧮</div> EMI Estimate</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Based on 20yr loan @ 8.5% interest</div>
-          <div style="font-size:20px;font-weight:800;color:var(--primary)">₹${calcEMI(p.price, 8.5, 20)}<span style="font-size:13px;font-weight:500;color:var(--muted)">/month</span></div>
+          <div style="font-size:20px;font-weight:800;color:var(--primary)">
+            ₹${calcEMI(p.price, 8.5, 20)}<span style="font-size:13px;font-weight:500;color:var(--muted)">/month</span>
+          </div>
           <div style="font-size:11px;color:var(--muted);margin-top:6px">For 80% loan amount. Consult your bank for exact rates.</div>
         </div>` : ''}
 
       </div>
 
-      <!-- Similar properties (full width) -->
+      <!-- Similar (full width) -->
       <div class="similar-section" style="grid-column:1/-1" id="similar-section">
         <div class="loading-state">Loading similar properties...</div>
       </div>
     `;
   }
 
-  // ── Similar properties ────────────────────────────
+  // ── Similar ──────────────────────────────────────
   async function loadSimilar() {
     try {
-      const res = await fetch('/api/properties');
-      const all = await res.json();
+      const res  = await fetch('/api/properties');
+      const all  = await res.json();
       const list = Array.isArray(all) ? all : (all.properties || all.data || []);
       const similar = list
         .filter(p => p.id !== property.id && (p.city === property.city || p.type === property.type))
@@ -518,19 +534,17 @@
         <div class="similar-title">Similar Properties</div>
         <div class="similar-grid">
           ${similar.map(p => {
-            const photo = p.photos?.[0];
+            const photo  = p.photos?.[0];
             const isRent = p.type === 'rent';
             return `
               <div class="sim-card" onclick="window.location.href='/property.html?id=${p.id}'">
                 <div class="sim-img">
-                  ${photo
-                    ? `<img src="${photo}" alt="${esc(p.title)}" loading="lazy" />`
-                    : `<div class="sim-img-placeholder">🏠</div>`}
+                  ${photo ? `<img src="${photo}" alt="${esc(p.title)}" loading="lazy"/>` : `<div class="sim-img-placeholder">🏠</div>`}
                 </div>
                 <div class="sim-body">
-                  <div class="sim-price">${isRent ? '₹' + Number(p.price).toLocaleString('en-IN') + '/mo' : '₹' + formatPrice(p.price)}</div>
-                  <div class="sim-title">${esc(p.title || 'Property')}</div>
-                  <div class="sim-loc">📍 ${esc(p.locality || p.city || '')}</div>
+                  <div class="sim-price">${isRent ? '₹'+Number(p.price).toLocaleString('en-IN')+'/mo' : '₹'+formatPrice(p.price)}</div>
+                  <div class="sim-title">${esc(p.title||'Property')}</div>
+                  <div class="sim-loc">📍 ${esc(p.locality||p.city||'')}</div>
                 </div>
               </div>`;
           }).join('')}
@@ -540,57 +554,44 @@
     }
   }
 
-  // ── Gallery ───────────────────────────────────────
+  // ── Gallery ──────────────────────────────────────
   function setPhoto(idx) {
     if (!property?.photos?.length) return;
     currentPhoto = idx;
-
-    const mainArea = document.getElementById('gallery-main');
     const img = document.getElementById('main-photo');
     if (img) img.src = property.photos[idx];
-
-    document.querySelectorAll('.gallery-thumb').forEach((t, i) => {
-      t.classList.toggle('active', i === idx);
-    });
+    document.querySelectorAll('.gallery-thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
   }
 
   function changePhoto(dir) {
     if (!property?.photos?.length) return;
-    const next = (currentPhoto + dir + property.photos.length) % property.photos.length;
-    setPhoto(next);
+    setPhoto((currentPhoto + dir + property.photos.length) % property.photos.length);
   }
 
-  // ── Lightbox ──────────────────────────────────────
+  // ── Lightbox ─────────────────────────────────────
   function openLb(idx) {
     if (!property?.photos?.length) return;
-    lbIndex = idx;
-    updateLb();
+    lbIndex = idx; updateLb();
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
-
   function closeLb() {
     document.getElementById('lightbox').classList.remove('open');
     document.body.style.overflow = '';
   }
-
   function lbNav(dir) {
     if (!property?.photos?.length) return;
     lbIndex = (lbIndex + dir + property.photos.length) % property.photos.length;
     updateLb();
   }
-
   function updateLb() {
     document.getElementById('lb-img').src = property.photos[lbIndex];
-    document.getElementById('lb-counter').textContent = `${lbIndex + 1} / ${property.photos.length}`;
+    document.getElementById('lb-counter').textContent = `${lbIndex+1} / ${property.photos.length}`;
   }
 
-  // Close lightbox on backdrop click
   document.getElementById('lightbox').addEventListener('click', function(e) {
     if (e.target === this) closeLb();
   });
-
-  // Keyboard navigation
   document.addEventListener('keydown', e => {
     if (!document.getElementById('lightbox').classList.contains('open')) return;
     if (e.key === 'ArrowRight') lbNav(1);
@@ -598,43 +599,69 @@
     if (e.key === 'Escape')     closeLb();
   });
 
-  // ── Save / Share ──────────────────────────────────
-  function toggleSave() {
-    isSaved = !isSaved;
+  // ── Save (Favorites) ─────────────────────────────
+  async function toggleSave() {
+    if (!currentUser) { window.location.href = '/login.html'; return; }
     const btn = document.getElementById('save-btn');
-    btn.textContent = isSaved ? '❤️ Saved' : '🤍 Save';
-    btn.classList.toggle('saved', isSaved);
-    toast(isSaved ? '❤️ Saved to wishlist' : 'Removed from wishlist');
+    btn.disabled = true;
+
+    try {
+      if (isSaved) {
+        await fetch('/api/favorites', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: currentUser.id, property_id: property.id })
+        });
+        isSaved = false;
+        btn.textContent = '🤍 Save';
+        btn.classList.remove('saved');
+        toast('Removed from favorites');
+      } else {
+        await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: currentUser.id, property_id: property.id })
+        });
+        isSaved = true;
+        btn.textContent = '❤️ Saved';
+        btn.classList.add('saved');
+        toast('❤️ Saved to favorites!');
+      }
+    } catch(e) { toast('❌ Failed to update favorites'); }
+    btn.disabled = false;
   }
 
+  // ── Message Owner ─────────────────────────────────
+  function openMessages() {
+    if (!currentUser) { window.location.href = '/login.html'; return; }
+    if (!property.listed_by) { toast('Owner contact not available'); return; }
+    window.location.href = `/messages.html?property=${property.id}&with=${property.listed_by}`;
+  }
+
+  // ── Share ─────────────────────────────────────────
   function shareProperty() {
     if (navigator.share) {
-      navigator.share({
-        title: property?.title || 'Property on Estate49',
-        text: `Check out this property on Estate49: ${property?.title}`,
-        url: window.location.href
-      });
+      navigator.share({ title: property?.title || 'Property on Estate49', url: window.location.href });
     } else {
       navigator.clipboard.writeText(window.location.href)
-        .then(() => toast('🔗 Link copied to clipboard!'))
+        .then(() => toast('🔗 Link copied!'))
         .catch(() => toast('🔗 ' + window.location.href));
     }
   }
 
   // ── Map ───────────────────────────────────────────
   function openMap() {
-    const query = encodeURIComponent([property?.address, property?.locality, property?.city].filter(Boolean).join(', '));
-    window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+    const q = encodeURIComponent([property?.address, property?.locality, property?.city].filter(Boolean).join(', '));
+    window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
   }
 
-  // ── EMI Calculator ────────────────────────────────
-  function calcEMI(principal, annualRate, years) {
-    const p = principal * 0.8; // 80% loan
-    const r = annualRate / 12 / 100;
+  // ── EMI ───────────────────────────────────────────
+  function calcEMI(principal, rate, years) {
+    const p = principal * 0.8;
+    const r = rate / 12 / 100;
     const n = years * 12;
     if (!r) return Math.round(p/n).toLocaleString('en-IN');
-    const emi = p * r * Math.pow(1+r, n) / (Math.pow(1+r, n) - 1);
-    return Math.round(emi).toLocaleString('en-IN');
+    return Math.round(p * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1)).toLocaleString('en-IN');
   }
 
   // ── Not Found ─────────────────────────────────────
@@ -643,7 +670,7 @@
       <div class="not-found" style="grid-column:1/-1">
         <div class="not-found-icon">🏚️</div>
         <div class="not-found-title">Property Not Found</div>
-        <div style="color:var(--muted);font-size:14px;margin:8px 0 24px">This listing may have been removed or the link is incorrect.</div>
+        <div style="color:var(--muted);font-size:14px;margin:8px 0 24px">This listing may have been removed.</div>
         <a href="/browse.html" style="display:inline-block;padding:12px 24px;background:var(--primary);color:white;border-radius:12px;font-weight:600;text-decoration:none">Browse All Properties</a>
       </div>`;
   }
@@ -655,27 +682,19 @@
     if (n >= 100000)   return (n/100000).toFixed(1).replace(/\.0$/,'') + ' L';
     return n.toLocaleString('en-IN');
   }
-
   function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-
-  function esc(t) {
-    return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
+  function esc(t) { return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function timeAgo(dateStr) {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const days = Math.floor(diff / 86400000);
+    const days = Math.floor((Date.now() - new Date(dateStr)) / 86400000);
     if (days === 0) return 'today';
     if (days === 1) return 'yesterday';
     if (days < 7)  return `${days} days ago`;
     if (days < 30) return `${Math.floor(days/7)} weeks ago`;
     return `${Math.floor(days/30)} months ago`;
   }
-
   function toast(msg) {
     const el = document.getElementById('toast-el');
-    el.textContent = msg;
-    el.classList.add('show');
+    el.textContent = msg; el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2500);
   }
 </script>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile — Estate49</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/auth.js"></script>
+  <script src="/nav.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--primary:#c0392b;--primary-dark:#a93226;--primary-light:#fadbd8;--bg:#f7f7f8;--card:#fff;--border:#e5e5e5;--text:#0d0d0d;--muted:#6e6e80}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+    .auth-loading{position:fixed;inset:0;background:white;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:9999}
+    .al-icon{width:56px;height:56px;background:var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px}
+    .al-spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .page{display:none}
+    .wrap{max-width:860px;margin:0 auto;padding:32px 20px 60px;display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
+    /* Left */
+    .profile-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:sticky;top:80px}
+    .avatar-wrap{position:relative;width:96px;height:96px;margin:0 auto 16px;cursor:pointer}
+    .avatar-img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--primary)}
+    .avatar-placeholder{width:96px;height:96px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;border:3px solid var(--primary)}
+    .avatar-edit{position:absolute;bottom:2px;right:2px;background:var(--primary);color:white;border:2px solid white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer}
+    .profile-name{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+    .profile-email{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .profile-role-badge{display:inline-block;padding:4px 12px;background:var(--primary-light);color:var(--primary);border-radius:20px;font-size:12px;font-weight:600;margin-bottom:20px}
+    .profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+    .pstat{background:var(--bg);border-radius:12px;padding:12px;text-align:center;border:1px solid var(--border)}
+    .pstat-num{font-size:20px;font-weight:800;color:var(--primary)}
+    .pstat-label{font-size:11px;color:var(--muted);margin-top:2px}
+    .profile-nav{display:flex;flex-direction:column;gap:4px}
+    .pnav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.2s;text-decoration:none}
+    .pnav-item:hover{background:var(--bg);color:var(--text)}
+    .pnav-item.active{background:var(--primary-light);color:var(--primary);font-weight:600}
+    /* Right panels */
+    .panels{display:flex;flex-direction:column;gap:20px}
+    .panel{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px;box-shadow:0 2px 8px rgba(0,0,0,0.04);display:none}
+    .panel.active{display:block}
+    .panel-title{font-size:16px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+    .panel-icon{width:30px;height:30px;background:var(--primary-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+    .form-row.single{grid-template-columns:1fr}
+    .form-group{display:flex;flex-direction:column;gap:6px}
+    label{font-size:13px;font-weight:600;color:var(--text)}
+    input,select{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg);outline:none;transition:border-color 0.2s}
+    input:focus,select:focus{border-color:var(--primary);background:white}
+    .field-hint{font-size:11px;color:var(--muted)}
+    .rera-section{margin-top:20px;padding-top:20px;border-top:1px solid var(--border);display:none}
+    .rera-section.show{display:block}
+    .rera-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .rera-badge{background:#fff3e0;color:#e65100;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+    .btn-save{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:all 0.2s;margin-top:8px}
+    .btn-save:hover{background:var(--primary-dark)}
+    .btn-save:disabled{opacity:0.6;cursor:not-allowed}
+    /* My listings */
+    .listings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .my-prop-card{background:var(--bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all 0.2s;cursor:pointer}
+    .my-prop-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+    .my-prop-img{height:120px;background:#ececf1;overflow:hidden}
+    .my-prop-img img{width:100%;height:100%;object-fit:cover}
+    .my-prop-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:32px}
+    .my-prop-body{padding:12px}
+    .my-prop-price{font-size:15px;font-weight:800;color:var(--primary);margin-bottom:3px}
+    .my-prop-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+    .my-prop-loc{font-size:11px;color:var(--muted);margin-bottom:10px}
+    .my-prop-actions{display:flex;gap:6px}
+    .btn-sm{flex:1;padding:7px;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all 0.2s;border:1.5px solid var(--border);background:white;color:var(--muted)}
+    .btn-sm:hover{border-color:var(--primary);color:var(--primary)}
+    .btn-sm.danger:hover{border-color:#e53935;color:#e53935}
+    .empty-panel{text-align:center;padding:48px 20px;color:var(--muted)}
+    .empty-panel-icon{font-size:40px;margin-bottom:12px}
+    .empty-panel-text{font-size:14px}
+    /* Toast */
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1a1a;color:white;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all 0.3s;z-index:500;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    @media(max-width:700px){.wrap{grid-template-columns:1fr}.profile-card{position:static}.listings-grid{grid-template-columns:1fr}.form-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="auth-loading" id="auth-loading"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
+<div class="page" id="page">
+  <div id="navbar-root"></div>
+
+  <div class="wrap">
+    <!-- Left -->
+    <div class="profile-card">
+      <div class="avatar-wrap" onclick="document.getElementById('avatar-file').click()">
+        <div class="avatar-placeholder" id="avatar-display">👤</div>
+        <div class="avatar-edit">✏️</div>
+      </div>
+      <input type="file" id="avatar-file" accept="image/*" style="display:none" onchange="uploadAvatar(event)"/>
+      <div class="profile-name"  id="pcard-name">Loading...</div>
+      <div class="profile-email" id="pcard-email"></div>
+      <div class="profile-role-badge" id="pcard-role">Client</div>
+      <div class="profile-stats">
+        <div class="pstat"><div class="pstat-num" id="stat-listings">0</div><div class="pstat-label">Listings</div></div>
+        <div class="pstat"><div class="pstat-num" id="stat-favorites">0</div><div class="pstat-label">Saved</div></div>
+      </div>
+      <div class="profile-nav">
+        <a class="pnav-item active" onclick="showPanel('edit')"    id="pnav-edit">✏️ Edit Profile</a>
+        <a class="pnav-item"        onclick="showPanel('listings')" id="pnav-listings">🏠 My Listings</a>
+        <a class="pnav-item"        href="/favorites.html">❤️ My Favorites</a>
+        <a class="pnav-item"        href="/messages.html">💬 Messages</a>
+        <a class="pnav-item"        href="/notifications.html">🔔 Notifications</a>
+        <a class="pnav-item"        onclick="signOut()" style="color:#e53935;margin-top:8px">🚪 Sign Out</a>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div class="panels">
+
+      <!-- Edit Profile -->
+      <div class="panel active" id="panel-edit">
+        <div class="panel-title"><div class="panel-icon">✏️</div> Edit Profile</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="f-name" placeholder="Your full name"/>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" id="f-phone" placeholder="+91 98765 43210"/>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="text" id="f-email" disabled style="opacity:0.6;cursor:not-allowed"/>
+            <span class="field-hint">Email cannot be changed</span>
+          </div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label>I am a...</label>
+            <select id="f-role" onchange="checkReraSection()">
+              <option value="client">Property Seeker / Client</option>
+              <option value="owner">Property Owner</option>
+              <option value="broker">Broker / Agent</option>
+              <option value="builder">Builder / Developer</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- RERA Section — shows for broker/builder -->
+        <div class="rera-section" id="rera-section">
+          <div class="rera-title">📋 Professional Details <span class="rera-badge">Optional</span></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>RERA Registration Number</label>
+              <input type="text" id="f-rera" placeholder="e.g. PRM/KA/RERA/123"/>
+            </div>
+            <div class="form-group">
+              <label>Agency / Company Name</label>
+              <input type="text" id="f-agency" placeholder="Your agency name"/>
+            </div>
+          </div>
+          <div class="form-row single">
+            <div class="form-group">
+              <label>License Expiry Date</label>
+              <input type="text" id="f-expiry" placeholder="e.g. Dec 2026"/>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-save" id="save-btn" onclick="saveProfile()">💾 Save Profile</button>
+      </div>
+
+      <!-- My Listings -->
+      <div class="panel" id="panel-listings">
+        <div class="panel-title"><div class="panel-icon">🏠</div> My Listings</div>
+        <div id="my-listings-content">
+          <div class="empty-panel"><div class="empty-panel-icon">🏚️</div><div class="empty-panel-text">Loading your listings...</div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast-el"></div>
+<script>
+  let currentUser = null;
+  let profileData = {};
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const session = await getSession();
+      if (!session) { window.location.href = '/login.html'; return; }
+      currentUser = session.user;
+
+      document.getElementById('auth-loading').style.display = 'none';
+      document.getElementById('page').style.display = 'block';
+
+      await initNavbar({ active: 'profile' });
+      await loadProfile();
+      await loadMyListings();
+    } catch(e) { window.location.href = '/login.html'; }
+  });
+
+  async function loadProfile() {
+    const u = currentUser;
+    const name  = u.user_metadata?.full_name || u.email.split('@')[0];
+    const email = u.email;
+    const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+
+    document.getElementById('pcard-name').textContent  = name;
+    document.getElementById('pcard-email').textContent = email;
+    document.getElementById('f-email').value = email;
+    document.getElementById('f-name').value  = name;
+
+    try {
+      const res = await fetch(`/api/profiles/${u.id}`);
+      profileData = await res.json();
+
+      if (profileData.avatar_url) {
+        document.getElementById('avatar-display').outerHTML =
+          `<img class="avatar-img" id="avatar-display" src="${profileData.avatar_url}" alt="Avatar" />`;
+      } else {
+        document.getElementById('avatar-display').textContent = initials;
+      }
+
+      if (profileData.phone)          document.getElementById('f-phone').value  = profileData.phone;
+      if (profileData.role)           document.getElementById('f-role').value   = profileData.role;
+      if (profileData.rera_number)    document.getElementById('f-rera').value   = profileData.rera_number;
+      if (profileData.agency_name)    document.getElementById('f-agency').value = profileData.agency_name;
+      if (profileData.license_expiry) document.getElementById('f-expiry').value = profileData.license_expiry;
+
+      document.getElementById('pcard-role').textContent = capitalize(profileData.role || 'client');
+      checkReraSection();
+
+    } catch(e) {
+      document.getElementById('avatar-display').textContent = initials;
+    }
+  }
+
+  async function loadMyListings() {
+    try {
+      const res  = await fetch(`/api/properties?listed_by=${currentUser.id}`);
+      const list = await res.json();
+      document.getElementById('stat-listings').textContent = list.length;
+
+      const content = document.getElementById('my-listings-content');
+      if (!list.length) {
+        content.innerHTML = `<div class="empty-panel"><div class="empty-panel-icon">🏚️</div><div class="empty-panel-text">You haven't listed any properties yet.</div><br/><a href="/list-property.html" style="color:var(--primary);font-weight:600;font-size:14px">+ List your first property</a></div>`;
+        return;
+      }
+
+      content.innerHTML = `<div class="listings-grid">${list.map(p => {
+        const photo = p.photos?.[0];
+        const isRent = p.type === 'rent';
+        return `<div class="my-prop-card">
+          <div class="my-prop-img" onclick="window.location.href='/property.html?id=${p.id}'">
+            ${photo ? `<img src="${photo}" alt="${esc(p.title)}" loading="lazy"/>` : `<div class="my-prop-img-ph">🏠</div>`}
+          </div>
+          <div class="my-prop-body">
+            <div class="my-prop-price">₹${isRent ? Number(p.price).toLocaleString('en-IN')+'/mo' : formatPrice(p.price)}</div>
+            <div class="my-prop-title">${esc(p.title)}</div>
+            <div class="my-prop-loc">📍 ${esc(p.locality||p.city||'')}</div>
+            <div class="my-prop-actions">
+              <button class="btn-sm" onclick="window.location.href='/property.html?id=${p.id}'">👁 View</button>
+              <button class="btn-sm danger" onclick="deleteListing(${p.id}, this)">🗑 Delete</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}</div>`;
+
+      // favorites count
+      const fr = await fetch(`/api/favorites/${currentUser.id}`);
+      const fd = await fr.json();
+      document.getElementById('stat-favorites').textContent = fd.length || 0;
+
+    } catch(e) {}
+  }
+
+  async function deleteListing(id, btn) {
+    if (!confirm('Delete this listing? This cannot be undone.')) return;
+    btn.textContent = '...';
+    try {
+      await fetch(`/api/properties/${id}`, { method: 'DELETE' });
+      toast('🗑 Listing deleted');
+      await loadMyListings();
+    } catch(e) { toast('Failed to delete'); }
+  }
+
+  async function saveProfile() {
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = '⏳ Saving...';
+    try {
+      const payload = {
+        id:             currentUser.id,
+        full_name:      document.getElementById('f-name').value.trim(),
+        phone:          document.getElementById('f-phone').value.trim(),
+        role:           document.getElementById('f-role').value,
+        rera_number:    document.getElementById('f-rera').value.trim(),
+        agency_name:    document.getElementById('f-agency').value.trim(),
+        license_expiry: document.getElementById('f-expiry').value.trim(),
+      };
+      if (profileData.avatar_url) payload.avatar_url = profileData.avatar_url;
+
+      const res = await fetch('/api/profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error();
+      toast('✅ Profile saved!');
+      document.getElementById('pcard-name').textContent = payload.full_name;
+      document.getElementById('pcard-role').textContent = capitalize(payload.role);
+    } catch(e) { toast('❌ Failed to save'); }
+    btn.disabled = false; btn.innerHTML = '💾 Save Profile';
+  }
+
+  async function uploadAvatar(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    toast('⏳ Uploading photo...');
+    try {
+      const fd = new FormData(); fd.append('photo', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!data.url) throw new Error();
+      profileData.avatar_url = data.url;
+      const wrap = document.querySelector('.avatar-wrap');
+      wrap.querySelector('#avatar-display')?.remove();
+      const img = document.createElement('img');
+      img.className = 'avatar-img'; img.id = 'avatar-display';
+      img.src = data.url; img.alt = 'Avatar';
+      wrap.prepend(img);
+      toast('✅ Photo updated! Click Save to apply.');
+    } catch(e) { toast('❌ Upload failed'); }
+    e.target.value = '';
+  }
+
+  function checkReraSection() {
+    const role = document.getElementById('f-role').value;
+    document.getElementById('rera-section').classList.toggle('show', role === 'broker' || role === 'builder');
+  }
+
+  function showPanel(name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.querySelectorAll('.pnav-item').forEach(p => p.classList.remove('active'));
+    document.getElementById('pnav-' + name)?.classList.add('active');
+  }
+
+  function capitalize(s){ return s ? s.charAt(0).toUpperCase()+s.slice(1) : ''; }
+  function esc(t){ return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+  function formatPrice(n){ n=Number(n); if(n>=10000000) return (n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr'; if(n>=100000) return (n/100000).toFixed(1).replace(/\.0$/,'')+'L'; return n.toLocaleString('en-IN'); }
+  function toast(msg){ const el=document.getElementById('toast-el'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notifications — Estate49</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/auth.js"></script>
+  <script src="/nav.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--primary:#c0392b;--primary-dark:#a93226;--primary-light:#fadbd8;--bg:#f7f7f8;--card:#fff;--border:#e5e5e5;--text:#0d0d0d;--muted:#6e6e80}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+    .auth-loading{position:fixed;inset:0;background:white;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:9999}
+    .al-icon{width:56px;height:56px;background:var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px}
+    .al-spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .page{display:none}
+    .wrap{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .page-title{font-size:24px;font-weight:800;color:var(--text)}
+    .mark-all-btn{padding:8px 16px;border:1.5px solid var(--border);border-radius:10px;background:white;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;color:var(--muted);transition:all 0.2s}
+    .mark-all-btn:hover{border-color:var(--primary);color:var(--primary)}
+    .notif-list{display:flex;flex-direction:column;gap:8px}
+    .notif-item{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px 20px;display:flex;align-items:flex-start;gap:14px;cursor:pointer;transition:all 0.2s;position:relative}
+    .notif-item:hover{border-color:var(--primary);box-shadow:0 4px 16px rgba(192,57,43,0.08)}
+    .notif-item.unread{background:#fffcfc;border-color:#f5c6c2}
+    .notif-item.unread::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:60%;background:var(--primary);border-radius:0 4px 4px 0}
+    .notif-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+    .notif-icon.message{background:#e3f2fd}
+    .notif-icon.enquiry{background:#e8f5e9}
+    .notif-icon.listing{background:#fff3e0}
+    .notif-icon.default{background:var(--primary-light)}
+    .notif-body{flex:1;min-width:0}
+    .notif-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+    .notif-text{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:6px}
+    .notif-time{font-size:11px;color:var(--muted)}
+    .notif-unread-dot{width:8px;height:8px;background:var(--primary);border-radius:50%;flex-shrink:0;margin-top:6px}
+    .empty-state{text-align:center;padding:80px 24px;display:flex;flex-direction:column;align-items:center;gap:12px}
+    .empty-icon{font-size:56px}
+    .empty-title{font-size:20px;font-weight:700}
+    .empty-sub{font-size:14px;color:var(--muted);max-width:320px;line-height:1.6}
+    .filter-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+    .ftab{padding:7px 16px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;background:white;color:var(--muted);transition:all 0.2s;font-family:inherit}
+    .ftab:hover{border-color:var(--primary);color:var(--primary)}
+    .ftab.active{background:var(--primary);border-color:var(--primary);color:white;font-weight:600}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1a1a;color:white;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all 0.3s;z-index:500;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    @media(max-width:600px){.wrap{padding:16px 14px 60px}}
+  </style>
+</head>
+<body>
+<div class="auth-loading" id="auth-loading"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
+<div class="page" id="page">
+  <div id="navbar-root"></div>
+  <div class="wrap">
+    <div class="page-header">
+      <div class="page-title">🔔 Notifications</div>
+      <button class="mark-all-btn" onclick="markAllRead()">✓ Mark all as read</button>
+    </div>
+
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="filterNotifs('all',   this)">All</button>
+      <button class="ftab"        onclick="filterNotifs('message', this)">💬 Messages</button>
+      <button class="ftab"        onclick="filterNotifs('enquiry', this)">📋 Enquiries</button>
+    </div>
+
+    <div class="notif-list" id="notif-list">
+      <div class="empty-state"><div class="al-spin" style="margin:0 auto"></div></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast-el"></div>
+<script>
+  let currentUser  = null;
+  let allNotifs    = [];
+  let activeFilter = 'all';
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const session = await getSession();
+      if (!session) { window.location.href = '/login.html'; return; }
+      currentUser = session.user;
+      document.getElementById('auth-loading').style.display = 'none';
+      document.getElementById('page').style.display = 'block';
+      await initNavbar({ active: 'notifications' });
+      await loadNotifications();
+    } catch(e) { window.location.href = '/login.html'; }
+  });
+
+  async function loadNotifications() {
+    try {
+      const res = await fetch(`/api/notifications/${currentUser.id}`);
+      allNotifs = await res.json();
+      renderNotifs();
+    } catch(e) {
+      document.getElementById('notif-list').innerHTML =
+        `<div class="empty-state"><div class="empty-icon">❌</div><div class="empty-title">Failed to load</div></div>`;
+    }
+  }
+
+  function renderNotifs() {
+    const list = activeFilter === 'all'
+      ? allNotifs
+      : allNotifs.filter(n => n.type === activeFilter);
+
+    const el = document.getElementById('notif-list');
+
+    if (!list.length) {
+      el.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">🔔</div>
+        <div class="empty-title">No notifications</div>
+        <div class="empty-sub">You're all caught up! We'll notify you about messages and enquiries here.</div>
+      </div>`;
+      return;
+    }
+
+    const iconMap = { message: '💬', enquiry: '📋', listing: '🏠' };
+    const classMap = { message: 'message', enquiry: 'enquiry', listing: 'listing' };
+
+    el.innerHTML = list.map(n => {
+      const icon  = iconMap[n.type]  || '🔔';
+      const cls   = classMap[n.type] || 'default';
+      const time  = timeAgo(n.created_at);
+
+      return `<div class="notif-item ${n.is_read ? '' : 'unread'}"
+        onclick="openNotif('${n.id}', '${esc(n.link || '')}')">
+        <div class="notif-icon ${cls}">${icon}</div>
+        <div class="notif-body">
+          <div class="notif-title">${esc(n.title || 'Notification')}</div>
+          <div class="notif-text">${esc(n.body || '')}</div>
+          <div class="notif-time">${time}</div>
+        </div>
+        ${!n.is_read ? '<div class="notif-unread-dot"></div>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  async function openNotif(id, link) {
+    // Mark as read
+    await fetch(`/api/notifications/${id}/read`, { method: 'PATCH' }).catch(()=>{});
+    const notif = allNotifs.find(n => String(n.id) === String(id));
+    if (notif) notif.is_read = true;
+    renderNotifs();
+    if (link) window.location.href = link;
+  }
+
+  async function markAllRead() {
+    try {
+      await fetch(`/api/notifications/${currentUser.id}/read-all`, { method: 'PATCH' });
+      allNotifs.forEach(n => n.is_read = true);
+      renderNotifs();
+      toast('✓ All notifications marked as read');
+    } catch(e) { toast('❌ Failed to update'); }
+  }
+
+  function filterNotifs(type, btn) {
+    activeFilter = type;
+    document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderNotifs();
+  }
+
+  function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins  = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days  = Math.floor(diff / 86400000);
+    if (mins  <  1) return 'Just now';
+    if (mins  < 60) return `${mins}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days  <  7) return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString('en-IN', { day:'numeric', month:'short' });
+  }
+
+  function esc(t){ return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+  function toast(msg){ const el=document.getElementById('toast-el'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
+</script>
+</body>
+</html>
