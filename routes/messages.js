@@ -2,113 +2,155 @@ const express  = require('express');
 const router   = express.Router();
 const supabase = require('../db');
 
-// ── INBOX must be FIRST before /:propertyId ──────────────────────────────────
-router.get('/inbox/:userId', async (req, res) => {
+async function getUser(req) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) return null;
+  const token = auth.split(' ')[1];
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+  return error ? null : user;
+}
+
+// ⚠️ IMPORTANT: /conversations and /inbox/:userId MUST come before /:propertyId
+
+// GET /api/messages/conversations  — all conversations for auth user
+router.get('/conversations', async (req, res) => {
   try {
-    const { userId } = req.params;
+    const user = await getUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
     const { data, error } = await supabase
       .from('messages')
-      .select('*, properties(id, title, photos, city, locality, listed_by, contact_name)')
-      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+      .select('*, properties(id, title, city, locality, photos)')
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
+    if (error) return res.json([]);
 
-    // Group into threads — one per property+otherUser combo
-    const threads = {};
-    (data || []).forEach(m => {
-      const otherId = m.sender_id === userId ? m.receiver_id : m.sender_id;
-      const key = `${m.property_id}_${otherId}`;
-      if (!threads[key]) {
-        threads[key] = { ...m, otherId, unread: 0 };
+    // Group into unique conversations
+    const map = new Map();
+    (data || []).forEach(msg => {
+      const otherId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+      const key = `${msg.property_id || 'general'}_${otherId}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          id: key,
+          property_id: msg.property_id,
+          property: msg.properties,
+          other_user_id: otherId,
+          last_message: msg.content,
+          last_message_at: msg.created_at,
+          unread_count: 0
+        });
       }
-      if (!m.is_read && m.receiver_id === userId) {
-        threads[key].unread++;
+      if (!msg.read && msg.receiver_id === user.id) {
+        map.get(key).unread_count++;
       }
     });
 
-    res.json(Object.values(threads));
+    res.json(Array.from(map.values()));
   } catch (err) {
-    console.error('GET /inbox error:', err.message);
+    console.error('GET /api/messages/conversations error:', err.message);
+    res.json([]);
+  }
+});
+
+// GET /api/messages/inbox/:userId  — inbox messages for a userId (used by nav.js)
+router.get('/inbox/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error) return res.json([]);
+    res.json(data || []);
+  } catch (err) {
+    console.error('GET /api/messages/inbox/:userId error:', err.message);
+    res.json([]);
+  }
+});
+
+// GET /api/messages?property_id=X&with=userId  — messages in a conversation
+router.get('/', async (req, res) => {
+  try {
+    const user = await getUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { property_id, with: withUserId } = req.query;
+
+    let query = supabase
+      .from('messages')
+      .select('*')
+      .order('created_at', { ascending: true });
+
+    if (property_id) query = query.eq('property_id', property_id);
+    if (withUserId) {
+      query = query.or(
+        `and(sender_id.eq.${user.id},receiver_id.eq.${withUserId}),and(sender_id.eq.${withUserId},receiver_id.eq.${user.id})`
+      );
+    } else {
+      query = query.or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`);
+    }
+
+    const { data, error } = await query;
+    if (error) return res.json([]);
+    res.json(data || []);
+  } catch (err) {
+    res.json([]);
+  }
+});
+
+// POST /api/messages  — send a message
+router.post('/', async (req, res) => {
+  try {
+    const user = await getUser(req);
+    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { receiver_id, property_id, content } = req.body;
+    if (!receiver_id || !content) {
+      return res.status(400).json({ error: 'receiver_id and content are required' });
+    }
+
+    const { data, error } = await supabase
+      .from('messages')
+      .insert([{
+        sender_id:   user.id,
+        receiver_id,
+        property_id: property_id || null,
+        content:     content.trim(),
+        read:        false,
+        created_at:  new Date().toISOString()
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (err) {
+    console.error('POST /api/messages error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ── GET conversation ─────────────────────────────────────────────────────────
+// GET /api/messages/:propertyId  — messages for a property listing
 router.get('/:propertyId', async (req, res) => {
   try {
     const { propertyId } = req.params;
-    const { user1, user2 } = req.query;
 
-    let query = supabase
+    const { data, error } = await supabase
       .from('messages')
       .select('*')
       .eq('property_id', propertyId)
       .order('created_at', { ascending: true });
 
-    if (user1 && user2) {
-      query = query.or(
-        `and(sender_id.eq.${user1},receiver_id.eq.${user2}),and(sender_id.eq.${user2},receiver_id.eq.${user1})`
-      );
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
+    if (error) return res.json([]);
     res.json(data || []);
   } catch (err) {
-    console.error('GET /:propertyId error:', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ── POST send message ────────────────────────────────────────────────────────
-router.post('/', async (req, res) => {
-  try {
-    const { property_id, sender_id, receiver_id, sender_name, message } = req.body;
-    if (!property_id || !sender_id || !receiver_id || !message) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    const { data, error } = await supabase
-      .from('messages')
-      .insert([{ property_id, sender_id, receiver_id, sender_name, message }])
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    // Create notification for receiver
-    await supabase.from('notifications').insert([{
-      user_id: receiver_id,
-      type:    'message',
-      title:   `New message from ${sender_name || 'someone'}`,
-      body:    message.slice(0, 80),
-      link:    `/messages.html?property=${property_id}&with=${sender_id}`
-    }]).catch(() => {});
-
-    res.status(201).json(data);
-  } catch (err) {
-    console.error('POST /messages error:', err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ── PATCH mark as read ───────────────────────────────────────────────────────
-router.patch('/read', async (req, res) => {
-  try {
-    const { property_id, receiver_id, sender_id } = req.body;
-    const { error } = await supabase
-      .from('messages')
-      .update({ is_read: true })
-      .eq('property_id', property_id)
-      .eq('receiver_id', receiver_id)
-      .eq('sender_id', sender_id)
-      .eq('is_read', false);
-
-    if (error) throw error;
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.json([]);
   }
 });
 
