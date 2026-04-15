@@ -239,7 +239,6 @@
   <p class="al-text">Loading...</p>
 </div>
 
-<!-- ✅ Shared navbar — replaces old <nav> -->
 <div id="navbar-root"></div>
 
 <div class="page" id="page">
@@ -347,26 +346,36 @@
   const PAGE_SIZE = 12;
   let activeType = 'all';
   let activeToggles = { parking: false, pet: false, brokerage: false, gym: false, pool: false };
+  // local liked state mirrors server favourites
   let liked = new Set();
+  let currentUser = null;
+  let token = null;
 
   window.addEventListener('DOMContentLoaded', async () => {
     try {
       const session = await getSession();
       if (!session) { window.location.href = '/login.html'; return; }
 
+      currentUser = session.user;
+      token = session.access_token;
+
       document.getElementById('auth-loading').style.display = 'none';
       document.getElementById('page').style.display = 'flex';
       document.getElementById('page').style.flexDirection = 'column';
 
-      // ✅ Load shared navbar with ❤️ 💬 🔔 👤
       await initNavbar({ active: 'browse' });
 
       const params = new URLSearchParams(window.location.search);
       if (params.get('type')) setType(params.get('type'), false);
       if (params.get('q')) document.getElementById('search-input').value = params.get('q');
 
-      await fetchProperties();
-    } catch(e) { window.location.href = '/login.html'; }
+      await Promise.all([
+        fetchProperties(),
+        fetchFavoritesState()
+      ]);
+    } catch(e) {
+      window.location.href = '/login.html';
+    }
   });
 
   async function fetchProperties() {
@@ -378,6 +387,20 @@
     } catch(e) {
       allProperties = [];
       renderDemoProperties();
+    }
+  }
+
+  // Load which listings are already favorited so hearts show correctly
+  async function fetchFavoritesState() {
+    try {
+      const res = await fetch('/api/favorites', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const favs = await res.json();
+      liked = new Set(favs.map(f => f.property_id || f.id));
+    } catch(e) {
+      // ignore, just show all as not liked
     }
   }
 
@@ -429,8 +452,8 @@
     if (activeType !== 'all') result = result.filter(p => p.type === activeType);
     if (q) result = result.filter(p =>
       (p.title||'').toLowerCase().includes(q) ||
-      (p.city||'').toLowerCase().includes(q)
-            (p.locality||'').toLowerCase().includes(q) ||
+      (p.city||'').toLowerCase().includes(q) ||
+      (p.locality||'').toLowerCase().includes(q) ||
       (p.description||'').toLowerCase().includes(q)
     );
 
@@ -540,7 +563,11 @@
       <div class="prop-img-wrap">
         ${imgHtml}
         <span class="prop-badge ${isRent ? 'rent' : 'buy'}">${isRent ? 'Rent' : 'Buy'}</span>
-        <button class="prop-wishlist ${isLiked ? 'liked' : ''}" onclick="event.stopPropagation(); toggleLike(${p.id}, this)">${isLiked ? '❤️' : '🤍'}</button>
+        <button
+          class="prop-wishlist ${isLiked ? 'liked' : ''}"
+          onclick="event.stopPropagation(); toggleLike(${p.id}, this)"
+          title="${isLiked ? 'Remove from favorites' : 'Save to favorites'}"
+        >${isLiked ? '❤️' : '🤍'}</button>
       </div>
       <div class="prop-body">
         <div class="prop-price">${price}</div>
@@ -549,7 +576,7 @@
         <div class="prop-tags">${tags.slice(0,4).map(t => `<span class="prop-tag">${t}</span>`).join('')}</div>
         <div class="prop-footer">
           <span class="prop-posted">Posted ${posted}</span>
-          <button class="prop-contact" onclick="event.stopPropagation(); contactOwner(${p.id})">📞 Contact</button>
+          <button class="prop-contact" onclick="event.stopPropagation(); contactOwner(${p.id}, '${p.listed_by || ''}')">📞 Contact</button>
         </div>
       </div>`;
 
@@ -558,17 +585,60 @@
 
   function openProperty(id) { window.location.href = `/property.html?id=${id}`; }
 
-  function toggleLike(id, btn) {
-    if (liked.has(id)) {
-      liked.delete(id); btn.textContent = '🤍'; btn.classList.remove('liked');
-      toast('Removed from wishlist');
-    } else {
-      liked.add(id); btn.textContent = '❤️'; btn.classList.add('liked');
-      toast('❤️ Added to wishlist');
+  // FAVORITES: call backend /api/favorites to persist
+  async function toggleLike(id, btn) {
+    if (!currentUser || !token) {
+      window.location.href = '/login.html';
+      return;
+    }
+
+    const isCurrentlyLiked = liked.has(id);
+
+    try {
+      if (isCurrentlyLiked) {
+        // remove favorite
+        const res = await fetch(`/api/favorites/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed');
+        liked.delete(id);
+        btn.textContent = '🤍';
+        btn.classList.remove('liked');
+        toast('Removed from favorites');
+      } else {
+        // add favorite
+        const res = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ property_id: id })
+        });
+        if (!res.ok) throw new Error('Failed');
+        liked.add(id);
+        btn.textContent = '❤️';
+        btn.classList.add('liked');
+        toast('❤️ Added to favorites');
+      }
+    } catch (e) {
+      toast('Could not update favorites. Please try again.');
     }
   }
 
-  function contactOwner(id) { toast('📞 Contact feature coming soon!'); }
+  // CONTACT: open/create conversation in messages.html
+  function contactOwner(propertyId, ownerId) {
+    if (!ownerId) {
+      toast('Owner info not available for this listing');
+      return;
+    }
+    const params = new URLSearchParams({
+      to: ownerId,
+      listing: propertyId
+    });
+    window.location.href = `/messages.html?${params.toString()}`;
+  }
 
   function formatPrice(n) {
     n = Number(n);

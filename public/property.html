@@ -40,7 +40,7 @@
     .left-col { display: flex; flex-direction: column; gap: 20px; }
 
     /* Gallery */
-    .gallery-wrap { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
+    .gallery-wrap { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); position: relative; }
     .gallery-main { position: relative; height: 420px; background: var(--bg); cursor: pointer; overflow: hidden; }
     .gallery-main img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
     .gallery-main:hover img { transform: scale(1.02); }
@@ -216,6 +216,7 @@
 <script>
   let property    = null;
   let currentUser = null;
+  let token       = null;
   let currentPhoto = 0;
   let lbIndex = 0;
   let isSaved = false;
@@ -227,6 +228,7 @@
       const session = await getSession();
       if (!session) { window.location.href = '/login.html'; return; }
       currentUser = session.user;
+      token = session.access_token;
 
       document.getElementById('auth-loading').style.display = 'none';
       document.getElementById('page').style.display = 'block';
@@ -249,7 +251,7 @@
       if (!res.ok) throw new Error('Not found');
       property = await res.json();
       await loadOwnerProfile();
-      await checkIfSaved();
+      await initFavoriteState();
       renderProperty();
       loadSimilar();
     } catch(e) {
@@ -260,7 +262,7 @@
         property   = list.find(p => String(p.id) === String(id));
         if (!property) throw new Error('Not found');
         await loadOwnerProfile();
-        await checkIfSaved();
+        await initFavoriteState();
         renderProperty();
         loadSimilar();
       } catch(e2) { showNotFound(); }
@@ -276,13 +278,17 @@
     } catch(e) {}
   }
 
-  // ── Check if already saved ───────────────────────
-  async function checkIfSaved() {
+  // ── Init favorites state ────────────────────────
+  async function initFavoriteState() {
     if (!currentUser || !property) return;
     try {
-      const res  = await fetch(`/api/favorites/${currentUser.id}`);
+      const res = await fetch('/api/favorites', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) return;
       const favs = await res.json();
-      isSaved = favs.some(f => String(f.property_id) === String(property.id));
+      const favIds = new Set(favs.map(f => f.property_id || f.id));
+      isSaved = favIds.has(property.id);
     } catch(e) {}
   }
 
@@ -357,7 +363,7 @@
 
     // Message button — only show if not own listing
     const msgBtn = !isOwnListing && p.listed_by
-      ? `<button class="btn-message" onclick="openMessages()">💬 Send Message</button>` : '';
+      ? `<button class="btn-message" id="prop-contact-btn">💬 Send Message</button>` : '';
 
     const wrap = document.getElementById('content-wrap');
     wrap.innerHTML = `
@@ -490,9 +496,7 @@
 
         <!-- Save / Share / AI -->
         <div class="action-card">
-          <button class="action-btn ${isSaved ? 'saved' : ''}" id="save-btn" onclick="toggleSave()">
-            ${isSaved ? '❤️ Saved' : '🤍 Save'}
-          </button>
+          <button class="action-btn ${isSaved ? 'saved' : ''}" id="save-btn">${isSaved ? '❤️ Saved' : '🤍 Save'}</button>
           <button class="action-btn" onclick="shareProperty()">🔗 Share</button>
           <button class="action-btn" onclick="window.location.href='/chat.html?q=Tell me about ${encodeURIComponent(p.title||'this property')}'">🤖 Ask AI</button>
         </div>
@@ -515,6 +519,12 @@
         <div class="loading-state">Loading similar properties...</div>
       </div>
     `;
+
+    // Bind buttons
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) saveBtn.onclick = toggleSave;
+    const msgButton = document.getElementById('prop-contact-btn');
+    if (msgButton) msgButton.onclick = contactOwner;
   }
 
   // ── Similar ──────────────────────────────────────
@@ -601,41 +611,53 @@
 
   // ── Save (Favorites) ─────────────────────────────
   async function toggleSave() {
-    if (!currentUser) { window.location.href = '/login.html'; return; }
+    if (!currentUser || !token) { window.location.href = '/login.html'; return; }
+    if (!property) return;
     const btn = document.getElementById('save-btn');
+    if (!btn) return;
     btn.disabled = true;
 
     try {
       if (isSaved) {
-        await fetch('/api/favorites', {
+        const res = await fetch(`/api/favorites/${property.id}`, {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: currentUser.id, property_id: property.id })
+          headers: { Authorization: `Bearer ${token}` }
         });
+        if (!res.ok) throw new Error('Failed');
         isSaved = false;
         btn.textContent = '🤍 Save';
         btn.classList.remove('saved');
         toast('Removed from favorites');
       } else {
-        await fetch('/api/favorites', {
+        const res = await fetch('/api/favorites', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: currentUser.id, property_id: property.id })
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ property_id: property.id })
         });
+        if (!res.ok) throw new Error('Failed');
         isSaved = true;
         btn.textContent = '❤️ Saved';
         btn.classList.add('saved');
         toast('❤️ Saved to favorites!');
       }
-    } catch(e) { toast('❌ Failed to update favorites'); }
+    } catch(e) {
+      toast('❌ Failed to update favorites');
+    }
     btn.disabled = false;
   }
 
   // ── Message Owner ─────────────────────────────────
-  function openMessages() {
+  function contactOwner() {
     if (!currentUser) { window.location.href = '/login.html'; return; }
     if (!property.listed_by) { toast('Owner contact not available'); return; }
-    window.location.href = `/messages.html?property=${property.id}&with=${property.listed_by}`;
+    const params = new URLSearchParams({
+      to: property.listed_by,
+      listing: property.id
+    });
+    window.location.href = `/messages.html?${params.toString()}`;
   }
 
   // ── Share ─────────────────────────────────────────
