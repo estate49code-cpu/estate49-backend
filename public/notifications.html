@@ -133,7 +133,6 @@
 
 <script>
   let currentUser = null;
-  let token = null;
   let allNotifs = [];
   let activeTab = 'all';
 
@@ -142,7 +141,6 @@
       const session = await getSession();
       if (!session) { window.location.href = '/login.html'; return; }
       currentUser = session.user;
-      token = session.access_token;
 
       const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
       const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
@@ -157,16 +155,20 @@
     } catch(e) { window.location.href = '/login.html'; }
   });
 
+  // ── Load Notifications (Supabase direct) ──
   async function loadNotifications() {
+    document.getElementById('notif-container').innerHTML = `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading notifications...</div></div>`;
     try {
-      const res = await fetch('/api/notifications', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      allNotifs = await res.json();
+      const { data, error } = await sb.from('notifications')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      allNotifs = data || [];
       renderNotifs(allNotifs);
     } catch(e) {
-      // Graceful fallback — show empty state instead of error
+      allNotifs = [];
       renderNotifs([]);
     }
   }
@@ -183,7 +185,7 @@
 
   function renderNotifs(notifs) {
     const c = document.getElementById('notif-container');
-    if (!notifs.length) {
+    if (!notifs || !notifs.length) {
       c.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">🔔</div>
@@ -206,32 +208,28 @@
             </div>
           </div>
           ${!n.read ? '<div class="notif-dot"></div>' : ''}
-        </div>`;
-    }).join('')}</div>`;
+        </div>`; }).join('')}</div>`;
   }
 
   async function markRead(id) {
-    try {
-      await fetch('/api/notifications/' + id + '/read', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+    const { error } = await sb.from('notifications').update({ read: true }).eq('id', id);
+    if (!error) {
       const n = allNotifs.find(x => x.id === id);
       if (n) n.read = true;
       filterTab(activeTab);
-    } catch(e) {}
+    }
   }
 
   async function markAllRead() {
-    try {
-      await fetch('/api/notifications/read-all', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
+    const { error } = await sb.from('notifications')
+      .update({ read: true })
+      .eq('user_id', currentUser.id)
+      .eq('read', false);
+    if (!error) {
       allNotifs.forEach(n => n.read = true);
       filterTab(activeTab);
       toast('✓ All marked as read');
-    } catch(e) { toast('❌ Failed'); }
+    }
   }
 
   function timeAgo(dateStr) {

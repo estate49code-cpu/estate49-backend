@@ -391,16 +391,12 @@
   let currentUser = null;
   let editingListingId = null;
   let deletingListingId = null;
-  let token = null;
 
-  // ── Auth ──
   window.addEventListener('DOMContentLoaded', async () => {
     try {
       const session = await getSession();
       if (!session) { window.location.href = '/login.html'; return; }
-
       currentUser = session.user;
-      token = session.access_token;
 
       const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
       const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -408,7 +404,9 @@
       document.getElementById('nav-avatar').textContent = initials;
       document.getElementById('nav-dropdown-name').textContent = fullName;
       document.getElementById('nav-dropdown-email').textContent = currentUser.email;
-      document.getElementById('profile-avatar').childNodes[0].textContent = initials;
+
+      const avatarEl = document.getElementById('profile-avatar');
+      avatarEl.childNodes[0].textContent = initials;
       document.getElementById('profile-name').textContent = fullName;
       document.getElementById('profile-email').textContent = currentUser.email;
       document.getElementById('edit-name').value = fullName;
@@ -425,36 +423,36 @@
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.sidebar-nav-item').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + name)?.classList.add('active');
-
     if (name === 'favorites') loadFavorites();
     if (name === 'notifications') loadNotifications();
   }
 
-  // ── Load Listings ──
+  // ── Load Listings (Supabase direct) ──
   async function loadListings() {
+    document.getElementById('listings-container').innerHTML = `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading your listings...</div></div>`;
     try {
-      const res = await fetch('/api/my-properties', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('Failed');
-      const listings = await res.json();
+      const { data, error } = await sb.from('properties')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
 
-      document.getElementById('stat-listings').textContent = listings.length;
-      renderListings(listings);
+      if (error) throw error;
+      document.getElementById('stat-listings').textContent = data.length;
+      renderListings(data);
     } catch(e) {
       document.getElementById('listings-container').innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">❌</div>
-          <div class="empty-title">Failed to load listings</div>
-          <div class="empty-sub">Please refresh the page and try again</div>
-          <button class="btn-add" onclick="loadListings()">Retry</button>
+          <div class="empty-icon">🏠</div>
+          <div class="empty-title">No listings yet</div>
+          <div class="empty-sub">Start by adding your first property</div>
+          <a class="btn-add" href="/list-property.html">+ List a Property</a>
         </div>`;
     }
   }
 
   function renderListings(listings) {
     const c = document.getElementById('listings-container');
-    if (!listings.length) {
+    if (!listings || !listings.length) {
       c.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">🏠</div>
@@ -464,20 +462,22 @@
         </div>`;
       return;
     }
-
     c.innerHTML = `<div class="listings-grid">${listings.map(p => listingCardHtml(p)).join('')}</div>`;
   }
 
   function safeImg(url) {
     if (!url) return null;
+    if (Array.isArray(url)) url = url[0];
+    if (!url) return null;
     return url.replace(/^http:\/\//i, 'https://');
   }
 
   function listingCardHtml(p) {
-    const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '') : '—';
-    const imgUrl = safeImg(Array.isArray(p.photos) ? p.photos[0] : p.photos);
+    const type = p.listing_type || p.type || 'rent';
+    const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (type === 'rent' ? '/mo' : '') : '—';
+    const imgUrl = safeImg(p.photos);
     const imgHtml = imgUrl
-      ? `<img class="listing-card-img" src="${imgUrl}" alt="${p.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=listing-card-img-placeholder>🏠</div>'" />`
+      ? `<img class="listing-card-img" src="${imgUrl}" alt="${p.title || ''}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="listing-card-img-placeholder" style="display:none">🏠</div>`
       : `<div class="listing-card-img-placeholder">🏠</div>`;
 
     return `
@@ -496,24 +496,21 @@
       </div>`;
   }
 
-  function viewListing(id) {
-    window.location.href = '/property.html?id=' + id;
-  }
+  function viewListing(id) { window.location.href = '/property.html?id=' + id; }
 
-  // ── Edit Modal ──
+  // ── Edit Modal (Supabase direct) ──
   async function openEditModal(id) {
     editingListingId = id;
     try {
-      const res = await fetch('/api/properties/' + id, {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      const p = await res.json();
-      document.getElementById('em-title').value = p.title || '';
-      document.getElementById('em-price').value = p.price || '';
-      document.getElementById('em-locality').value = p.locality || '';
-      document.getElementById('em-bhk').value = p.bhk || '2';
-      document.getElementById('em-furnished').value = p.furnished || 'semi';
-      document.getElementById('em-desc').value = p.description || '';
+      const { data: p, error } = await sb.from('properties').select('*').eq('id', id).single();
+      if (!error && p) {
+        document.getElementById('em-title').value = p.title || '';
+        document.getElementById('em-price').value = p.price || '';
+        document.getElementById('em-locality').value = p.locality || '';
+        document.getElementById('em-bhk').value = p.bhk || '2';
+        document.getElementById('em-furnished').value = p.furnished || 'semi';
+        document.getElementById('em-desc').value = p.description || '';
+      }
     } catch(e) {}
     document.getElementById('edit-modal').classList.add('open');
   }
@@ -534,21 +531,20 @@
       description: document.getElementById('em-desc').value.trim(),
     };
     try {
-      const res = await fetch('/api/properties/' + editingListingId, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) throw new Error('Failed');
+      const { error } = await sb.from('properties')
+        .update(payload)
+        .eq('id', editingListingId)
+        .eq('user_id', currentUser.id);
+      if (error) throw error;
       toast('✅ Listing updated!');
       closeEditModal();
       loadListings();
     } catch(e) {
-      toast('❌ Update failed. Please try again.');
+      toast('❌ Update failed: ' + (e.message || 'Please try again'));
     }
   }
 
-  // ── Delete ──
+  // ── Delete (Supabase direct) ──
   function askDelete(id) {
     deletingListingId = id;
     document.getElementById('confirm-overlay').classList.add('open');
@@ -562,67 +558,79 @@
   async function confirmDelete() {
     if (!deletingListingId) return;
     try {
-      const res = await fetch('/api/properties/' + deletingListingId, {
-        method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('Failed');
+      const { error } = await sb.from('properties')
+        .delete()
+        .eq('id', deletingListingId)
+        .eq('user_id', currentUser.id);
+      if (error) throw error;
       toast('🗑️ Listing deleted');
       closeConfirm();
       loadListings();
     } catch(e) {
-      toast('❌ Delete failed. Please try again.');
+      toast('❌ Delete failed: ' + (e.message || 'Please try again'));
       closeConfirm();
     }
   }
 
-  // ── Load Favorites ──
+  // ── Load Favorites (Supabase direct) ──
   async function loadFavorites() {
     document.getElementById('favorites-container').innerHTML = `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading...</div></div>`;
     try {
-      const res = await fetch('/api/favorites', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('Failed');
-      const favs = await res.json();
-      document.getElementById('stat-saved').textContent = favs.length;
-      renderFavorites(favs);
+      // Step 1: get favorite property IDs
+      const { data: favRows, error: favErr } = await sb.from('favorites')
+        .select('property_id').eq('user_id', currentUser.id);
+      if (favErr) throw favErr;
+
+      if (!favRows || !favRows.length) {
+        document.getElementById('stat-saved').textContent = '0';
+        renderFavorites([]);
+        return;
+      }
+
+      // Step 2: get property details
+      const ids = favRows.map(f => f.property_id).filter(Boolean);
+      const { data: props, error: propsErr } = await sb.from('properties')
+        .select('*').in('id', ids);
+      if (propsErr) throw propsErr;
+
+      document.getElementById('stat-saved').textContent = (props || []).length;
+      renderFavorites(props || []);
     } catch(e) {
       document.getElementById('favorites-container').innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">❌</div>
-          <div class="empty-title">Failed to load favorites</div>
-          <div class="empty-sub">Please try again</div>
-          <button class="btn-add" onclick="loadFavorites()">Retry</button>
+          <div class="empty-icon">❤️</div>
+          <div class="empty-title">No saved properties</div>
+          <div class="empty-sub">Browse listings and save ones you love</div>
+          <a class="btn-add" href="/browse.html">Browse Properties</a>
         </div>`;
     }
   }
 
   function renderFavorites(favs) {
     const c = document.getElementById('favorites-container');
-    if (!favs.length) {
+    if (!favs || !favs.length) {
       c.innerHTML = `<div class="empty-state"><div class="empty-icon">❤️</div><div class="empty-title">No saved properties</div><div class="empty-sub">Browse listings and save ones you love</div><a class="btn-add" href="/browse.html">Browse Properties</a></div>`;
       return;
     }
     c.innerHTML = `<div class="fav-grid">${favs.map(p => {
-      const imgUrl = safeImg(Array.isArray(p.photos) ? p.photos[0] : p.photos);
+      const imgUrl = safeImg(p.photos);
       const imgHtml = imgUrl
-        ? `<img class="fav-img" src="${imgUrl}" alt="${p.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=fav-img-placeholder>🏠</div>'" />`
+        ? `<img class="fav-img" src="${imgUrl}" alt="${p.title || ''}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="fav-img-placeholder" style="display:none">🏠</div>`
         : `<div class="fav-img-placeholder">🏠</div>`;
-      return `<a class="fav-card" href="/property.html?id=${p.id}">${imgHtml}<div class="fav-body"><div class="fav-price">₹${Number(p.price).toLocaleString('en-IN')}</div><div class="fav-title">${p.title}</div><div class="fav-loc">📍 ${p.locality}, ${p.city}</div></div></a>`;
+      return `<a class="fav-card" href="/property.html?id=${p.id}">${imgHtml}<div class="fav-body"><div class="fav-price">₹${Number(p.price || 0).toLocaleString('en-IN')}</div><div class="fav-title">${p.title || 'Untitled'}</div><div class="fav-loc">📍 ${p.locality || ''}, ${p.city || ''}</div></div></a>`;
     }).join('')}</div>`;
   }
 
-  // ── Load Notifications ──
+  // ── Load Notifications (Supabase direct) ──
   async function loadNotifications() {
     document.getElementById('notifications-container').innerHTML = `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading...</div></div>`;
     try {
-      const res = await fetch('/api/notifications', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('Failed');
-      const notifs = await res.json();
-      renderNotifications(notifs);
+      const { data, error } = await sb.from('notifications')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      renderNotifications(data || []);
     } catch(e) {
       document.getElementById('notifications-container').innerHTML = `
         <div class="empty-state">
@@ -651,40 +659,36 @@
   }
 
   async function markRead(id) {
-    try {
-      await fetch('/api/notifications/' + id + '/read', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      loadNotifications();
-    } catch(e) {}
+    await sb.from('notifications').update({ read: true }).eq('id', id);
+    loadNotifications();
   }
 
   async function markAllRead() {
-    try {
-      await fetch('/api/notifications/read-all', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      loadNotifications();
-      toast('✓ All notifications marked as read');
-    } catch(e) {}
+    await sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false);
+    loadNotifications();
+    toast('✓ All notifications marked as read');
   }
 
-  // ── Save Profile ──
+  // ── Save Profile (Supabase direct) ──
   async function saveProfile() {
     const name = document.getElementById('edit-name').value.trim();
     const phone = document.getElementById('edit-phone').value.trim();
     const bio = document.getElementById('edit-bio').value.trim();
     try {
-      const { supabase } = window;
-      // Update via Supabase auth metadata
-      await fetch('/api/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ full_name: name, phone, bio })
+      const { error } = await sb.auth.updateUser({
+        data: { full_name: name, phone, bio }
       });
+      if (error) throw error;
+      // Also update profiles table if it exists
+      await sb.from('profiles').upsert({
+        id: currentUser.id,
+        full_name: name,
+        phone,
+        bio,
+        updated_at: new Date().toISOString()
+      }).eq('id', currentUser.id);
       toast('✅ Profile updated!');
+      document.getElementById('profile-name').textContent = name;
     } catch(e) {
       toast('❌ Failed to update profile');
     }
@@ -700,9 +704,7 @@
     return Math.floor(diff/86400) + 'd ago';
   }
 
-  function toggleNavDropdown() {
-    document.getElementById('nav-dropdown').classList.toggle('open');
-  }
+  function toggleNavDropdown() { document.getElementById('nav-dropdown').classList.toggle('open'); }
   document.addEventListener('click', e => {
     const wrap = document.querySelector('.nav-user-wrap');
     if (wrap && !wrap.contains(e.target)) document.getElementById('nav-dropdown')?.classList.remove('open');
@@ -710,8 +712,7 @@
 
   function toast(msg) {
     const el = document.getElementById('toast-el');
-    el.textContent = msg;
-    el.classList.add('show');
+    el.textContent = msg; el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2800);
   }
 </script>

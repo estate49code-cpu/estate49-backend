@@ -150,7 +150,6 @@
 
 <script>
   let currentUser = null;
-  let token = null;
   let allFavs = [];
   let activeFilter = 'all';
 
@@ -159,7 +158,6 @@
       const session = await getSession();
       if (!session) { window.location.href = '/login.html'; return; }
       currentUser = session.user;
-      token = session.access_token;
 
       const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
       const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -174,47 +172,60 @@
     } catch(e) { window.location.href = '/login.html'; }
   });
 
-  // ── Load Favorites ──
+  // ── Load Favorites (Supabase direct) ──
   async function loadFavorites() {
-    document.getElementById('favs-container').innerHTML = `
-      <div class="empty-state">
-        <div class="al-spin" style="margin:0 auto 16px"></div>
-        <div class="empty-sub">Loading your saved properties...</div>
-      </div>`;
+    document.getElementById('favs-container').innerHTML = `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading your saved properties...</div></div>`;
     try {
-      const res = await fetch('/api/favorites', {
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      allFavs = await res.json();
+      // Step 1: get favorite rows
+      const { data: favRows, error: favErr } = await sb.from('favorites')
+        .select('property_id')
+        .eq('user_id', currentUser.id);
+
+      if (favErr) throw favErr;
+
+      if (!favRows || !favRows.length) {
+        document.getElementById('fav-count-sub').textContent = 'No saved properties yet';
+        allFavs = [];
+        renderFavs([]);
+        return;
+      }
+
+      // Step 2: get property details
+      const ids = favRows.map(f => f.property_id).filter(Boolean);
+      const { data: props, error: propsErr } = await sb.from('properties')
+        .select('*').in('id', ids);
+
+      if (propsErr) throw propsErr;
+
+      allFavs = props || [];
       document.getElementById('fav-count-sub').textContent =
         allFavs.length ? `${allFavs.length} saved propert${allFavs.length === 1 ? 'y' : 'ies'}` : 'No saved properties yet';
       renderFavs(allFavs);
     } catch(e) {
       document.getElementById('fav-count-sub').textContent = '';
-      document.getElementById('favs-container').innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">❤️</div>
-          <div class="empty-title">No favorites yet</div>
-          <div class="empty-sub">Browse listings and tap ❤️ to save properties you love. They'll appear here.</div>
-          <a class="btn-browse" href="/browse.html">🔍 Browse Properties</a>
-        </div>`;
+      allFavs = [];
+      renderFavs([]);
     }
   }
 
-  // ── Filter ──
   function filterFavs(type) {
     activeFilter = type;
     document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
     document.getElementById('fc-' + type).classList.add('active');
-    const filtered = type === 'all' ? allFavs : allFavs.filter(p => p.listing_type === type || p.type === type);
+    const filtered = type === 'all' ? allFavs : allFavs.filter(p => (p.listing_type || p.type) === type);
     renderFavs(filtered);
   }
 
-  // ── Render ──
+  function safeImg(url) {
+    if (!url) return null;
+    if (Array.isArray(url)) url = url[0];
+    if (!url) return null;
+    return url.replace(/^http:\/\//i, 'https://');
+  }
+
   function renderFavs(favs) {
     const c = document.getElementById('favs-container');
-    if (!favs.length) {
+    if (!favs || !favs.length) {
       c.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">❤️</div>
@@ -228,31 +239,20 @@
     c.innerHTML = `<div class="favs-grid">${favs.map(p => favCardHtml(p)).join('')}</div>`;
   }
 
-  function safeImg(url) {
-    if (!url) return null;
-    return url.replace(/^http:\/\//i, 'https://');
-  }
-
   function favCardHtml(p) {
-    const imgRaw = Array.isArray(p.photos) ? p.photos[0] : p.photos;
-    const imgUrl = safeImg(imgRaw);
+    const imgUrl = safeImg(p.photos);
     const imgHtml = imgUrl
-      ? `<img class="fav-img" src="${imgUrl}" alt="${p.title || ''}" loading="lazy"
-           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-         <div class="fav-img-placeholder" style="display:none">🏠</div>`
+      ? `<img class="fav-img" src="${imgUrl}" alt="${p.title || ''}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div class="fav-img-placeholder" style="display:none">🏠</div>`
       : `<div class="fav-img-placeholder">🏠</div>`;
 
-    const price = p.price
-      ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.listing_type === 'rent' || p.type === 'rent' ? '/mo' : '')
-      : '—';
-
+    const type = p.listing_type || p.type || 'rent';
+    const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (type === 'rent' ? '/mo' : '') : '—';
     const tags = [
       p.bhk ? p.bhk + ' BHK' : null,
-      p.furnished ? (p.furnished === 'furnished' ? 'Furnished' : p.furnished === 'semi' ? 'Semi' : 'Unfurnished') : null,
+      p.furnished === 'furnished' ? 'Furnished' : p.furnished === 'semi' ? 'Semi' : p.furnished === 'unfurnished' ? 'Unfurnished' : null,
       p.area ? p.area + ' sq.ft' : null
     ].filter(Boolean);
-
-    const typeLabel = (p.listing_type || p.type) === 'buy' ? 'FOR SALE' : 'FOR RENT';
+    const typeLabel = type === 'buy' ? 'FOR SALE' : 'FOR RENT';
 
     return `
       <div class="fav-card" id="fav-${p.id}">
@@ -268,23 +268,27 @@
           ${tags.length ? `<div class="fav-tags">${tags.map(t => `<span class="fav-tag">${t}</span>`).join('')}</div>` : ''}
           <div class="fav-actions">
             <a class="fav-btn fav-btn-view" href="/property.html?id=${p.id}">👁 View</a>
-            <button class="fav-btn fav-btn-msg" onclick="messageOwner('${p.id}', '${p.user_id || p.owner_id || ''}')">💬 Message</button>
+            <button class="fav-btn fav-btn-msg" onclick="messageOwner('${p.id}', '${p.user_id || ''}')">💬 Message</button>
           </div>
         </div>
       </div>`;
   }
 
-  // ── Unsave ──
+  // ── Unsave (Supabase direct) ──
   async function unsaveFavorite(propertyId) {
     try {
-      const res = await fetch('/api/favorites/' + propertyId, {
-        method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + token }
-      });
-      if (!res.ok) throw new Error('Failed');
-      // Animate removal
+      const { error } = await sb.from('favorites')
+        .delete()
+        .eq('user_id', currentUser.id)
+        .eq('property_id', propertyId);
+      if (error) throw error;
+
       const card = document.getElementById('fav-' + propertyId);
-      if (card) { card.style.opacity = '0'; card.style.transform = 'scale(0.9)'; card.style.transition = 'all 0.3s'; setTimeout(() => card.remove(), 300); }
+      if (card) {
+        card.style.opacity = '0'; card.style.transform = 'scale(0.9)';
+        card.style.transition = 'all 0.3s';
+        setTimeout(() => card.remove(), 300);
+      }
       allFavs = allFavs.filter(p => p.id !== propertyId);
       document.getElementById('fav-count-sub').textContent =
         allFavs.length ? `${allFavs.length} saved propert${allFavs.length === 1 ? 'y' : 'ies'}` : 'No saved properties yet';
@@ -294,13 +298,11 @@
     }
   }
 
-  // ── Message Owner ──
   function messageOwner(listingId, ownerId) {
     if (!ownerId) { toast('Owner info not available'); return; }
     window.location.href = `/messages.html?to=${ownerId}&listing=${listingId}`;
   }
 
-  // ── Helpers ──
   function toggleNavDropdown() { document.getElementById('nav-dropdown').classList.toggle('open'); }
   document.addEventListener('click', e => {
     const wrap = document.querySelector('.nav-user-wrap');

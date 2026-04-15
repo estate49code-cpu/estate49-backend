@@ -293,39 +293,47 @@
       initVoiceMsg();
       loadConversations();
 
-      // Auto-open conversation from URL params
       const params = new URLSearchParams(location.search);
       const toUser = params.get('to');
       const listingId = params.get('listing');
-      if (toUser) {
-        setTimeout(() => openOrCreateConv(toUser, listingId), 800);
-      }
+      if (toUser) setTimeout(() => openOrCreateConv(toUser, listingId), 800);
 
     } catch(e) { window.location.href = '/login.html'; }
   });
 
-  // ── Load Conversations ──
+  // ── Load Conversations (fixed path: /api/messages/conversations) ──
   async function loadConversations() {
     try {
-      const res = await fetch('/api/conversations', {
+      const res = await fetch('/api/messages/conversations', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       allConvs = await res.json();
       renderConvList(allConvs);
     } catch(e) {
-      document.getElementById('conv-list').innerHTML = `
-        <div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">
-          <div style="font-size:32px;margin-bottom:8px">💬</div>
-          No conversations yet.<br/>
-          <a href="/browse.html" style="color:var(--primary);font-weight:600">Browse listings</a> to start chatting with owners.
-        </div>`;
+      // Try Supabase direct as fallback
+      try {
+        const { data, error } = await sb.from('conversations')
+          .select('*')
+          .or(`user1_id.eq.${currentUser.id},user2_id.eq.${currentUser.id}`)
+          .order('updated_at', { ascending: false });
+        if (error) throw error;
+        allConvs = data || [];
+        renderConvList(allConvs);
+      } catch(e2) {
+        document.getElementById('conv-list').innerHTML = `
+          <div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">
+            <div style="font-size:32px;margin-bottom:8px">💬</div>
+            No conversations yet.<br/>
+            <a href="/browse.html" style="color:var(--primary);font-weight:600">Browse listings</a> to start chatting.
+          </div>`;
+      }
     }
   }
 
   function renderConvList(convs) {
     const c = document.getElementById('conv-list');
-    if (!convs.length) {
+    if (!convs || !convs.length) {
       c.innerHTML = `<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px">
         <div style="font-size:40px;margin-bottom:10px">💬</div>
         No conversations yet.<br/><br/>
@@ -334,13 +342,13 @@
       return;
     }
     c.innerHTML = convs.map(conv => {
-      const name = conv.other_user_name || conv.other_email || 'User';
+      const name = conv.other_user_name || conv.other_email || conv.other_name || 'User';
       const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
       const preview = conv.last_message || conv.listing_title || 'New conversation';
       const timeStr = conv.updated_at ? timeAgo(conv.updated_at) : '';
       const isActive = conv.id === activeConvId;
       return `
-        <div class="conv-item ${isActive ? 'active' : ''}" onclick="openConversation('${conv.id}', '${conv.other_user_id}', '${conv.listing_id || ''}')">
+        <div class="conv-item ${isActive ? 'active' : ''}" onclick="openConversation('${conv.id}', '${conv.other_user_id || conv.user2_id || ''}', '${conv.listing_id || ''}')">
           <div class="conv-avatar">${initials}</div>
           <div class="conv-info">
             <div class="conv-name">${name}</div>
@@ -356,7 +364,7 @@
 
   function filterConvs(q) {
     const filtered = q
-      ? allConvs.filter(c => (c.other_user_name||'').toLowerCase().includes(q.toLowerCase()) || (c.listing_title||'').toLowerCase().includes(q.toLowerCase()))
+      ? allConvs.filter(c => (c.other_user_name||c.other_name||'').toLowerCase().includes(q.toLowerCase()) || (c.listing_title||'').toLowerCase().includes(q.toLowerCase()))
       : allConvs;
     renderConvList(filtered);
   }
@@ -367,43 +375,37 @@
     activeConvOtherId = otherId;
     activeConvListingId = listingId;
 
-    // Update sidebar active state
     document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
     event?.currentTarget?.classList?.add('active');
 
-    // Show active chat
     document.getElementById('chat-empty').style.display = 'none';
     const ac = document.getElementById('active-chat');
     ac.style.display = 'flex';
 
-    // Get conv info from allConvs
     const conv = allConvs.find(c => c.id === convId);
     if (conv) {
-      const name = conv.other_user_name || conv.other_email || 'User';
+      const name = conv.other_user_name || conv.other_name || conv.other_email || 'User';
       const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
       document.getElementById('ch-avatar').textContent = initials;
       document.getElementById('ch-name').textContent = name;
       document.getElementById('ch-sub').textContent = conv.listing_title || 'Property Enquiry';
-      if (listingId) {
-        document.getElementById('ch-view-prop').href = '/property.html?id=' + listingId;
-      }
+      if (listingId) document.getElementById('ch-view-prop').href = '/property.html?id=' + listingId;
     }
 
     loadMessages(convId);
-
-    // Poll for new messages every 5s
     if (pollInterval) clearInterval(pollInterval);
     pollInterval = setInterval(() => loadMessages(convId), 5000);
   }
 
+  // ── Open or Create Conversation (fixed path) ──
   async function openOrCreateConv(toUserId, listingId) {
     try {
-      const res = await fetch('/api/conversations/start', {
+      const res = await fetch('/api/messages/conversations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({ other_user_id: toUserId, listing_id: listingId })
       });
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const conv = await res.json();
       await loadConversations();
       openConversation(conv.id, toUserId, listingId);
@@ -412,29 +414,46 @@
     }
   }
 
-  // ── Load Messages ──
+  // ── Load Messages (fixed path) ──
   async function loadMessages(convId) {
     try {
-      const res = await fetch('/api/conversations/' + convId + '/messages', {
+      // Try /api/messages/conversations/:id/messages
+      const res = await fetch(`/api/messages/conversations/${convId}/messages`, {
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const messages = await res.json();
       renderMessages(messages);
-    } catch(e) {}
+    } catch(e) {
+      // Fallback: Supabase direct
+      try {
+        const { data, error } = await sb.from('messages')
+          .select('*')
+          .eq('conversation_id', convId)
+          .order('created_at', { ascending: true });
+        if (error) throw error;
+        renderMessages(data || []);
+      } catch(e2) {}
+    }
   }
 
   function renderMessages(messages) {
     const c = document.getElementById('chat-messages');
     const wasAtBottom = c.scrollHeight - c.scrollTop <= c.clientHeight + 80;
 
+    if (!messages || !messages.length) {
+      c.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;margin-top:40px">Send your first message!</div>`;
+      return;
+    }
+
     c.innerHTML = messages.map(m => {
       const isOut = m.sender_id === currentUser.id;
-      const initials = (m.sender_name || m.sender_email || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+      const senderName = m.sender_name || m.sender_email || 'User';
+      const initials = senderName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
       const timeStr = m.created_at ? new Date(m.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '';
 
       let content = '';
-      if (m.message) content += `<div>${escHtml(m.message)}</div>`;
+      if (m.message || m.content) content += `<div>${escHtml(m.message || m.content)}</div>`;
       if (m.photos && m.photos.length) {
         content += m.photos.map(url => {
           const safe = url.replace(/^http:\/\//i, 'https://');
@@ -453,12 +472,10 @@
         </div>`;
     }).join('');
 
-    if (wasAtBottom || messages.length <= 20) {
-      c.scrollTop = c.scrollHeight;
-    }
+    if (wasAtBottom || messages.length <= 20) c.scrollTop = c.scrollHeight;
   }
 
-  // ── Send Message ──
+  // ── Send Message (fixed path) ──
   async function sendMessage() {
     if (!activeConvId) return;
     const input = document.getElementById('msg-input');
@@ -476,17 +493,29 @@
       uploadedMsgPhotos = [];
       renderMsgPhotoPreview();
 
-      const res = await fetch('/api/conversations/' + activeConvId + '/messages', {
+      const res = await fetch(`/api/messages/conversations/${activeConvId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error('Failed');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       loadMessages(activeConvId);
-      loadConversations(); // refresh preview
+      loadConversations();
     } catch(e) {
-      toast('❌ Failed to send message');
-      input.value = text;
+      // Fallback: Supabase direct insert
+      try {
+        const { error } = await sb.from('messages').insert({
+          conversation_id: activeConvId,
+          sender_id: currentUser.id,
+          message: text,
+          created_at: new Date().toISOString()
+        });
+        if (error) throw error;
+        loadMessages(activeConvId);
+      } catch(e2) {
+        toast('❌ Failed to send message');
+        input.value = text;
+      }
     }
   }
 
@@ -506,16 +535,13 @@
     const files = Array.from(event.target.files);
     if (!files.length) return;
     toast('📤 Uploading...');
-
     for (const file of files) {
       const idx = uploadedMsgPhotos.length;
       const localUrl = URL.createObjectURL(file);
       uploadedMsgPhotos.push({ url: localUrl, serverUrl: null });
       renderMsgPhotoPreview();
-
       try {
-        const fd = new FormData();
-        fd.append('photo', file);
+        const fd = new FormData(); fd.append('photo', file);
         const res = await fetch('/api/upload', { method: 'POST', body: fd });
         const data = await res.json();
         if (data.url) uploadedMsgPhotos[idx].serverUrl = data.url;
@@ -527,11 +553,13 @@
   }
 
   function renderMsgPhotoPreview() {
-    const c = document.getElementById('photo-preview-strip');
-    c.innerHTML = uploadedMsgPhotos.map((p, i) => `
+    const strip = document.getElementById('photo-preview-strip');
+    if (!uploadedMsgPhotos.length) { strip.innerHTML = ''; return; }
+    strip.innerHTML = uploadedMsgPhotos.map((p, i) => `
       <div class="prev-thumb">
         <img src="${p.url}" />
         <button class="prev-rm" onclick="removeMsgPhoto(${i})">✕</button>
+        ${!p.serverUrl ? '<div style="position:absolute;inset:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:10px;color:white">📤</div>' : ''}
       </div>`).join('');
   }
 
@@ -540,73 +568,72 @@
     renderMsgPhotoPreview();
   }
 
-  // ── Voice ──
+  // ── Voice Msg ──
   function initVoiceMsg() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { document.getElementById('voice-msg-btn').style.display = 'none'; return; }
-    voiceRecog = new SR();
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      document.getElementById('voice-msg-btn').style.display = 'none';
+      return;
+    }
+    voiceRecog = new SpeechRecognition();
+    voiceRecog.continuous = false;
+    voiceRecog.interimResults = false;
     voiceRecog.lang = 'en-IN';
-    voiceRecog.onresult = e => {
-      document.getElementById('msg-input').value += e.results[0][0].transcript + ' ';
-      resizeInput(document.getElementById('msg-input'));
-      stopVoiceMsg();
+    voiceRecog.onresult = (e) => {
+      const text = e.results[0][0].transcript;
+      const input = document.getElementById('msg-input');
+      input.value += (input.value ? ' ' : '') + text;
+      resizeInput(input);
     };
-    voiceRecog.onend = stopVoiceMsg;
-    voiceRecog.onerror = () => { stopVoiceMsg(); toast('Voice not available'); };
+    voiceRecog.onend = () => {
+      voiceRecording = false;
+      const btn = document.getElementById('voice-msg-btn');
+      btn.innerHTML = '<span class="icon">🎙️</span> <span>Voice</span>';
+      btn.style.color = '';
+    };
   }
 
-  function toggleVoiceMsg() { voiceRecording ? stopVoiceMsg() : startVoiceMsg(); }
-
-  function startVoiceMsg() {
-    if (!voiceRecog) return;
-    voiceRecording = true;
-    voiceRecog.start();
-    document.getElementById('voice-msg-btn').innerHTML = '<span class="icon">🔴</span> <span>Stop</span>';
-    toast('🎙️ Listening...');
-  }
-
-  function stopVoiceMsg() {
-    voiceRecording = false;
-    try { voiceRecog?.stop(); } catch(e) {}
-    document.getElementById('voice-msg-btn').innerHTML = '<span class="icon">🎙️</span> <span>Voice</span>';
+  function toggleVoiceMsg() {
+    if (!voiceRecog) { toast('Voice not supported in this browser'); return; }
+    const btn = document.getElementById('voice-msg-btn');
+    if (!voiceRecording) {
+      voiceRecog.start();
+      voiceRecording = true;
+      btn.innerHTML = '<span class="icon">🔴</span> <span>Stop</span>';
+      btn.style.color = 'var(--primary)';
+      toast('🎙️ Listening...');
+    } else {
+      voiceRecog.stop();
+    }
   }
 
   function sharePropertyLink() {
     if (!activeConvListingId) { toast('No property linked to this conversation'); return; }
-    const link = window.location.origin + '/property.html?id=' + activeConvListingId;
-    document.getElementById('msg-input').value = '🏠 Property link: ' + link;
+    const url = window.location.origin + '/property.html?id=' + activeConvListingId;
+    document.getElementById('msg-input').value = url;
     resizeInput(document.getElementById('msg-input'));
   }
 
-  function reportUser() {
-    toast('🚩 User reported. Our team will review this.');
+  function reportUser() { toast('⚠️ Report submitted. Our team will review it.'); }
+
+  function openMobileSidebar() { document.getElementById('conv-sidebar').classList.add('mobile-open'); }
+  function closeMobileSidebar() { document.getElementById('conv-sidebar').classList.remove('mobile-open'); }
+
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // ── Mobile ──
-  function openMobileSidebar() {
-    document.getElementById('conv-sidebar').classList.add('mobile-open');
-  }
-  function closeMobileSidebar() {
-    document.getElementById('conv-sidebar').classList.remove('mobile-open');
-  }
-
-  // ── Helpers ──
   function timeAgo(dateStr) {
     if (!dateStr) return '';
     const diff = (Date.now() - new Date(dateStr)) / 1000;
-    if (diff < 60) return 'now';
-    if (diff < 3600) return Math.floor(diff/60) + 'm';
-    if (diff < 86400) return Math.floor(diff/3600) + 'h';
-    return Math.floor(diff/86400) + 'd';
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    return Math.floor(diff/86400) + 'd ago';
   }
 
-  function escHtml(t) {
-    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  function toggleNavDropdown() {
-    document.getElementById('nav-dropdown').classList.toggle('open');
-  }
+  function toggleNavDropdown() { document.getElementById('nav-dropdown').classList.toggle('open'); }
   document.addEventListener('click', e => {
     const wrap = document.querySelector('.nav-user-wrap');
     if (wrap && !wrap.contains(e.target)) document.getElementById('nav-dropdown')?.classList.remove('open');
@@ -614,8 +641,7 @@
 
   function toast(msg) {
     const el = document.getElementById('toast-el');
-    el.textContent = msg;
-    el.classList.add('show');
+    el.textContent = msg; el.classList.add('show');
     setTimeout(() => el.classList.remove('show'), 2800);
   }
 </script>
