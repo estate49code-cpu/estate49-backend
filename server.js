@@ -7,8 +7,12 @@ const path = require('path');
 require('dotenv').config();
 
 const supabase = require('./db');
-const propertiesRoute = require('./routes/properties');
-const uploadRoute = require('./routes/upload');
+const propertiesRoute     = require('./routes/properties');
+const uploadRoute         = require('./routes/upload');
+const favoritesRoute      = require('./routes/favorites');
+const messagesRoute       = require('./routes/messages');
+const notificationsRoute  = require('./routes/notifications');
+const profilesRoute       = require('./routes/profiles');
 
 const app = express();
 const server = http.createServer(app);
@@ -23,10 +27,14 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API routes
-app.use('/api/properties', propertiesRoute);
-app.use('/api/upload', uploadRoute);
+app.use('/api/properties',    propertiesRoute);
+app.use('/api/upload',        uploadRoute);
+app.use('/api/favorites',     favoritesRoute);
+app.use('/api/messages',      messagesRoute);
+app.use('/api/notifications', notificationsRoute);
+app.use('/api/profiles',      profilesRoute);
 
-// ─── REST Chat Route ──────────────────────────────────────────────────────────
+// --- REST Chat Route
 app.post('/api/chat', async (req, res) => {
   try {
     const { history, mode } = req.body;
@@ -48,13 +56,13 @@ app.post('/api/chat', async (req, res) => {
   } catch (err) {
     console.error('Chat API error:', err.message);
     res.status(500).json({
-      reply: '❌ Something went wrong. Please try again.',
+      reply: 'Something went wrong. Please try again.',
       updatedHistory: req.body.history || []
     });
   }
 });
 
-// ─── Auth Routes ──────────────────────────────────────────────────────────────
+// --- Auth Routes
 app.get('/auth/callback', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'auth', 'callback.html'));
 });
@@ -67,7 +75,7 @@ app.get('/login.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// ─── New Page Routes ──────────────────────────────────────────────────────────
+// --- Page Routes
 app.get('/chat', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'chat.html'));
 });
@@ -99,12 +107,11 @@ app.get('/property', (req, res) => {
 app.get('/property.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'property.html'));
 });
-// ─────────────────────────────────────────────────────────────────────────────
 
 // Test DB connection
 supabase.from('properties').select('id').limit(1).then(({ error }) => {
   if (error) console.log('DB Error:', error.message);
-  else console.log('Database connected successfully! ✅');
+  else console.log('Database connected successfully!');
 });
 
 // Page routes
@@ -120,7 +127,7 @@ app.get('/owner', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'owner', 'owner-form.html'));
 });
 
-// ─── Session Store ────────────────────────────────────────────────────────────
+// --- Session Store
 const sessions = new Map();
 
 function detectMode(text) {
@@ -134,14 +141,14 @@ function detectMode(text) {
   return listerKeywords.some(k => lower.includes(k)) ? 'lister' : 'client';
 }
 
-// ─── Socket.io AI Chat ────────────────────────────────────────────────────────
+// --- Socket.io AI Chat
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   sessions.set(socket.id, { mode: null, history: [] });
 
   socket.emit('bot_reply', {
-    message: `🏠 Welcome to Estate49!\n\nI'm your AI real estate assistant for Bengaluru.\n\nAre you:\n👉 Looking for a property to rent or buy?\n👉 Listing a property you own or manage?\n\nJust tell me what you need!`,
+    message: `Welcome to Estate49!\n\nI'm your AI real estate assistant for Bengaluru.\n\nAre you:\n- Looking for a property to rent or buy?\n- Listing a property you own or manage?\n\nJust tell me what you need!`,
     timestamp: new Date()
   });
 
@@ -192,7 +199,7 @@ io.on('connection', (socket) => {
       console.error('Socket error:', err.message);
       socket.emit('typing', false);
       socket.emit('bot_reply', {
-        message: '❌ I had trouble processing that. Please try again in a moment.',
+        message: 'I had trouble processing that. Please try again in a moment.',
         timestamp: new Date()
       });
     }
