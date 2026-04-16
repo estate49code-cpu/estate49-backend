@@ -2,24 +2,24 @@ const express  = require('express');
 const router   = express.Router();
 const supabase = require('../db');
 
-async function getUser(req) {
+async function getUserId(req) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return null;
   const token = auth.split(' ')[1];
   const { data: { user }, error } = await supabase.auth.getUser(token);
-  return error ? null : user;
+  return error ? null : (user?.id || null);
 }
 
-// GET /api/favorites — all saved properties for logged-in user
+// GET /api/favorites — all favorites for logged-in user
 router.get('/', async (req, res) => {
   try {
-    const user = await getUser(req);
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    const userId = await getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     const { data, error } = await supabase
       .from('favorites')
       .select('*, properties(*)')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+      .eq('userid', userId)
+      .order('createdat', { ascending: false });
     if (error) throw error;
     res.json(data || []);
   } catch (err) {
@@ -28,14 +28,14 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/favorites/:userId — by userId (used by profile page)
+// GET /api/favorites/:userId — by userId (profile page)
 router.get('/:userId', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('favorites')
       .select('*, properties(*)')
-      .eq('user_id', req.params.userId)
-      .order('created_at', { ascending: false });
+      .eq('userid', req.params.userId)
+      .order('createdat', { ascending: false });
     if (error) throw error;
     res.json(data || []);
   } catch (err) {
@@ -43,25 +43,28 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
-// POST /api/favorites — add to favorites
+// POST /api/favorites — add favorite
 router.post('/', async (req, res) => {
   try {
-    const user = await getUser(req);
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
-    const { property_id } = req.body;
-    if (!property_id) return res.status(400).json({ error: 'property_id required' });
+    const userId = await getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
 
+    // frontend sends 'propertyid' (no underscore) — accept both just in case
+    const propertyid = req.body.propertyid || req.body.property_id;
+    if (!propertyid) return res.status(400).json({ error: 'propertyid required' });
+
+    // avoid duplicates
     const { data: existing } = await supabase
       .from('favorites')
       .select('id')
-      .eq('user_id', user.id)
-      .eq('property_id', property_id)
+      .eq('userid', userId)
+      .eq('propertyid', propertyid)
       .maybeSingle();
     if (existing) return res.json(existing);
 
     const { data, error } = await supabase
       .from('favorites')
-      .insert([{ user_id: user.id, property_id }])
+      .insert([{ userid: userId, propertyid }])
       .select()
       .single();
     if (error) throw error;
@@ -72,16 +75,16 @@ router.post('/', async (req, res) => {
   }
 });
 
-// DELETE /api/favorites/:propertyId — remove from favorites
+// DELETE /api/favorites/:propertyId — remove favorite
 router.delete('/:propertyId', async (req, res) => {
   try {
-    const user = await getUser(req);
-    if (!user) return res.status(401).json({ error: 'Unauthorized' });
+    const userId = await getUserId(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     const { error } = await supabase
       .from('favorites')
       .delete()
-      .eq('user_id', user.id)
-      .eq('property_id', req.params.propertyId);
+      .eq('userid', userId)
+      .eq('propertyid', req.params.propertyId);
     if (error) throw error;
     res.json({ success: true });
   } catch (err) {
