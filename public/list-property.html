@@ -134,8 +134,10 @@
         <div class="form-group">
           <label class="form-label">Furnishing</label>
           <select class="form-select" id="furnished">
-            <option value="">Select</option><option value="unfurnished">Unfurnished</option>
-            <option value="semi">Semi-Furnished</option><option value="fully">Fully Furnished</option>
+            <option value="">Select</option>
+            <option value="unfurnished">Unfurnished</option>
+            <option value="semi">Semi-Furnished</option>
+            <option value="fully">Fully Furnished</option>
           </select>
         </div>
         <div class="form-group">
@@ -145,14 +147,26 @@
       </div>
       <label class="form-label" style="margin-bottom:10px;display:block">Amenities</label>
       <div class="check-grid" id="amenities-grid">
-        ${[['parking','🚗 Parking'],['gym','🏋️ Gym'],['pool','🏊 Pool'],['lift','🛗 Lift'],
-           ['security','💂 Security'],['cctv','📹 CCTV'],['clubhouse','🏢 Clubhouse'],['garden','🌳 Garden'],
-           ['powerbackup','⚡ Power Backup'],['ac','❄️ AC'],['balcony','🌅 Balcony'],
-           ['modular_kitchen','👨‍🍳 Mod Kitchen'],['washing_machine','🫧 Washing M/C'],
-           ['fridge','🧊 Fridge'],['wifi','📶 WiFi'],['pet_friendly','🐾 Pet Friendly'],
-           ['gated','🔐 Gated'],['vastu','🕉 Vastu'],['water_24','💧 24/7 Water'],
-           ['no_brokerage','✅ Zero Brokerage']
-          ].map(([k,l])=>`<label class="check-item" id="ci-${k}"><input type="checkbox" id="${k}" onchange="tgl('${k}')"/> ${l}</label>`).join('')}
+        <label class="check-item" id="ci-parking"><input type="checkbox" id="parking" onchange="tgl('parking')"/> 🚗 Parking</label>
+        <label class="check-item" id="ci-gym"><input type="checkbox" id="gym" onchange="tgl('gym')"/> 🏋️ Gym</label>
+        <label class="check-item" id="ci-pool"><input type="checkbox" id="pool" onchange="tgl('pool')"/> 🏊 Pool</label>
+        <label class="check-item" id="ci-lift"><input type="checkbox" id="lift" onchange="tgl('lift')"/> 🛗 Lift</label>
+        <label class="check-item" id="ci-security"><input type="checkbox" id="security" onchange="tgl('security')"/> 💂 Security</label>
+        <label class="check-item" id="ci-cctv"><input type="checkbox" id="cctv" onchange="tgl('cctv')"/> 📹 CCTV</label>
+        <label class="check-item" id="ci-clubhouse"><input type="checkbox" id="clubhouse" onchange="tgl('clubhouse')"/> 🏢 Clubhouse</label>
+        <label class="check-item" id="ci-garden"><input type="checkbox" id="garden" onchange="tgl('garden')"/> 🌳 Garden</label>
+        <label class="check-item" id="ci-powerbackup"><input type="checkbox" id="powerbackup" onchange="tgl('powerbackup')"/> ⚡ Power Backup</label>
+        <label class="check-item" id="ci-ac"><input type="checkbox" id="ac" onchange="tgl('ac')"/> ❄️ AC</label>
+        <label class="check-item" id="ci-balcony"><input type="checkbox" id="balcony" onchange="tgl('balcony')"/> 🌅 Balcony</label>
+        <label class="check-item" id="ci-modular_kitchen"><input type="checkbox" id="modular_kitchen" onchange="tgl('modular_kitchen')"/> 👨‍🍳 Mod Kitchen</label>
+        <label class="check-item" id="ci-washing_machine"><input type="checkbox" id="washing_machine" onchange="tgl('washing_machine')"/> 🫧 Washing M/C</label>
+        <label class="check-item" id="ci-fridge"><input type="checkbox" id="fridge" onchange="tgl('fridge')"/> 🧊 Fridge</label>
+        <label class="check-item" id="ci-wifi"><input type="checkbox" id="wifi" onchange="tgl('wifi')"/> 📶 WiFi</label>
+        <label class="check-item" id="ci-pet_friendly"><input type="checkbox" id="pet_friendly" onchange="tgl('pet_friendly')"/> 🐾 Pet Friendly</label>
+        <label class="check-item" id="ci-gated"><input type="checkbox" id="gated" onchange="tgl('gated')"/> 🔐 Gated</label>
+        <label class="check-item" id="ci-vastu"><input type="checkbox" id="vastu" onchange="tgl('vastu')"/> 🕉 Vastu</label>
+        <label class="check-item" id="ci-water_24"><input type="checkbox" id="water_24" onchange="tgl('water_24')"/> 💧 24/7 Water</label>
+        <label class="check-item" id="ci-no_brokerage"><input type="checkbox" id="no_brokerage" onchange="tgl('no_brokerage')"/> ✅ Zero Brokerage</label>
       </div>
     </div>
 
@@ -177,7 +191,9 @@
         <div class="form-group">
           <label class="form-label">I am a</label>
           <select class="form-select" id="contact_role">
-            <option value="owner">Owner</option><option value="agent">Agent / Broker</option><option value="builder">Builder</option>
+            <option value="owner">Owner</option>
+            <option value="agent">Agent / Broker</option>
+            <option value="builder">Builder</option>
           </select>
         </div>
       </div>
@@ -217,13 +233,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('page').style.display='block';
   await initNavbar({active:'list'});
 
-  // Pre-fill from profile
   try{
     const r=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${tok}`}});
     if(r.ok){const p=await r.json(); if(p.fullname)document.getElementById('contact_name').value=p.fullname; if(p.phone)document.getElementById('contact_phone').value=p.phone;}
   }catch(e){}
 
-  // Edit mode
   editId=new URLSearchParams(window.location.search).get('edit');
   if(editId){
     document.getElementById('page-title').textContent='Edit Listing';
