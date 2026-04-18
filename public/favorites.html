@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Saved Properties — Estate49</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/auth.js"></script><script src="/nav.js"></script>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .fw{max-width:1100px;margin:0 auto;padding:36px 24px;}
+    .fh{font-size:var(--text-2xl);font-weight:800;margin-bottom:4px;}
+    .fsub{font-size:var(--text-sm);color:var(--muted);margin-bottom:32px;}
+    .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:box-shadow var(--transition);cursor:pointer;}
+    .card:hover{box-shadow:var(--shadow-md);}
+    .card-img{width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--surface-2);display:block;}
+    .card-img-ph{width:100%;aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:40px;}
+    .card-body{padding:16px;}
+    .card-price{font-size:var(--text-lg);font-weight:800;color:var(--primary);}
+    .card-title{font-size:var(--text-sm);font-weight:600;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .card-loc{font-size:var(--text-xs);color:var(--muted);margin-bottom:10px;}
+    .card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+    .tag{font-size:11px;padding:3px 8px;border-radius:var(--radius-full);background:var(--surface-2);color:var(--muted);font-weight:500;}
+    .card-footer{display:flex;gap:8px;}
+    .btn-unfav{flex:1;padding:8px;border-radius:var(--radius-md);border:1px solid var(--border);font-size:var(--text-xs);font-weight:600;color:var(--danger,#c0392b);background:transparent;cursor:pointer;transition:all var(--transition);}
+    .btn-unfav:hover{background:#fdf0ee;border-color:#c0392b;}
+    .btn-view{flex:2;padding:8px;border-radius:var(--radius-md);background:var(--primary);color:#fff;font-size:var(--text-xs);font-weight:600;border:none;cursor:pointer;transition:all var(--transition);}
+    .btn-view:hover{background:var(--primary-dark,#0c4e54);}
+    .empty{text-align:center;padding:80px 24px;}
+    .empty-icon{font-size:56px;margin-bottom:16px;}
+    .empty h2{font-size:var(--text-lg);font-weight:700;margin-bottom:8px;}
+    .empty p{color:var(--muted);font-size:var(--text-sm);margin-bottom:24px;}
+    .skeleton{background:linear-gradient(90deg,var(--surface-2) 25%,var(--border) 50%,var(--surface-2) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:var(--radius-md);}
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    .sk-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;}
+    .sk-img{width:100%;aspect-ratio:16/10;}
+    .sk-body{padding:16px;display:flex;flex-direction:column;gap:10px;}
+    .sk-line{height:14px;width:60%;}
+    .sk-line.full{width:90%;}
+    .sk-line.short{width:40%;}
+    @media(max-width:600px){.fw{padding:16px;}.cards{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<div class="auth-loading" id="al"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
+<div class="page" id="page">
+  <div id="navbar-root"></div>
+  <div class="fw">
+    <div class="fh">❤️ Saved Properties</div>
+    <div class="fsub" id="count-txt">Loading your saved properties…</div>
+    <div class="cards" id="cards-grid">
+      <!-- skeletons -->
+      ${[1,2,3].map(()=>`
+        <div class="sk-card">
+          <div class="skeleton sk-img"></div>
+          <div class="sk-body">
+            <div class="skeleton sk-line short"></div>
+            <div class="skeleton sk-line full"></div>
+            <div class="skeleton sk-line"></div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast-el"></div>
+
+<script>
+let tok = null;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const s = await getSession();
+  if (!s) { window.location.href = '/login.html'; return; }
+  tok = s.access_token;
+  document.getElementById('al').style.display = 'none';
+  document.getElementById('page').style.display = 'block';
+  await initNavbar({ active: 'favorites' });
+  await loadFavorites();
+});
+
+async function loadFavorites() {
+  try {
+    const r = await fetch('/api/favorites', { headers: { Authorization: `Bearer ${tok}` } });
+    if (!r.ok) throw new Error('Failed to load');
+    const data = await r.json();
+    renderCards(data);
+  } catch (e) {
+    document.getElementById('cards-grid').innerHTML = '';
+    document.getElementById('count-txt').textContent = 'Failed to load saved properties.';
+  }
+}
+
+function renderCards(items) {
+  const grid = document.getElementById('cards-grid');
+  const countTxt = document.getElementById('count-txt');
+
+  if (!items || items.length === 0) {
+    countTxt.textContent = '0 saved properties';
+    grid.innerHTML = `
+      <div class="empty" style="grid-column:1/-1">
+        <div class="empty-icon">❤️</div>
+        <h2>No saved properties yet</h2>
+        <p>Browse properties and tap the heart icon to save them here.</p>
+        <button class="btn btn-primary" onclick="window.location.href='/browse.html'">🔍 Browse Properties</button>
+      </div>`;
+    return;
+  }
+
+  countTxt.textContent = `${items.length} saved propert${items.length === 1 ? 'y' : 'ies'}`;
+  grid.innerHTML = items.map(fav => {
+    const p = fav.property || fav;
+    const img = p.photos?.[0];
+    const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '') : 'Price on request';
+    const tags = [p.bhk ? p.bhk + ' BHK' : null, p.property_type || p.prop_type, p.furnished].filter(Boolean);
+    return `
+      <div class="card" onclick="window.location.href='/property.html?id=${p.id}'">
+        ${img
+          ? `<img class="card-img" src="${img}" alt="${p.title || 'Property'}" loading="lazy"/>`
+          : `<div class="card-img-ph">🏠</div>`}
+        <div class="card-body">
+          <div class="card-price">${price}</div>
+          <div class="card-title">${p.title || 'Untitled Property'}</div>
+          <div class="card-loc">📍 ${[p.locality, p.city].filter(Boolean).join(', ') || 'Location not specified'}</div>
+          <div class="card-tags">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+          <div class="card-footer">
+            <button class="btn-unfav" onclick="event.stopPropagation();removeFav('${fav.id || p.id}', this)">🗑 Remove</button>
+            <button class="btn-view" onclick="event.stopPropagation();window.location.href='/property.html?id=${p.id}'">View Property →</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function removeFav(id, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Removing…';
+  try {
+    const r = await fetch(`/api/favorites/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${tok}` }
+    });
+    if (!r.ok) throw new Error();
+    toast('Removed from saved');
+    await loadFavorites();
+  } catch (e) {
+    toast('Failed to remove');
+    btn.disabled = false;
+    btn.textContent = '🗑 Remove';
+  }
+}
+
+function toast(m) {
+  const el = document.getElementById('toast-el');
+  el.textContent = m;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
