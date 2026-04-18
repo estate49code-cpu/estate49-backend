@@ -1,134 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Sign In — Estate49</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="/style.css"/>
+  <script src="/auth.js"></script>
   <style>
-    body{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:16px;}
-    .auth-card{width:100%;max-width:420px;}
-    .auth-logo{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:32px;}
-    .auth-logo-icon{width:52px;height:52px;background:var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;}
-    .auth-logo-text{font-size:1.875rem;font-weight:800;color:var(--primary);}
-    .tabs{display:flex;background:var(--surface-2);border-radius:var(--radius-lg);padding:4px;margin-bottom:20px;border:1px solid var(--border);}
-    .tab{flex:1;padding:10px;border-radius:calc(var(--radius-lg) - 3px);font-size:var(--text-sm);font-weight:600;color:var(--muted);transition:all var(--transition);}
-    .tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);}
-    .aform{display:flex;flex-direction:column;gap:16px;}
-    .aform.hidden{display:none;}
-    .gbtn{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius-md);background:var(--surface);font-size:var(--text-sm);font-weight:600;width:100%;transition:all var(--transition);}
-    .gbtn:hover{border-color:var(--primary);background:var(--primary-xlight);}
-    .or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:var(--text-xs);}
-    .or::before,.or::after{content:'';flex:1;height:1px;background:var(--divider);}
-    .amsg{padding:12px 16px;border-radius:var(--radius-md);font-size:var(--text-sm);display:none;}
-    .amsg.ok{background:var(--success-light);color:var(--success);display:block;}
-    .amsg.er{background:var(--primary-light);color:var(--primary);display:block;}
-    .fgt{font-size:var(--text-xs);color:var(--primary);cursor:pointer;}
-    .fgt:hover{text-decoration:underline;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f7f6f2;padding:16px;}
+    .card{background:#fff;border-radius:16px;padding:36px 32px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(0,0,0,0.08);}
+    .logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:24px;}
+    .logo-icon{font-size:32px;}
+    .logo-text{font-size:24px;font-weight:800;color:#c0392b;}
+    .tabs{display:flex;border:1px solid #e5e5e5;border-radius:8px;margin-bottom:24px;overflow:hidden;}
+    .tab{flex:1;padding:10px;font-size:14px;font-weight:600;background:none;border:none;cursor:pointer;color:#888;transition:all 0.2s;}
+    .tab.active{background:#c0392b;color:#fff;}
+    .google-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:11px;border:1.5px solid #dadce0;border-radius:8px;background:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-bottom:16px;}
+    .google-btn:hover{background:#f5f5f5;border-color:#c0392b;}
+    .google-btn img{width:18px;height:18px;}
+    .divider{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#e5e5e5;}
+    .divider span{font-size:12px;color:#aaa;}
+    .form-group{margin-bottom:14px;}
+    label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#333;}
+    input{width:100%;padding:10px 12px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:14px;font-family:inherit;transition:border-color 0.2s;}
+    input:focus{outline:none;border-color:#c0392b;}
+    .forgot{float:right;font-size:12px;color:#c0392b;text-decoration:none;margin-top:-4px;}
+    .forgot:hover{text-decoration:underline;}
+    .submit-btn{width:100%;padding:12px;background:#c0392b;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:background 0.2s;}
+    .submit-btn:hover{background:#a93226;}
+    .submit-btn:disabled{background:#e0a0a0;cursor:not-allowed;}
+    .err{background:#fee2e2;color:#c0392b;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;}
+    .success{background:#d1fae5;color:#065f46;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;}
+    .name-group{display:none;}
+    .name-group.show{display:block;}
   </style>
 </head>
 <body>
-<script src="/auth.js"></script>
-<div class="auth-card card">
-  <div class="auth-logo">
-    <div class="auth-logo-icon">🏠</div>
-    <span class="auth-logo-text">Estate49</span>
+<div class="card">
+  <div class="logo">
+    <span class="logo-icon">🏠</span>
+    <span class="logo-text">Estate49</span>
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="sw('in')">Sign In</button>
-    <button class="tab"        onclick="sw('up')">Sign Up</button>
+    <button class="tab active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+    <button class="tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
   </div>
 
-  <div class="amsg" id="msg"></div>
+  <div class="err" id="err-box"></div>
+  <div class="success" id="success-box"></div>
 
-  <!-- SIGN IN -->
-  <form class="aform" id="fi" onsubmit="doIn(event)">
-    <button type="button" class="gbtn" onclick="signInWithGoogle()">
-      <svg width="18" height="18" viewBox="0 0 24 24">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-      </svg>
-      Continue with Google
-    </button>
-    <div class="or">or</div>
-    <div class="form-group">
-      <label class="form-label">Email</label>
-      <input type="email" class="form-input" id="si-e" placeholder="you@example.com" required/>
-    </div>
-    <div class="form-group">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <label class="form-label">Password</label>
-        <span class="fgt" onclick="doFgt()">Forgot password?</span>
-      </div>
-      <input type="password" class="form-input" id="si-p" placeholder="••••••••" required/>
-    </div>
-    <button type="submit" class="btn btn-primary btn-full btn-lg" id="bsi">Sign In</button>
-  </form>
+  <!-- Google -->
+  <button class="google-btn" onclick="signInWithGoogle()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
+    Continue with Google
+  </button>
 
-  <!-- SIGN UP -->
-  <form class="aform hidden" id="fu" onsubmit="doUp(event)">
-    <button type="button" class="gbtn" onclick="signInWithGoogle()">
-      <svg width="18" height="18" viewBox="0 0 24 24">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-      </svg>
-      Continue with Google
-    </button>
-    <div class="or">or</div>
-    <div class="form-group">
-      <label class="form-label">Full Name</label>
-      <input type="text" class="form-input" id="su-n" placeholder="Your full name" required/>
+  <div class="divider"><span>or</span></div>
+
+  <!-- Form -->
+  <form onsubmit="handleSubmit(event)">
+    <div class="form-group name-group" id="name-group">
+      <label for="fullname">Full Name</label>
+      <input type="text" id="fullname" placeholder="Your full name" autocomplete="name"/>
     </div>
     <div class="form-group">
-      <label class="form-label">Email</label>
-      <input type="email" class="form-input" id="su-e" placeholder="you@example.com" required/>
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com" required autocomplete="email"/>
     </div>
     <div class="form-group">
-      <label class="form-label">Password</label>
-      <input type="password" class="form-input" id="su-p" placeholder="Min 6 characters" required minlength="6"/>
+      <label for="password">
+        Password
+        <a href="#" class="forgot" id="forgot-link" onclick="forgotPassword(event)">Forgot password?</a>
+      </label>
+      <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" minlength="6"/>
     </div>
-    <button type="submit" class="btn btn-primary btn-full btn-lg" id="bsu">Create Account</button>
+    <button type="submit" class="submit-btn" id="submit-btn">Sign In</button>
   </form>
 </div>
 
 <script>
-  getSession().then(s => { if (s) window.location.href = '/browse.html'; });
+let mode = 'signin';
 
-  function sw(t) {
-    document.getElementById('fi').classList.toggle('hidden', t !== 'in');
-    document.getElementById('fu').classList.toggle('hidden', t !== 'up');
-    document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='in')||(i===1&&t==='up')));
-    clrMsg();
-  }
-  function showMsg(txt, cls) { const el=document.getElementById('msg'); el.textContent=txt; el.className='amsg '+cls; }
-  function clrMsg() { document.getElementById('msg').className='amsg'; }
+// Redirect if already logged in
+window.addEventListener('DOMContentLoaded', async () => {
+  const s = await getSession();
+  if (s) window.location.replace('/browse.html');
+});
 
-  async function doIn(e) {
-    e.preventDefault();
-    const btn=document.getElementById('bsi'); btn.disabled=true; btn.textContent='Signing in…';
-    const r=await signInWithEmail(document.getElementById('si-e').value, document.getElementById('si-p').value);
-    if (r.success) window.location.href='/browse.html';
-    else { showMsg(r.message,'er'); btn.disabled=false; btn.textContent='Sign In'; }
+function switchTab(t) {
+  mode = t;
+  document.getElementById('tab-signin').classList.toggle('active', t === 'signin');
+  document.getElementById('tab-signup').classList.toggle('active', t === 'signup');
+  document.getElementById('name-group').classList.toggle('show', t === 'signup');
+  document.getElementById('submit-btn').textContent = t === 'signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('forgot-link').style.display = t === 'signin' ? '' : 'none';
+  document.getElementById('password').autocomplete = t === 'signin' ? 'current-password' : 'new-password';
+  hideMessages();
+}
+
+async function handleSubmit(e) {
+  e.preventDefault();
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const fullname = document.getElementById('fullname').value.trim();
+  const btn      = document.getElementById('submit-btn');
+
+  hideMessages();
+  btn.disabled = true;
+  btn.textContent = mode === 'signin' ? 'Signing in...' : 'Creating account...';
+
+  try {
+    if (mode === 'signin') {
+      await signInWithEmail(email, password);
+      window.location.replace('/browse.html');
+    } else {
+      if (!fullname) { showErr('Please enter your full name.'); return; }
+      const data = await signUpWithEmail(email, password, fullname);
+      if (data?.user?.identities?.length === 0) {
+        showErr('An account with this email already exists. Please sign in.');
+      } else {
+        showSuccess('Account created! Please check your email to confirm, then sign in.');
+        switchTab('signin');
+      }
+    }
+  } catch(err) {
+    showErr(err.message || 'Something went wrong. Try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
   }
-  async function doUp(e) {
-    e.preventDefault();
-    const btn=document.getElementById('bsu'); btn.disabled=true; btn.textContent='Creating…';
-    const r=await signUpWithEmail(document.getElementById('su-e').value, document.getElementById('su-p').value, document.getElementById('su-n').value);
-    if (r.success) showMsg(r.message,'ok');
-    else { showMsg(r.message,'er'); btn.disabled=false; btn.textContent='Create Account'; }
-  }
-  async function doFgt() {
-    const email=document.getElementById('si-e').value;
-    if (!email) { showMsg('Enter your email first','er'); return; }
-    const r=await resetPassword(email);
-    showMsg(r.message, r.success?'ok':'er');
-  }
+}
+
+async function forgotPassword(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  if (!email) { showErr('Enter your email address first.'); return; }
+  const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/auth/callback'
+  });
+  if (error) showErr(error.message);
+  else showSuccess('Password reset email sent! Check your inbox.');
+}
+
+function showErr(msg)     { const e=document.getElementById('err-box');     e.textContent=msg; e.style.display='block'; }
+function showSuccess(msg) { const e=document.getElementById('success-box'); e.textContent=msg; e.style.display='block'; }
+function hideMessages()   { document.getElementById('err-box').style.display='none'; document.getElementById('success-box').style.display='none'; }
 </script>
 </body>
 </html>
