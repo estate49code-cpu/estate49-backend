@@ -1,918 +1,324 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>List Property — Estate49</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/auth.js"></script>
-  <script src="/nav.js"></script>
+  <script src="/auth.js"></script><script src="/nav.js"></script>
+  <link rel="stylesheet" href="/style.css"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --primary: #c0392b;
-      --primary-dark: #a93226;
-      --primary-light: #fadbd8;
-      --bg: #f7f7f8;
-      --card: #ffffff;
-      --border: #e5e5e5;
-      --text: #0d0d0d;
-      --muted: #6e6e80;
-      --success: #2e7d32;
-      --success-light: #e8f5e9;
-    }
-
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-    .auth-loading { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 9999; }
-    .al-icon { width: 56px; height: 56px; background: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 16px rgba(192,57,43,0.25); }
-    .al-spin { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    nav { background: white; border-bottom: 1px solid var(--border); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
-    .nav-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .nav-logo-icon { width: 32px; height: 32px; background: var(--primary); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-    .nav-logo-text { font-size: 17px; font-weight: 800; color: var(--primary); }
-    .nav-right { display: flex; align-items: center; gap: 10px; }
-    .nav-link { padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; transition: all 0.2s; }
-    .nav-link:hover { background: var(--bg); color: var(--text); }
-    .nav-link.active { color: var(--primary); background: var(--primary-light); }
-    .nav-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; cursor: pointer; position: relative; }
-
-    .nav-user-wrap { position: relative; }
-    .nav-dropdown {
-      display: none; position: absolute; top: calc(100% + 8px); right: 0;
-      background: white; border: 1px solid var(--border); border-radius: 14px;
-      padding: 8px; min-width: 180px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 200;
-    }
-    .nav-dropdown.open { display: block; }
-    .nav-dropdown-name { padding: 8px 12px 4px; font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .nav-dropdown-email { padding: 0 12px 8px; font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
-    .nav-dropdown-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 8px 12px; border-radius: 8px;
-      font-size: 13px; color: var(--muted);
-      cursor: pointer; transition: all 0.2s;
-      border: none; background: none; width: 100%; text-align: left;
-      text-decoration: none;
-    }
-    .nav-dropdown-item:hover { background: var(--bg); color: var(--text); }
-    .nav-dropdown-item.signout { color: var(--primary); }
-    .nav-dropdown-item.signout:hover { background: var(--primary-light); }
-
-    .page { display: none; }
-
-    .progress-wrap { background: white; border-bottom: 1px solid var(--border); padding: 16px 32px; }
-    .progress-steps { display: flex; align-items: center; max-width: 700px; margin: 0 auto; gap: 0; }
-    .step { display: flex; align-items: center; gap: 8px; flex: 1; cursor: default; }
-    .step-circle {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 2px solid var(--border);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700; color: var(--muted);
-      background: white; flex-shrink: 0; transition: all 0.3s;
-    }
-    .step.active .step-circle { border-color: var(--primary); background: var(--primary); color: white; }
-    .step.done .step-circle { border-color: var(--success); background: var(--success); color: white; }
-    .step-label { font-size: 12px; font-weight: 500; color: var(--muted); transition: color 0.3s; white-space: nowrap; }
-    .step.active .step-label { color: var(--primary); font-weight: 600; }
-    .step.done .step-label { color: var(--success); }
-    .step-line { flex: 1; height: 2px; background: var(--border); margin: 0 8px; transition: background 0.3s; min-width: 20px; }
-    .step-line.done { background: var(--success); }
-
-    .main-content { max-width: 760px; margin: 0 auto; padding: 32px 24px 60px; }
-
-    .section-header { margin-bottom: 24px; }
-    .section-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
-    .section-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
-
-    .form-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 20px; padding: 28px; margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .card-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-    .card-title-icon { width: 30px; height: 30px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-    .form-row.single { grid-template-columns: 1fr; }
-    .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group:last-child { margin-bottom: 0; }
-
-    label { font-size: 13px; font-weight: 600; color: var(--text); }
-    label span { color: var(--primary); }
-
-    input[type=text], input[type=number], input[type=tel],
-    input[type=email], select, textarea {
-      width: 100%; padding: 11px 14px;
-      border: 1.5px solid var(--border); border-radius: 12px;
-      font-size: 14px; font-family: inherit; color: var(--text);
-      background: var(--bg); outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(192,57,43,0.08);
-      background: white;
-    }
-    input.error, select.error, textarea.error {
-      border-color: #e53935;
-      box-shadow: 0 0 0 3px rgba(229,57,53,0.08);
-    }
-    textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
-    select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e80' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-    .field-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .field-error { font-size: 11px; color: #e53935; margin-top: 2px; display: none; }
-    .field-error.show { display: block; }
-
-    .amenity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-    .amenity-btn {
-      display: flex; align-items: center; gap: 8px;
-      padding: 10px 14px; border: 1.5px solid var(--border);
-      border-radius: 12px; background: var(--bg);
-      font-size: 13px; font-weight: 500; color: var(--muted);
-      cursor: pointer; transition: all 0.2s; user-select: none;
-    }
-    .amenity-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-    .amenity-btn.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 600; }
-    .amenity-check { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; transition: all 0.2s; }
-    .amenity-btn.active .amenity-check { background: var(--primary); border-color: var(--primary); color: white; }
-
-    .photo-drop {
-      border: 2px dashed var(--border); border-radius: 16px;
-      padding: 36px 24px; text-align: center;
-      cursor: pointer; transition: all 0.2s; background: var(--bg);
-    }
-    .photo-drop:hover, .photo-drop.dragover { border-color: var(--primary); background: var(--primary-light); }
-    .photo-drop-icon { font-size: 36px; margin-bottom: 10px; }
-    .photo-drop-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-    .photo-drop-sub { font-size: 13px; color: var(--muted); }
-    .photo-drop-btn { display: inline-block; margin-top: 12px; padding: 8px 20px; background: var(--primary); color: white; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
-
-    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 16px; }
-    .photo-thumb { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); }
-    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .photo-rm { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .photo-main-badge { position: absolute; bottom: 4px; left: 4px; background: var(--primary); color: white; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; }
-    .photo-progress { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; color: white; font-size: 12px; }
-    .photo-progress .pbar-wrap { width: 70%; height: 4px; background: rgba(255,255,255,0.3); border-radius: 4px; }
-    .photo-progress .pbar { height: 100%; background: white; border-radius: 4px; transition: width 0.3s; }
-
-    .nav-btns {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border);
-    }
-    .btn-back {
-      display: flex; align-items: center; gap: 6px;
-      padding: 12px 22px; border: 1.5px solid var(--border);
-      border-radius: 12px; background: white;
-      font-size: 14px; font-weight: 600; font-family: inherit;
-      cursor: pointer; color: var(--muted); transition: all 0.2s;
-    }
-    .btn-back:hover { border-color: var(--text); color: var(--text); }
-    .btn-next {
-      display: flex; align-items: center; gap: 8px;
-      padding: 12px 28px; background: var(--primary); color: white;
-      border: none; border-radius: 12px;
-      font-size: 14px; font-weight: 600; font-family: inherit;
-      cursor: pointer; transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(192,57,43,0.3);
-    }
-    .btn-next:hover { background: var(--primary-dark); transform: translateY(-1px); }
-    .btn-next:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
-    .step-panel { display: none; }
-    .step-panel.active { display: block; }
-
-    .success-screen { text-align: center; padding: 60px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-    .success-icon { width: 80px; height: 80px; background: var(--success-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; border: 3px solid #a5d6a7; }
-    .success-title { font-size: 24px; font-weight: 800; color: var(--text); }
-    .success-sub { font-size: 15px; color: var(--muted); max-width: 400px; line-height: 1.6; }
-    .success-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
-    .success-btn { padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-block; }
-    .success-btn.primary { background: var(--primary); color: white; border: none; }
-    .success-btn.primary:hover { background: var(--primary-dark); }
-    .success-btn.outline { background: white; color: var(--text); border: 1.5px solid var(--border); }
-    .success-btn.outline:hover { border-color: var(--primary); color: var(--primary); }
-
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; z-index: 500; pointer-events: none; white-space: nowrap; }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    @media (max-width: 640px) {
-      nav { padding: 0 16px; }
-      .progress-wrap { padding: 12px 16px; }
-      .step-label { display: none; }
-      .main-content { padding: 20px 14px 60px; }
-      .form-card { padding: 20px 16px; }
-      .form-row { grid-template-columns: 1fr; }
-      .form-row.triple { grid-template-columns: 1fr 1fr; }
-      .amenity-grid { grid-template-columns: 1fr 1fr; }
-      .nav-dropdown-name, .nav-dropdown-email { display: none; }
-    }
+    .lw{max-width:780px;margin:0 auto;padding:36px 24px;}
+    .lh{font-size:var(--text-2xl);font-weight:800;margin-bottom:8px;}
+    .lsub{font-size:var(--text-sm);color:var(--muted);margin-bottom:36px;}
+    .step{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;margin-bottom:20px;}
+    .step-title{font-size:var(--text-lg);font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+    .step-num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:12px;}
+    .photo-slot{aspect-ratio:4/3;border-radius:var(--radius-md);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:28px;background:var(--surface-2);transition:all var(--transition);overflow:hidden;position:relative;}
+    .photo-slot:hover{border-color:var(--primary);background:var(--primary-xlight);}
+    .photo-slot img{width:100%;height:100%;object-fit:cover;}
+    .photo-rm{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+    .type-btns{display:flex;gap:10px;flex-wrap:wrap;}
+    .type-btn{padding:10px 24px;border:2px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;transition:all var(--transition);}
+    .type-btn.sel{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
+    .form-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+    .form-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .save-bar{position:sticky;bottom:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:16px 24px;display:flex;gap:12px;align-items:center;justify-content:flex-end;}
+    .prog{font-size:var(--text-xs);color:var(--muted);flex:1;}
+    @media(max-width:600px){.form-3,.form-2{grid-template-columns:1fr;}.lw{padding:16px;}.save-bar{padding:12px 16px;}}
   </style>
 </head>
 <body>
-
-<div class="auth-loading" id="auth-loading">
-  <div class="al-icon">🏠</div>
-  <div class="al-spin"></div>
-</div>
-
+<div class="auth-loading" id="al"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
 <div class="page" id="page">
+  <div id="navbar-root"></div>
+  <div class="lw">
+    <div class="lh" id="page-title">List Your Property</div>
+    <div class="lsub">Fill in the details below. All starred (*) fields are required.</div>
 
-  <nav>
-    <a class="nav-logo" href="/">
-      <div class="nav-logo-icon">🏠</div>
-      <span class="nav-logo-text">Estate49</span>
-    </a>
-    <div class="nav-right">
-      <a class="nav-link" href="/">Home</a>
-      <a class="nav-link" href="/browse.html">Browse</a>
-      <a class="nav-link active" href="/list-property.html">List Property</a>
-      <a class="nav-link" href="/chat.html">AI Chat</a>
-      <div class="nav-user-wrap">
-        <div class="nav-avatar" id="nav-avatar" onclick="toggleNavDropdown()">👤</div>
-        <div class="nav-dropdown" id="nav-dropdown">
-          <div class="nav-dropdown-name" id="nav-dropdown-name">Loading...</div>
-          <div class="nav-dropdown-email" id="nav-dropdown-email"></div>
-          <button class="nav-dropdown-item signout" onclick="signOut()">🚪 Sign Out</button>
+    <!-- STEP 1: Type & Basic -->
+    <div class="step">
+      <div class="step-title"><div class="step-num">1</div>Property Type & Listing</div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Listing For *</label>
+        <div class="type-btns">
+          <button type="button" class="type-btn sel" data-t="rent" onclick="setType('rent')">🔑 Rent</button>
+          <button type="button" class="type-btn" data-t="buy" onclick="setType('buy')">🏡 Sale</button>
+        </div>
+      </div>
+      <div class="form-3">
+        <div class="form-group">
+          <label class="form-label">Property Type *</label>
+          <select class="form-select" id="prop_type">
+            <option value="apartment">Apartment</option><option value="house">Independent House</option>
+            <option value="villa">Villa</option><option value="plot">Plot</option>
+            <option value="pg">PG/Hostel</option><option value="commercial">Commercial</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">BHK</label>
+          <select class="form-select" id="bhk"><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Bathrooms</label>
+          <select class="form-select" id="bathrooms"><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
         </div>
       </div>
     </div>
-  </nav>
 
-  <div class="progress-wrap">
-    <div class="progress-steps">
-      <div class="step active" id="ps-1">
-        <div class="step-circle">1</div>
-        <span class="step-label">Basic Info</span>
+    <!-- STEP 2: Title, Location, Description -->
+    <div class="step">
+      <div class="step-title"><div class="step-num">2</div>Title & Location</div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Listing Title *</label>
+        <input type="text" class="form-input" id="title" placeholder="e.g. Spacious 2BHK in Koramangala with parking"/>
       </div>
-      <div class="step-line" id="pl-1"></div>
-      <div class="step" id="ps-2">
-        <div class="step-circle">2</div>
-        <span class="step-label">Details</span>
+      <div class="form-2" style="margin-bottom:16px">
+        <div class="form-group">
+          <label class="form-label">City *</label>
+          <input type="text" class="form-input" id="city" placeholder="e.g. Bengaluru" value="Bengaluru"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Locality / Area *</label>
+          <input type="text" class="form-input" id="locality" placeholder="e.g. Koramangala, HSR Layout"/>
+        </div>
       </div>
-      <div class="step-line" id="pl-2"></div>
-      <div class="step" id="ps-3">
-        <div class="step-circle">3</div>
-        <span class="step-label">Amenities</span>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Full Address</label>
+        <input type="text" class="form-input" id="address" placeholder="Flat no, Street, Landmark…"/>
       </div>
-      <div class="step-line" id="pl-3"></div>
-      <div class="step" id="ps-4">
-        <div class="step-circle">4</div>
-        <span class="step-label">Photos</span>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="description" placeholder="Describe the property — neighborhood, nearby landmarks, special features…"></textarea>
       </div>
-      <div class="step-line" id="pl-4"></div>
-      <div class="step" id="ps-5">
-        <div class="step-circle">5</div>
-        <span class="step-label">Contact</span>
+    </div>
+
+    <!-- STEP 3: Price & Details -->
+    <div class="step">
+      <div class="step-title"><div class="step-num">3</div>Price & Details</div>
+      <div class="form-3" style="margin-bottom:16px">
+        <div class="form-group">
+          <label class="form-label">Price (₹) *</label>
+          <input type="number" class="form-input" id="price" placeholder="e.g. 25000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deposit (₹)</label>
+          <input type="number" class="form-input" id="deposit" placeholder="e.g. 100000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Maintenance (₹/mo)</label>
+          <input type="number" class="form-input" id="maintenance" placeholder="e.g. 2000"/>
+        </div>
       </div>
+      <div class="form-3">
+        <div class="form-group">
+          <label class="form-label">Total Area (ft²)</label>
+          <input type="number" class="form-input" id="area" placeholder="1200"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Carpet Area (ft²)</label>
+          <input type="number" class="form-input" id="carpet_area" placeholder="980"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Floor</label>
+          <input type="text" class="form-input" id="floor" placeholder="e.g. 3rd of 6"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Furnishing & Availability -->
+    <div class="step">
+      <div class="step-title"><div class="step-num">4</div>Furnishing & Availability</div>
+      <div class="form-2" style="margin-bottom:16px">
+        <div class="form-group">
+          <label class="form-label">Furnishing</label>
+          <select class="form-select" id="furnished">
+            <option value="">Select</option><option value="unfurnished">Unfurnished</option>
+            <option value="semi">Semi-Furnished</option><option value="fully">Fully Furnished</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Available From</label>
+          <input type="date" class="form-input" id="available_from"/>
+        </div>
+      </div>
+      <label class="form-label" style="margin-bottom:10px;display:block">Amenities</label>
+      <div class="check-grid" id="amenities-grid">
+        ${[['parking','🚗 Parking'],['gym','🏋️ Gym'],['pool','🏊 Pool'],['lift','🛗 Lift'],
+           ['security','💂 Security'],['cctv','📹 CCTV'],['clubhouse','🏢 Clubhouse'],['garden','🌳 Garden'],
+           ['powerbackup','⚡ Power Backup'],['ac','❄️ AC'],['balcony','🌅 Balcony'],
+           ['modular_kitchen','👨‍🍳 Mod Kitchen'],['washing_machine','🫧 Washing M/C'],
+           ['fridge','🧊 Fridge'],['wifi','📶 WiFi'],['pet_friendly','🐾 Pet Friendly'],
+           ['gated','🔐 Gated'],['vastu','🕉 Vastu'],['water_24','💧 24/7 Water'],
+           ['no_brokerage','✅ Zero Brokerage']
+          ].map(([k,l])=>`<label class="check-item" id="ci-${k}"><input type="checkbox" id="${k}" onchange="tgl('${k}')"/> ${l}</label>`).join('')}
+      </div>
+    </div>
+
+    <!-- STEP 5: Contact -->
+    <div class="step">
+      <div class="step-title"><div class="step-num">5</div>Contact Details</div>
+      <div class="form-2" style="margin-bottom:16px">
+        <div class="form-group">
+          <label class="form-label">Contact Name *</label>
+          <input type="text" class="form-input" id="contact_name" placeholder="Your name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone *</label>
+          <input type="tel" class="form-input" id="contact_phone" placeholder="9876543210"/>
+        </div>
+      </div>
+      <div class="form-2" style="margin-bottom:16px">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="contact_email"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">I am a</label>
+          <select class="form-select" id="contact_role">
+            <option value="owner">Owner</option><option value="agent">Agent / Broker</option><option value="builder">Builder</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Best time to contact</label>
+        <input type="text" class="form-input" id="contact_time" placeholder="e.g. Weekdays 10am–7pm"/>
+      </div>
+    </div>
+
+    <!-- STEP 6: Photos -->
+    <div class="step">
+      <div class="step-title"><div class="step-num">6</div>Photos</div>
+      <p class="form-hint" style="margin-bottom:12px">Add up to 10 photos. First photo will be the cover. JPG/PNG/WEBP, max 10MB each.</p>
+      <div class="photos-grid" id="photos-grid">
+        <div class="photo-slot" onclick="pickPhoto()" title="Add photo">➕</div>
+      </div>
+      <input type="file" id="file-inp" accept="image/*" multiple style="display:none" onchange="handleFiles(event)"/>
+      <div id="upload-status" style="margin-top:8px;font-size:var(--text-xs);color:var(--muted)"></div>
     </div>
   </div>
 
-  <div class="main-content">
-
-    <!-- STEP 1 -->
-    <div class="step-panel active" id="panel-1">
-      <div class="section-header">
-        <div class="section-title">📋 Basic Information</div>
-        <div class="section-sub">Tell us the essentials about your property</div>
-      </div>
-
-      <div class="form-card">
-        <div class="card-title"><div class="card-title-icon">🏠</div> Property Type & Listing</div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Listing Type <span>*</span></label>
-            <select id="listing-type">
-              <option value="">Select...</option>
-              <option value="rent">For Rent</option>
-              <option value="buy">For Sale / Buy</option>
-            </select>
-            <span class="field-error" id="err-listing-type">Please select listing type</span>
-          </div>
-          <div class="form-group">
-            <label>Property Type <span>*</span></label>
-            <select id="property-type">
-              <option value="">Select...</option>
-              <option value="apartment">Apartment / Flat</option>
-              <option value="villa">Villa / House</option>
-              <option value="studio">Studio</option>
-              <option value="penthouse">Penthouse</option>
-              <option value="plot">Plot / Land</option>
-              <option value="commercial">Commercial</option>
-              <option value="pg">PG / Hostel</option>
-            </select>
-            <span class="field-error" id="err-property-type">Please select property type</span>
-          </div>
-        </div>
-
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Property Title <span>*</span></label>
-            <input type="text" id="prop-title" placeholder="e.g. Spacious 2BHK in Koramangala with Parking" maxlength="100" />
-            <span class="field-hint">Make it descriptive — this is what buyers/renters see first</span>
-            <span class="field-error" id="err-title">Please enter a title</span>
-          </div>
-        </div>
-
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Description</label>
-            <textarea id="prop-desc" placeholder="Describe your property — highlights, nearby landmarks, what makes it special..."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-card">
-        <div class="card-title"><div class="card-title-icon">📍</div> Location</div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>City <span>*</span></label>
-            <select id="prop-city">
-              <option value="">Select city</option>
-              <option value="Bengaluru">Bengaluru</option>
-              <option value="Mumbai">Mumbai</option>
-              <option value="Delhi">Delhi</option>
-              <option value="Hyderabad">Hyderabad</option>
-              <option value="Chennai">Chennai</option>
-              <option value="Pune">Pune</option>
-              <option value="Kolkata">Kolkata</option>
-              <option value="Ahmedabad">Ahmedabad</option>
-              <option value="Noida">Noida</option>
-              <option value="Gurgaon">Gurgaon</option>
-              <option value="Other">Other</option>
-            </select>
-            <span class="field-error" id="err-city">Please select a city</span>
-          </div>
-          <div class="form-group">
-            <label>Locality / Area <span>*</span></label>
-            <input type="text" id="prop-locality" placeholder="e.g. Koramangala, HSR Layout" />
-            <span class="field-error" id="err-locality">Please enter the locality</span>
-          </div>
-        </div>
-
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Full Address</label>
-            <input type="text" id="prop-address" placeholder="Street, building, landmark..." />
-          </div>
-        </div>
-      </div>
-
-      <div class="nav-btns">
-        <div></div>
-        <button class="btn-next" onclick="goStep(2)">Next: Property Details →</button>
-      </div>
-    </div>
-
-    <!-- STEP 2 -->
-    <div class="step-panel" id="panel-2">
-      <div class="section-header">
-        <div class="section-title">📐 Property Details</div>
-        <div class="section-sub">Size, configuration and pricing</div>
-      </div>
-
-      <div class="form-card">
-        <div class="card-title"><div class="card-title-icon">🛏️</div> Configuration</div>
-
-        <div class="form-row triple">
-          <div class="form-group">
-            <label>BHK / Bedrooms <span>*</span></label>
-            <select id="prop-bhk">
-              <option value="">Select</option>
-              <option value="1">1 BHK</option>
-              <option value="2">2 BHK</option>
-              <option value="3">3 BHK</option>
-              <option value="4">4 BHK</option>
-              <option value="5">5 BHK</option>
-              <option value="6">6+ BHK</option>
-            </select>
-            <span class="field-error" id="err-bhk">Required</span>
-          </div>
-          <div class="form-group">
-            <label>Bathrooms</label>
-            <select id="prop-bath">
-              <option value="">Select</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4+</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Floor</label>
-            <select id="prop-floor">
-              <option value="">Any</option>
-              <option value="ground">Ground Floor</option>
-              <option value="1">1st Floor</option>
-              <option value="2">2nd Floor</option>
-              <option value="3">3rd Floor</option>
-              <option value="4-6">4th–6th</option>
-              <option value="7-10">7th–10th</option>
-              <option value="11+">11th+</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Super Built-up Area (sq.ft)</label>
-            <input type="number" id="prop-area" placeholder="e.g. 1200" min="0" />
-          </div>
-          <div class="form-group">
-            <label>Carpet Area (sq.ft)</label>
-            <input type="number" id="prop-carpet" placeholder="e.g. 950" min="0" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Furnished Status <span>*</span></label>
-            <select id="prop-furnished">
-              <option value="">Select</option>
-              <option value="furnished">Fully Furnished</option>
-              <option value="semi">Semi Furnished</option>
-              <option value="unfurnished">Unfurnished</option>
-            </select>
-            <span class="field-error" id="err-furnished">Required</span>
-          </div>
-          <div class="form-group">
-            <label>Available From</label>
-            <input type="text" id="prop-available" placeholder="e.g. Immediately, June 2025" />
-          </div>
-        </div>
-      </div>
-
-      <div class="form-card">
-        <div class="card-title"><div class="card-title-icon">💰</div> Pricing</div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Price (₹) <span>*</span></label>
-            <input type="number" id="prop-price" placeholder="e.g. 25000" min="0" />
-            <span class="field-hint" id="price-hint">Monthly rent in ₹</span>
-            <span class="field-error" id="err-price">Please enter a price</span>
-          </div>
-          <div class="form-group" id="deposit-group">
-            <label>Security Deposit (₹)</label>
-            <input type="number" id="prop-deposit" placeholder="e.g. 50000" min="0" />
-            <span class="field-hint">Usually 2–3 months rent</span>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Maintenance Charges</label>
-            <input type="number" id="prop-maintenance" placeholder="₹/month (if separate)" min="0" />
-          </div>
-          <div class="form-group">
-            <label>No Brokerage?</label>
-            <select id="prop-brokerage">
-              <option value="false">Brokerage applicable</option>
-              <option value="true">No Brokerage — Direct Owner</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="nav-btns">
-        <button class="btn-back" onclick="goStep(1)">← Back</button>
-        <button class="btn-next" onclick="goStep(3)">Next: Amenities →</button>
-      </div>
-    </div>
-
-    <!-- STEP 3 -->
-    <div class="step-panel" id="panel-3">
-      <div class="section-header">
-        <div class="section-title">✨ Amenities & Features</div>
-        <div class="section-sub">Select all that apply — more amenities = more interest</div>
-      </div>
-
-      <div class="form-card">
-        <div class="card-title"><div class="card-title-icon">🏢</div> Building Amenities</div>
-        <div class="amenity-grid" id="amenity-building">
-          <div class="amenity-btn" data-key="lift" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🛗 Lift</div>
-          <div class="amenity-btn" data-key="parking" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🚗 Parking</div>
-          <div class="amenity-btn" data-key="security" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🔒 Security</div>
-          <div class="amenity-btn" data-key="cctv" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>📹 CCTV</div>
-          <div class="amenity-btn" data-key="gym" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>💪 Gym</div>
-          <div class="amenity-btn" data-key="pool" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🏊 Pool</div>
-          <div class="amenity-btn" data-key="clubhouse" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🏛️ Clubhouse</div>
-          <div class="amenity-btn" data-key="garden" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🌳 Garden</div>
-          <div class="amenity-btn" data-key="powerbackup" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>⚡ Power Backup</div>
-          <div class="amenity-btn" data-key="intercom" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>📞 Intercom</div>
-        </div>
-      </div>
-
-      <div class="form-card">
-        <div class="card-title"><div class="card-title-icon">🏠</div> Flat Features</div>
-        <div class="amenity-grid">
-          <div class="amenity-btn" data-key="ac" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>❄️ Air Conditioning</div>
-          <div class="amenity-btn" data-key="balcony" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🏗️ Balcony</div>
-          <div class="amenity-btn" data-key="modular_kitchen" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🍳 Modular Kitchen</div>
-          <div class="amenity-btn" data-key="washing_machine" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🫧 Washing Machine</div>
-          <div class="amenity-btn" data-key="fridge" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🧊 Refrigerator</div>
-          <div class="amenity-btn" data-key="wifi" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>📶 WiFi Ready</div>
-          <div class="amenity-btn" data-key="pet_friendly" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🐾 Pet Friendly</div>
-          <div class="amenity-btn" data-key="gated" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🏘️ Gated Community</div>
-          <div class="amenity-btn" data-key="vastu" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>🔱 Vastu Compliant</div>
-          <div class="amenity-btn" data-key="water_24" onclick="toggleAmenity(this)"><div class="amenity-check">✓</div>💧 24/7 Water</div>
-        </div>
-      </div>
-
-      <div class="nav-btns">
-        <button class="btn-back" onclick="goStep(2)">← Back</button>
-        <button class="btn-next" onclick="goStep(4)">Next: Add Photos →</button>
-      </div>
-    </div>
-
-    <!-- STEP 4 -->
-    <div class="step-panel" id="panel-4">
-      <div class="section-header">
-        <div class="section-title">📸 Property Photos</div>
-        <div class="section-sub">Properties with photos get 5× more inquiries. First photo = cover image.</div>
-      </div>
-
-      <div class="form-card">
-        <div class="card-title"><div class="card-title-icon">🖼️</div> Upload Photos</div>
-
-        <div class="photo-drop" id="photo-drop"
-          onclick="document.getElementById('photo-file').click()"
-          ondragover="event.preventDefault(); this.classList.add('dragover')"
-          ondragleave="this.classList.remove('dragover')"
-          ondrop="handleDrop(event)">
-          <div class="photo-drop-icon">📤</div>
-          <div class="photo-drop-title">Drag & drop photos here</div>
-          <div class="photo-drop-sub">JPG, PNG or WEBP — max 10MB each</div>
-          <div class="photo-drop-btn">Choose Photos</div>
-        </div>
-
-        <input type="file" id="photo-file" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(event)" />
-        <div class="photo-grid" id="photo-grid"></div>
-        <p class="field-hint" style="margin-top:12px">💡 Tip: First photo is your cover image. You can reorder by removing and re-adding.</p>
-      </div>
-
-      <div class="nav-btns">
-        <button class="btn-back" onclick="goStep(3)">← Back</button>
-        <button class="btn-next" onclick="goStep(5)">Next: Contact Info →</button>
-      </div>
-    </div>
-
-    <!-- STEP 5 -->
-    <div class="step-panel" id="panel-5">
-      <div class="section-header">
-        <div class="section-title">📞 Contact Information</div>
-        <div class="section-sub">How should interested buyers/renters reach you?</div>
-      </div>
-
-      <div class="form-card">
-        <div class="card-title"><div class="card-title-icon">👤</div> Your Details</div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Your Name <span>*</span></label>
-            <input type="text" id="contact-name" placeholder="Full name" />
-            <span class="field-error" id="err-contact-name">Please enter your name</span>
-          </div>
-          <div class="form-group">
-            <label>You are a... <span>*</span></label>
-            <select id="contact-role">
-              <option value="">Select</option>
-              <option value="owner">Owner</option>
-              <option value="broker">Broker / Agent</option>
-              <option value="builder">Builder / Developer</option>
-            </select>
-            <span class="field-error" id="err-contact-role">Please select your role</span>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Phone Number <span>*</span></label>
-            <input type="tel" id="contact-phone" placeholder="+91 98765 43210" maxlength="15" />
-            <span class="field-error" id="err-contact-phone">Please enter a valid phone number</span>
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="contact-email" placeholder="your@email.com" />
-          </div>
-        </div>
-
-        <div class="form-row single">
-          <div class="form-group">
-            <label>Preferred Contact Time</label>
-            <select id="contact-time">
-              <option value="anytime">Any time</option>
-              <option value="morning">Morning (9am–12pm)</option>
-              <option value="afternoon">Afternoon (12pm–5pm)</option>
-              <option value="evening">Evening (5pm–9pm)</option>
-              <option value="whatsapp">WhatsApp only</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-card" id="summary-card">
-        <div class="card-title"><div class="card-title-icon">📋</div> Listing Summary</div>
-        <div id="summary-content" style="font-size:14px;color:var(--muted);line-height:2"></div>
-      </div>
-
-      <div class="nav-btns">
-        <button class="btn-back" onclick="goStep(4)">← Back</button>
-        <button class="btn-next" id="submit-btn" onclick="submitListing()">
-          🚀 Publish Listing
-        </button>
-      </div>
-    </div>
-
-    <!-- SUCCESS -->
-    <div class="step-panel" id="panel-success">
-      <div class="success-screen">
-        <div class="success-icon">✅</div>
-        <div class="success-title">Property Listed!</div>
-        <div class="success-sub">Your listing has been submitted successfully. It will be visible to thousands of buyers and renters on Estate49.</div>
-        <div class="success-actions">
-          <a class="success-btn primary" href="/browse.html">Browse All Listings</a>
-          <a class="success-btn outline" href="/list-property.html">List Another Property</a>
-          <a class="success-btn outline" href="/chat.html">Ask AI for Help</a>
-        </div>
-      </div>
-    </div>
-
+  <div class="save-bar">
+    <span class="prog" id="prog-txt"></span>
+    <button class="btn btn-secondary" onclick="window.location.href='/browse.html'">Cancel</button>
+    <button class="btn btn-primary btn-lg" id="sub-btn" onclick="submit()">🏠 Publish Listing</button>
   </div>
 </div>
-
 <div class="toast" id="toast-el"></div>
 
 <script>
-  let currentStep = 1;
-  let uploadedPhotos = [];
-  let amenities = {};
-  let currentUser = null;
+let tok=null, cu=null, ltype='rent', photos=[], editId=null;
 
-  window.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const session = await getSession();
-      if (!session) { window.location.href = '/login.html'; return; }
+window.addEventListener('DOMContentLoaded', async () => {
+  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
+  cu=s.user; tok=s.access_token;
+  document.getElementById('al').style.display='none';
+  document.getElementById('page').style.display='block';
+  await initNavbar({active:'list'});
 
-      currentUser = session.user;
-      const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
-      const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  // Pre-fill from profile
+  try{
+    const r=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${tok}`}});
+    if(r.ok){const p=await r.json(); if(p.fullname)document.getElementById('contact_name').value=p.fullname; if(p.phone)document.getElementById('contact_phone').value=p.phone;}
+  }catch(e){}
 
-      document.getElementById('nav-avatar').textContent = initials;
-      document.getElementById('nav-dropdown-name').textContent = fullName;
-      document.getElementById('nav-dropdown-email').textContent = currentUser.email;
-
-      document.getElementById('contact-name').value = fullName;
-      document.getElementById('contact-email').value = currentUser.email || '';
-
-      document.getElementById('auth-loading').style.display = 'none';
-      document.getElementById('page').style.display = 'block';
-
-      document.getElementById('listing-type').addEventListener('change', function() {
-        const hint = document.getElementById('price-hint');
-        const dep = document.getElementById('deposit-group');
-        if (this.value === 'buy') {
-          hint.textContent = 'Sale price in ₹ (e.g. 7500000 for ₹75L)';
-          dep.style.display = 'none';
-        } else {
-          hint.textContent = 'Monthly rent in ₹';
-          dep.style.display = '';
-        }
-      });
-
-    } catch(e) {
-      window.location.href = '/login.html';
-    }
-  });
-
-  function toggleNavDropdown() {
-    document.getElementById('nav-dropdown').classList.toggle('open');
+  // Edit mode
+  editId=new URLSearchParams(window.location.search).get('edit');
+  if(editId){
+    document.getElementById('page-title').textContent='Edit Listing';
+    document.getElementById('sub-btn').textContent='💾 Save Changes';
+    try{
+      const r=await fetch(`/api/properties/${editId}`); const p=await r.json();
+      if(p.listed_by!==cu.id){toast('Not your listing');return;}
+      setType(p.type||'rent');
+      ['title','city','locality','address','description','price','deposit','maintenance',
+       'area','carpet_area','floor','furnished','available_from','contact_name',
+       'contact_phone','contact_email','contact_role','contact_time','prop_type','bhk','bathrooms'
+      ].forEach(k=>{const el=document.getElementById(k);if(el&&p[k]!=null)el.value=p[k];});
+      ['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
+       'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
+       'gated','vastu','water_24','no_brokerage'
+      ].forEach(k=>{if(p[k]){const el=document.getElementById(k);if(el){el.checked=true;document.getElementById('ci-'+k)?.classList.add('checked');}}});
+      photos=[...(p.photos||[])]; renderPhotos();
+    }catch(e){toast('Failed to load listing');}
   }
-  document.addEventListener('click', function(e) {
-    const wrap = document.querySelector('.nav-user-wrap');
-    if (wrap && !wrap.contains(e.target)) {
-      document.getElementById('nav-dropdown')?.classList.remove('open');
-    }
-  });
+});
 
-  function goStep(n) {
-    if (n > currentStep && !validateStep(currentStep)) return;
+function setType(t){
+  ltype=t;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('sel',b.dataset.t===t));
+}
+function tgl(k){const c=document.getElementById(k)?.checked;document.getElementById('ci-'+k)?.classList.toggle('checked',!!c);}
+function pickPhoto(){document.getElementById('file-inp').click();}
 
-    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById('panel-' + n).classList.add('active');
-
-    for (let i = 1; i <= 5; i++) {
-      const ps = document.getElementById('ps-' + i);
-      ps.classList.remove('active', 'done');
-      if (i < n) ps.classList.add('done');
-      if (i === n) ps.classList.add('active');
-      if (i < 5) {
-        const pl = document.getElementById('pl-' + i);
-        pl.classList.toggle('done', i < n);
-      }
-    }
-
-    currentStep = n;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (n === 5) buildSummary();
+async function handleFiles(e){
+  const files=Array.from(e.target.files||[]); e.target.value='';
+  const avail=10-photos.length; if(avail<=0){toast('Max 10 photos');return;}
+  const toUp=files.slice(0,avail);
+  document.getElementById('upload-status').textContent=`Uploading ${toUp.length} photo(s)…`;
+  for(const f of toUp){
+    try{
+      const fd=new FormData(); fd.append('file',f);
+      const r=await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${tok}`},body:fd});
+      if(!r.ok)throw new Error(await r.text());
+      const {url}=await r.json(); photos.push(url); renderPhotos();
+    }catch(ex){toast('Upload failed: '+f.name);}
   }
+  document.getElementById('upload-status').textContent=photos.length?`${photos.length} photo(s) ready`:'';
+}
 
-  function validateStep(step) {
-    let valid = true;
-    const check = (id, errId, condition) => {
-      const el = document.getElementById(id);
-      const err = document.getElementById(errId);
-      const fail = condition ? !el.value.trim() : false;
-      el.classList.toggle('error', fail);
-      if (err) err.classList.toggle('show', fail);
-      if (fail) valid = false;
-    };
+function renderPhotos(){
+  const g=document.getElementById('photos-grid');
+  g.innerHTML=photos.map((url,i)=>`
+    <div class="photo-slot">
+      <img src="${url}" alt="photo ${i+1}" loading="lazy"/>
+      ${i===0?`<div style="position:absolute;bottom:4px;left:4px;background:var(--primary);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700">COVER</div>`:''}
+      <div class="photo-rm" onclick="rmPhoto(${i})">✕</div>
+    </div>`).join('');
+  if(photos.length<10)g.insertAdjacentHTML('beforeend','<div class="photo-slot" onclick="pickPhoto()">➕</div>');
+}
+function rmPhoto(i){photos.splice(i,1);renderPhotos();}
 
-    if (step === 1) {
-      check('listing-type', 'err-listing-type', true);
-      check('property-type', 'err-property-type', true);
-      check('prop-title', 'err-title', true);
-      check('prop-city', 'err-city', true);
-      check('prop-locality', 'err-locality', true);
-    }
-    if (step === 2) {
-      check('prop-bhk', 'err-bhk', true);
-      check('prop-price', 'err-price', true);
-      check('prop-furnished', 'err-furnished', true);
-    }
-    if (step === 5) {
-      check('contact-name', 'err-contact-name', true);
-      check('contact-role', 'err-contact-role', true);
-      const phone = document.getElementById('contact-phone').value.trim();
-      const phoneErr = document.getElementById('err-contact-phone');
-      const phoneInvalid = !phone || phone.replace(/\D/g,'').length < 10;
-      document.getElementById('contact-phone').classList.toggle('error', phoneInvalid);
-      phoneErr.classList.toggle('show', phoneInvalid);
-      if (phoneInvalid) valid = false;
-    }
-
-    if (!valid) toast('⚠️ Please fill in all required fields');
-    return valid;
+async function submit(){
+  const V=id=>document.getElementById(id)?.value?.trim()||'';
+  if(!V('title')||!V('price')||!V('city')||!V('locality')||!V('contact_name')||!V('contact_phone')){
+    toast('Fill in all required (*) fields'); return;
   }
+  const btn=document.getElementById('sub-btn'); btn.disabled=true; btn.textContent='Publishing…';
+  const bools=['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
+    'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
+    'gated','vastu','water_24','no_brokerage'];
+  const payload={
+    type:ltype, property_type:V('prop_type'),
+    bhk:V('bhk')?parseInt(V('bhk')):null, bathrooms:V('bathrooms')?parseInt(V('bathrooms')):null,
+    title:V('title'), city:V('city'), locality:V('locality'), address:V('address'),
+    description:V('description'), price:parseFloat(V('price')),
+    deposit:V('deposit')?parseFloat(V('deposit')):null,
+    maintenance:V('maintenance')?parseFloat(V('maintenance')):null,
+    area:V('area')?parseInt(V('area')):null, carpet_area:V('carpet_area')?parseInt(V('carpet_area')):null,
+    floor:V('floor'), furnished:V('furnished'), available_from:V('available_from'),
+    contact_name:V('contact_name'), contact_phone:V('contact_phone'),
+    contact_email:V('contact_email'), contact_role:V('contact_role'),
+    contact_time:V('contact_time'), photos,
+  };
+  bools.forEach(k=>payload[k]=!!document.getElementById(k)?.checked);
 
-  function toggleAmenity(el) {
-    const key = el.dataset.key;
-    el.classList.toggle('active');
-    amenities[key] = el.classList.contains('active');
+  try{
+    const url=editId?`/api/properties/${editId}`:'/api/properties';
+    const method=editId?'PATCH':'POST';
+    const r=await fetch(url,{method,headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(payload)});
+    if(!r.ok){const e=await r.json();throw new Error(e.error||'Failed');}
+    const d=await r.json();
+    toast(editId?'✅ Listing updated!':'✅ Listing published!');
+    setTimeout(()=>window.location.href=`/property.html?id=${d.id}`,1000);
+  }catch(e){
+    toast('Error: '+e.message);
+    btn.disabled=false; btn.textContent=editId?'💾 Save Changes':'🏠 Publish Listing';
   }
+}
 
-  function handleDrop(e) {
-    e.preventDefault();
-    document.getElementById('photo-drop').classList.remove('dragover');
-    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-    uploadFiles(files);
-  }
-
-  function handlePhotoSelect(e) {
-    const files = Array.from(e.target.files);
-    uploadFiles(files);
-    e.target.value = '';
-  }
-
-  async function uploadFiles(files) {
-    if (!files.length) return;
-    if (uploadedPhotos.length + files.length > 15) { toast('Maximum 15 photos allowed'); return; }
-
-    for (const file of files) {
-      if (file.size > 10 * 1024 * 1024) { toast(`${file.name} is too large (max 10MB)`); continue; }
-
-      const localUrl = URL.createObjectURL(file);
-      const idx = uploadedPhotos.length;
-      uploadedPhotos.push({ url: localUrl, name: file.name, uploading: true, serverUrl: null });
-      renderPhotoGrid();
-
-      try {
-        const formData = new FormData();
-        formData.append('photo', file);
-        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-        const data = await res.json();
-        if (data.url) {
-          uploadedPhotos[idx].serverUrl = data.url;
-          uploadedPhotos[idx].url = data.url;
-        }
-      } catch(e) {
-        toast('Upload failed for ' + file.name);
-      }
-
-      uploadedPhotos[idx].uploading = false;
-      renderPhotoGrid();
-    }
-  }
-
-  function renderPhotoGrid() {
-    const grid = document.getElementById('photo-grid');
-    grid.innerHTML = '';
-    uploadedPhotos.forEach((p, i) => {
-      const div = document.createElement('div');
-      div.className = 'photo-thumb';
-      div.innerHTML = `
-        <img src="${p.url}" alt="Photo ${i+1}" />
-        ${i === 0 ? '<span class="photo-main-badge">Cover</span>' : ''}
-        ${p.uploading
-          ? `<div class="photo-progress"><div class="pbar-wrap"><div class="pbar" style="width:70%"></div></div>Uploading...</div>`
-          : `<button class="photo-rm" onclick="removePhoto(${i})">✕</button>`
-        }`;
-      grid.appendChild(div);
-    });
-  }
-
-  function removePhoto(i) {
-    uploadedPhotos.splice(i, 1);
-    renderPhotoGrid();
-  }
-
-  function buildSummary() {
-    const lines = [
-      ['📋 Type', `${document.getElementById('listing-type').options[document.getElementById('listing-type').selectedIndex]?.text} — ${document.getElementById('property-type').options[document.getElementById('property-type').selectedIndex]?.text}`],
-      ['🏠 Title', document.getElementById('prop-title').value],
-      ['📍 Location', `${document.getElementById('prop-locality').value}, ${document.getElementById('prop-city').value}`],
-      ['🛏️ BHK', document.getElementById('prop-bhk').value + ' BHK'],
-      ['💰 Price', '₹' + Number(document.getElementById('prop-price').value || 0).toLocaleString('en-IN')],
-      ['🪑 Furnished', document.getElementById('prop-furnished').options[document.getElementById('prop-furnished').selectedIndex]?.text],
-      ['📸 Photos', uploadedPhotos.length + ' uploaded'],
-      ['✨ Amenities', Object.keys(amenities).filter(k => amenities[k]).length + ' selected'],
-    ];
-    document.getElementById('summary-content').innerHTML = lines
-      .map(([k, v]) => `<div style="display:flex;gap:12px"><span style="font-weight:600;color:var(--text);min-width:110px">${k}</span><span>${v || '—'}</span></div>`)
-      .join('');
-  }
-
-  async function submitListing() {
-    if (!validateStep(5)) return;
-
-    const btn = document.getElementById('submit-btn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Publishing...';
-
-    const payload = {
-      type: document.getElementById('listing-type').value,
-      property_type: document.getElementById('property-type').value,
-      title: document.getElementById('prop-title').value.trim(),
-      description: document.getElementById('prop-desc').value.trim(),
-      city: document.getElementById('prop-city').value,
-      locality: document.getElementById('prop-locality').value.trim(),
-      address: document.getElementById('prop-address').value.trim(),
-      bhk: parseInt(document.getElementById('prop-bhk').value) || null,
-      bathrooms: parseInt(document.getElementById('prop-bath').value) || null,
-      floor: document.getElementById('prop-floor').value,
-      area: parseInt(document.getElementById('prop-area').value) || null,
-      carpet_area: parseInt(document.getElementById('prop-carpet').value) || null,
-      furnished: document.getElementById('prop-furnished').value,
-      available_from: document.getElementById('prop-available').value,
-      price: parseFloat(document.getElementById('prop-price').value) || 0,
-      deposit: parseFloat(document.getElementById('prop-deposit').value) || null,
-      maintenance: parseFloat(document.getElementById('prop-maintenance').value) || null,
-      no_brokerage: document.getElementById('prop-brokerage').value === 'true',
-      ...amenities,
-      photos: uploadedPhotos.filter(p => p.serverUrl).map(p => p.serverUrl),
-      contact_name: document.getElementById('contact-name').value.trim(),
-      contact_role: document.getElementById('contact-role').value,
-      contact_phone: document.getElementById('contact-phone').value.trim(),
-      contact_email: document.getElementById('contact-email').value.trim(),
-      contact_time: document.getElementById('contact-time').value,
-      listed_by: currentUser?.id || null,
-      posted_at: new Date().toISOString(),
-    };
-
-    try {
-      const res = await fetch('/api/properties', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) throw new Error('Server error');
-
-      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById('panel-success').classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    } catch(e) {
-      toast('❌ Failed to submit. Please try again.');
-      btn.disabled = false;
-      btn.innerHTML = '🚀 Publish Listing';
-    }
-  }
-
-  function toast(msg) {
-    const el = document.getElementById('toast-el');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 2800);
-  }
+function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 </script>
 </body>
 </html>

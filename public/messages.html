@@ -1,488 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Messages — Estate49</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/auth.js"></script>
-  <script src="/nav.js"></script>
+  <script src="/auth.js"></script><script src="/nav.js"></script>
+  <link rel="stylesheet" href="/style.css"/>
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --primary:#c0392b;--primary-dark:#a93226;--primary-light:#fadbd8;
-      --bg:#fff;--bg2:#f7f7f8;--bg3:#ececf1;
-      --border:#e5e5e5;--text:#0d0d0d;--muted:#6e6e80;--r:14px;
-    }
-    body{font-family:'Inter',sans-serif;background:var(--bg2);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
-    .al{position:fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:9999}
-    .al-box{width:52px;height:52px;background:var(--primary);border-radius:13px;display:flex;align-items:center;justify-content:center}
-    .al-box svg{width:28px;height:28px;fill:white}
-    .spin{width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:sp .8s linear infinite}
-    @keyframes sp{to{transform:rotate(360deg)}}
-    .spin-sm{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:sp .8s linear infinite}
-    .page{display:none;flex:1;flex-direction:column;overflow:hidden}
-
-    /* Safety bar */
-    .safety{background:#fff8e1;border-bottom:1px solid #ffe082;padding:8px 24px;font-size:12px;color:#7b5800;display:flex;align-items:center;gap:8px;flex-shrink:0}
-    .safety button{margin-left:auto;background:none;border:none;cursor:pointer;font-size:15px;color:#7b5800;line-height:1}
-
-    /* Layout */
-    .layout{display:flex;flex:1;overflow:hidden}
-
-    /* ── Sidebar ── */
-    .sidebar{width:300px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
-    .sb-head{padding:16px 20px;border-bottom:1px solid var(--border);font-size:16px;font-weight:700}
-    .sb-search{padding:10px 14px;border-bottom:1px solid var(--border)}
-    .sb-search input{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;outline:none;background:var(--bg2)}
-    .sb-search input:focus{border-color:var(--primary)}
-    .sb-list{flex:1;overflow-y:auto}
-    .conv{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;border-bottom:1px solid var(--bg2);transition:background .15s}
-    .conv:hover{background:var(--bg2)}
-    .conv.active{background:var(--primary-light)}
-    .conv-av{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0}
-    .conv-info{flex:1;min-width:0}
-    .conv-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .conv-prev{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-    .conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
-    .conv-time{font-size:11px;color:var(--muted)}
-    .conv-unread{background:var(--primary);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}
-    .sb-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:40px 24px;text-align:center}
-    .sb-empty-icon{font-size:44px}
-    .sb-empty-title{font-size:15px;font-weight:700}
-    .sb-empty-sub{font-size:13px;color:var(--muted);line-height:1.6}
-
-    /* ── Chat panel ── */
-    .chat{flex:1;display:flex;flex-direction:column;overflow:hidden}
-    .chat-ph{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;text-align:center}
-    .chat-ph svg{width:64px;height:64px;stroke:var(--border);fill:none;stroke-width:1.5}
-    .chat-ph-title{font-size:20px;font-weight:700}
-    .chat-ph-sub{font-size:14px;color:var(--muted);max-width:320px;line-height:1.6}
-
-    /* Chat header */
-    .chat-head{padding:13px 20px;border-bottom:1px solid var(--border);background:#fff;display:flex;align-items:center;gap:12px;flex-shrink:0}
-    .chat-head-av{width:38px;height:38px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
-    .chat-head-info{flex:1}
-    .chat-head-name{font-size:14px;font-weight:700}
-    .chat-head-prop{font-size:12px;color:var(--muted);margin-top:1px}
-    .chat-head-link{padding:6px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;background:#fff;cursor:pointer;text-decoration:none;color:var(--text);transition:all .2s;white-space:nowrap}
-    .chat-head-link:hover{border-color:var(--primary);color:var(--primary)}
-
-    /* Messages */
-    .msgs{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:10px}
-    .msgs::-webkit-scrollbar{width:4px}
-    .msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-    .msg-row{display:flex;align-items:flex-end;gap:8px}
-    .msg-row.out{flex-direction:row-reverse}
-    .bubble{max-width:68%;padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.6;word-break:break-word}
-    .msg-row.in  .bubble{background:var(--bg3);color:var(--text);border-bottom-left-radius:4px}
-    .msg-row.out .bubble{background:var(--primary);color:#fff;border-bottom-right-radius:4px}
-    .msg-time{font-size:10px;color:var(--muted);margin-top:2px;text-align:right}
-    .msg-row.in .msg-time{text-align:left}
-    .msg-loading{display:flex;align-items:center;gap:8px;padding:20px;color:var(--muted);font-size:13px}
-
-    /* Input */
-    .input-area{padding:12px 20px 16px;background:#fff;border-top:1px solid var(--border);flex-shrink:0}
-    .input-box{display:flex;align-items:flex-end;gap:10px;background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:10px 12px;transition:border-color .2s}
-    .input-box:focus-within{border-color:var(--primary)}
-    .input-box textarea{flex:1;border:none;background:transparent;outline:none;resize:none;font-size:14px;font-family:inherit;color:var(--text);max-height:120px;min-height:22px;line-height:1.5}
-    .input-box textarea::placeholder{color:var(--muted)}
-    .send-btn{width:36px;height:36px;border:none;border-radius:10px;background:var(--primary);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
-    .send-btn:hover{background:var(--primary-dark)}
-    .send-btn:disabled{background:var(--border);cursor:not-allowed}
-    .send-btn svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-
-    /* Toast */
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;opacity:0;transition:all .3s;z-index:500;pointer-events:none;white-space:nowrap}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-    /* Mobile */
-    @media(max-width:700px){
-      .sidebar{width:100%}
-      .chat{display:none;position:fixed;inset:0;z-index:400;background:var(--bg2)}
-      .chat.mob-open{display:flex}
-      .sidebar.mob-hide{display:none}
-      .chat-head-back{display:flex!important}
-    }
-    .chat-head-back{display:none;align-items:center;justify-content:center;width:34px;height:34px;border:none;background:none;cursor:pointer;margin-right:4px;border-radius:8px;transition:background .2s}
-    .chat-head-back:hover{background:var(--bg2)}
-    .chat-head-back svg{width:20px;height:20px;stroke:var(--text);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .msg-layout{display:grid;grid-template-columns:320px 1fr;height:calc(100dvh - var(--nav-h));overflow:hidden;}
+    .conv-list{border-right:1px solid var(--border);overflow-y:auto;background:var(--surface);}
+    .conv-header{padding:16px;border-bottom:1px solid var(--border);font-size:var(--text-lg);font-weight:700;}
+    .conv-item{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;transition:background var(--transition);border-bottom:1px solid var(--divider);}
+    .conv-item:hover{background:var(--surface-2);}
+    .conv-item.active{background:var(--primary-light);}
+    .conv-avatar{width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .conv-info{flex:1;min-width:0;}
+    .conv-name{font-size:var(--text-sm);font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+    .conv-preview{font-size:var(--text-xs);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+    .conv-prop{font-size:10px;color:var(--primary);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .conv-time{font-size:10px;color:var(--faint);}
+    .unread-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;}
+    /* Chat panel */
+    .chat-panel{display:flex;flex-direction:column;background:var(--bg);}
+    .chat-header{padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .chat-header-avatar{width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+    .chat-header-name{font-size:var(--text-base);font-weight:700;}
+    .chat-header-prop{font-size:var(--text-xs);color:var(--primary);font-weight:600;cursor:pointer;}
+    .chat-header-prop:hover{text-decoration:underline;}
+    .chat-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px;}
+    .msg-bubble{max-width:72%;padding:10px 14px;border-radius:16px;font-size:var(--text-sm);line-height:1.5;word-break:break-word;}
+    .msg-mine{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px;}
+    .msg-theirs{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;}
+    .msg-time{font-size:10px;margin-top:3px;opacity:0.65;}
+    .msg-group{display:flex;flex-direction:column;}
+    .msg-group.mine{align-items:flex-end;}
+    .msg-group.theirs{align-items:flex-start;}
+    .chat-input-wrap{padding:12px 16px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:10px;}
+    .chat-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-lg);font-size:var(--text-sm);resize:none;max-height:120px;transition:border-color var(--transition);}
+    .chat-input:focus{outline:none;border-color:var(--primary);}
+    .send-btn{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;transition:all var(--transition);}
+    .send-btn:hover{background:var(--primary-dark);transform:scale(1.05);}
+    .chat-empty{flex:1;display:flex;align-items:center;justify-content:center;}
+    .no-conv{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px;color:var(--muted);}
+    .no-conv-icon{font-size:56px;margin-bottom:16px;}
+    @media(max-width:768px){.msg-layout{grid-template-columns:1fr;}.conv-list{display:none;}.conv-list.show-mobile{display:block;}.chat-panel{display:none;}.chat-panel.show-mobile{display:flex;}}
   </style>
 </head>
 <body>
-
-<div class="al" id="al">
-  <div class="al-box">
-    <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-  </div>
-  <div class="spin"></div>
-</div>
-
-<div id="navbar-root"></div>
-
+<div class="auth-loading" id="al"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
 <div class="page" id="page">
-  <div class="safety" id="safety-bar">
-    <svg style="width:14px;height:14px;flex-shrink:0;fill:#7b5800" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="#7b5800" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="#7b5800" stroke-width="2"/></svg>
-    <strong>Stay Safe:</strong> Never share OTPs, bank details or passwords. Meet only in public places.
-    <button onclick="document.getElementById('safety-bar').style.display='none'">✕</button>
-  </div>
-
-  <div class="layout">
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-      <div class="sb-head">Messages</div>
-      <div class="sb-search">
-        <input type="text" id="sb-search-inp" placeholder="Search conversations..." oninput="filterConvs()" />
-      </div>
-      <div class="sb-list" id="sb-list">
-        <div style="display:flex;align-items:center;gap:8px;padding:20px;color:var(--muted);font-size:13px">
-          <div class="spin-sm"></div> Loading conversations...
-        </div>
+  <div id="navbar-root"></div>
+  <div class="msg-layout">
+    <div class="conv-list" id="conv-list">
+      <div class="conv-header">💬 Messages</div>
+      <div id="convs">
+        <div style="padding:40px;text-align:center;color:var(--muted)"><div class="al-spin" style="margin:0 auto 12px"></div>Loading…</div>
       </div>
     </div>
-
-    <!-- Chat panel -->
-    <div class="chat" id="chat-panel">
-
-      <!-- Placeholder (no conversation selected) -->
-      <div class="chat-ph" id="chat-ph">
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        <div class="chat-ph-title">Your Messages</div>
-        <div class="chat-ph-sub">Select a conversation from the list, or contact a property owner from any listing.</div>
+    <div class="chat-panel" id="chat-panel">
+      <div class="no-conv">
+        <div class="no-conv-icon">💬</div>
+        <div style="font-size:var(--text-lg);font-weight:700;margin-bottom:8px">No conversation selected</div>
+        <div style="font-size:var(--text-sm)">Select a conversation from the left or message a property owner</div>
       </div>
-
-      <!-- Active conversation -->
-      <div id="active-chat" style="display:none;flex-direction:column;flex:1;overflow:hidden">
-        <div class="chat-head">
-          <button class="chat-head-back" id="back-btn" onclick="mobileBack()">
-            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          </button>
-          <div class="chat-head-av" id="ch-avatar">?</div>
-          <div class="chat-head-info">
-            <div class="chat-head-name" id="ch-name">Owner</div>
-            <div class="chat-head-prop" id="ch-prop"></div>
-          </div>
-          <a href="#" class="chat-head-link" id="ch-view-link" style="display:none">View Listing</a>
-        </div>
-
-        <div class="msgs" id="msgs-container"></div>
-
-        <div class="input-area">
-          <div class="input-box">
-            <textarea id="msg-input" placeholder="Type a message..." rows="1"
-              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
-              oninput="autoGrow(this)"></textarea>
-            <button class="send-btn" id="send-btn" onclick="sendMessage()">
-              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 </div>
-
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast-el"></div>
 
 <script>
-  let currentUser = null;
-  let currentToken = null;
-  let allConvs = [];
-  let activeConv = null; // { other_user_id, property_id, property }
-  let pollTimer = null;
+let cu=null, tok=null, convs=[], activeConv=null, polling=null;
 
-  window.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const session = await getSession();
-      if (!session) { window.location.href = '/login.html'; return; }
-      currentUser  = session.user;
-      currentToken = session.access_token;
-    } catch (e) {
-      window.location.href = '/login.html'; return;
-    }
+window.addEventListener('DOMContentLoaded', async () => {
+  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
+  cu=s.user; tok=s.access_token;
+  document.getElementById('al').style.display='none';
+  document.getElementById('page').style.display='block';
+  await initNavbar({active:'messages'});
+  await loadConvs();
 
-    document.getElementById('al').style.display = 'none';
-    document.getElementById('page').style.display = 'flex';
-    await initNavbar({ active: 'messages' });
-
-    await loadConversations();
-
-    // If URL has ?to=X&listing=Y, auto-open that conversation
-    const params = new URLSearchParams(window.location.search);
-    const toId   = params.get('to');
-    const listId = params.get('listing');
-    if (toId) {
-      openConversation(toId, listId || null, null);
-    }
-  });
-
-  // ── Load conversation list ──
-  async function loadConversations() {
-    try {
-      const r = await fetch(`/api/messages/inbox/${currentUser.id}`, {
-        headers: { Authorization: `Bearer ${currentToken}` }
+  // Auto-open from URL params: ?to=USER_ID&listing=PROP_ID
+  const params=new URLSearchParams(window.location.search);
+  const to=params.get('to'), listing=params.get('listing');
+  if(to){
+    try{
+      const r=await fetch('/api/messages/conversation',{
+        method:'POST',
+        headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
+        body:JSON.stringify({to, property_id: listing ? Number(listing) : null})
       });
-      if (!r.ok) throw new Error('Failed');
-      allConvs = await r.json();
-      renderConvList(allConvs);
-    } catch (e) {
-      document.getElementById('sb-list').innerHTML = `
-        <div class="sb-empty">
-          <div class="sb-empty-icon">💬</div>
-          <div class="sb-empty-title">No conversations yet</div>
-          <div class="sb-empty-sub">Browse properties and message an owner to get started.</div>
-        </div>`;
-    }
-  }
-
-  function renderConvList(convs) {
-    const list = document.getElementById('sb-list');
-    if (!convs || convs.length === 0) {
-      list.innerHTML = `
-        <div class="sb-empty">
-          <div class="sb-empty-icon">💬</div>
-          <div class="sb-empty-title">No conversations yet</div>
-          <div class="sb-empty-sub">Browse properties and tap Contact on a listing to start chatting.</div>
-        </div>`;
-      return;
-    }
-    list.innerHTML = convs.map(c => {
-      const initials = (c.other_user_id || '?').slice(0, 2).toUpperCase();
-      const propTitle = c.property ? (c.property.title || `Property`) : 'General';
-      const time = c.last_message_at ? timeAgo(c.last_message_at) : '';
-      const isActive = activeConv &&
-        activeConv.other_user_id === c.other_user_id &&
-        activeConv.property_id  === c.property_id;
-      return `
-        <div class="conv ${isActive ? 'active' : ''}"
-             onclick="openConversation('${c.other_user_id}', '${c.property_id || ''}', '${propTitle}')">
-          <div class="conv-av">${initials}</div>
-          <div class="conv-info">
-            <div class="conv-name">${esc(propTitle)}</div>
-            <div class="conv-prev">${esc(c.last_message || 'Start a conversation')}</div>
-          </div>
-          <div class="conv-meta">
-            <div class="conv-time">${time}</div>
-            ${c.unread_count > 0 ? `<div class="conv-unread">${c.unread_count}</div>` : ''}
-          </div>
-        </div>`;
-    }).join('');
-  }
-
-  function filterConvs() {
-    const q = document.getElementById('sb-search-inp').value.trim().toLowerCase();
-    if (!q) { renderConvList(allConvs); return; }
-    renderConvList(allConvs.filter(c => {
-      const title = (c.property?.title || '').toLowerCase();
-      return title.includes(q) || (c.last_message || '').toLowerCase().includes(q);
-    }));
-  }
-
-  // ── Open a conversation ──
-  async function openConversation(otherUserId, propertyId, propertyTitle) {
-    if (!otherUserId) return;
-    if (otherUserId === currentUser.id) {
-      showToast('You cannot message yourself');
-      return;
-    }
-
-    activeConv = { other_user_id: otherUserId, property_id: propertyId || null };
-
-    // Update UI
-    const initials = otherUserId.slice(0, 2).toUpperCase();
-    document.getElementById('ch-avatar').textContent = initials;
-    document.getElementById('ch-name').textContent   = 'Loading...';
-    document.getElementById('ch-prop').textContent   = propertyTitle || '';
-
-    if (propertyId) {
-      const link = document.getElementById('ch-view-link');
-      link.href = `/property.html?id=${propertyId}`;
-      link.style.display = 'block';
-    } else {
-      document.getElementById('ch-view-link').style.display = 'none';
-    }
-
-    document.getElementById('chat-ph').style.display    = 'none';
-    document.getElementById('active-chat').style.display = 'flex';
-
-    // Mobile: show chat panel
-    document.getElementById('chat-panel').classList.add('mob-open');
-    document.getElementById('sidebar').classList.add('mob-hide');
-
-    // Highlight active conv in list
-    renderConvList(allConvs);
-
-    // Load owner profile name
-    loadOwnerName(otherUserId);
-
-    // Load messages
-    await loadMessages();
-
-    // Mark as read
-    if (propertyId) {
-      fetch('/api/messages/read', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}` },
-        body: JSON.stringify({ property_id: propertyId, sender_id: otherUserId, receiver_id: currentUser.id })
-      }).catch(() => {});
-    }
-
-    // Start polling for new messages every 5 seconds
-    clearInterval(pollTimer);
-    pollTimer = setInterval(loadMessages, 5000);
-  }
-
-  async function loadOwnerName(userId) {
-    try {
-      const r = await fetch(`/api/profiles/${userId}`, {
-        headers: { Authorization: `Bearer ${currentToken}` }
-      });
-      if (r.ok) {
-        const p = await r.json();
-        document.getElementById('ch-name').textContent = p.full_name || 'Owner';
-        const av = document.getElementById('ch-avatar');
-        av.textContent = (p.full_name || 'Owner').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'OW';
+      if(r.ok){
+        const conv=await r.json();
+        // Reload convs to include new one
+        await loadConvs();
+        openConv(conv.id);
       }
-    } catch (_) {
-      document.getElementById('ch-name').textContent = 'Owner';
-    }
+    }catch(e){}
   }
+});
 
-  // ── Load messages in current conversation ──
-  async function loadMessages() {
-    if (!activeConv) return;
-    const { other_user_id, property_id } = activeConv;
-    try {
-      let url = `/api/messages?user1=${currentUser.id}&user2=${other_user_id}`;
-      if (property_id) url += `&property_id=${property_id}`;
-      const r = await fetch(url, { headers: { Authorization: `Bearer ${currentToken}` } });
-      if (!r.ok) throw new Error('Failed');
-      const msgs = await r.json();
-      renderMessages(msgs);
-    } catch (e) {
-      const c = document.getElementById('msgs-container');
-      if (!c.children.length) {
-        c.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">No messages yet. Send the first one!</div>`;
-      }
-    }
+async function loadConvs(){
+  try{
+    const r=await fetch('/api/messages/conversations',{headers:{Authorization:`Bearer ${tok}`}});
+    convs=await r.json(); if(!Array.isArray(convs))convs=[];
+    renderConvs();
+  }catch(e){document.getElementById('convs').innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">Failed to load</div>';}
+}
+
+function renderConvs(){
+  const el=document.getElementById('convs');
+  if(!convs.length){
+    el.innerHTML='<div class="empty-state" style="padding:40px 16px"><div class="empty-icon">💬</div><div class="empty-title" style="font-size:var(--text-base)">No messages yet</div><div class="empty-sub">Message a property owner to start a conversation</div><a href="/browse.html" class="btn btn-primary">Browse Properties</a></div>';
+    return;
   }
+  el.innerHTML=convs.map(c=>{
+    const op=c.other_profile; const name=op?.fullname||'User';
+    const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const prop=c.properties; const preview=c.last_message||'No messages yet';
+    const t=c.last_message_at?new Date(c.last_message_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+    return`<div class="conv-item ${activeConv===c.id?'active':''}" onclick="openConv(${c.id})">
+      <div class="conv-avatar">${op?.avatar_url?`<img src="${op.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`:ini}</div>
+      <div class="conv-info">
+        <div class="conv-name">${x(name)} <span class="conv-time">${t}</span></div>
+        ${prop?`<div class="conv-prop">🏠 ${x(prop.title||'Property')}</div>`:''}
+        <div class="conv-preview">${x(preview)}</div>
+      </div>
+      ${c.unread_count?`<div class="unread-dot"></div>`:''}
+    </div>`;
+  }).join('');
+}
 
-  function renderMessages(msgs) {
-    const container = document.getElementById('msgs-container');
-    const wasAtBottom = container.scrollHeight - container.clientHeight - container.scrollTop < 60;
+async function openConv(id){
+  activeConv=id; clearInterval(polling);
+  document.querySelectorAll('.conv-item').forEach(el=>el.classList.toggle('active',el.getAttribute('onclick')===`openConv(${id})`));
+  const conv=convs.find(c=>c.id===id); if(!conv)return;
+  const op=conv.other_profile; const name=op?.fullname||'User';
+  const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  const prop=conv.properties;
 
-    if (!msgs || msgs.length === 0) {
-      container.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">No messages yet. Send the first one!</div>`;
-      return;
-    }
+  document.getElementById('chat-panel').innerHTML=`
+    <div class="chat-header">
+      <div class="chat-header-avatar">${op?.avatar_url?`<img src="${op.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`:ini}</div>
+      <div style="flex:1;min-width:0">
+        <div class="chat-header-name">${x(name)}</div>
+        ${prop?`<div class="chat-header-prop" onclick="window.location.href='/property.html?id=${prop.id}'">🏠 ${x(prop.title||'Property')}</div>`:''}
+      </div>
+    </div>
+    <div class="chat-body" id="chat-body">
+      <div style="text-align:center;color:var(--muted);padding:20px">Loading messages…</div>
+    </div>
+    <div class="chat-input-wrap">
+      <textarea class="chat-input" id="msg-input" placeholder="Type a message…" rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+      <button class="send-btn" onclick="sendMsg()">➤</button>
+    </div>`;
 
-    container.innerHTML = msgs.map(m => {
-      const isOut = m.sender_id === currentUser.id;
-      const t = m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
-      return `
-        <div class="msg-row ${isOut ? 'out' : 'in'}">
-          <div>
-            <div class="bubble">${esc(m.message || m.content || '')}</div>
-            <div class="msg-time">${t}</div>
-          </div>
-        </div>`;
-    }).join('');
+  await loadMsgs(id);
+  // Poll every 3s
+  polling=setInterval(()=>loadMsgs(id),3000);
+}
 
-    if (wasAtBottom || msgs.length < 5) {
-      container.scrollTop = container.scrollHeight;
-    }
-  }
+async function loadMsgs(id){
+  try{
+    const r=await fetch(`/api/messages/${id}`,{headers:{Authorization:`Bearer ${tok}`}});
+    const msgs=await r.json(); if(!Array.isArray(msgs))return;
+    const body=document.getElementById('chat-body'); if(!body)return;
+    const wasBottom=body.scrollTop+body.clientHeight>=body.scrollHeight-40;
+    body.innerHTML=msgs.length?msgs.map(m=>{
+      const mine=m.sender_id===cu.id;
+      const t=new Date(m.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+      return`<div class="msg-group ${mine?'mine':'theirs'}">
+        <div class="msg-bubble ${mine?'msg-mine':'msg-theirs'}">${x(m.content)}</div>
+        <div class="msg-time">${t}</div>
+      </div>`;
+    }).join(''):'<div style="text-align:center;color:var(--muted);padding:40px">No messages yet. Say hi! 👋</div>';
+    if(wasBottom)body.scrollTop=body.scrollHeight;
+        // mark conv unread as 0
+    const ci=convs.find(c=>c.id===id); if(ci)ci.unread_count=0; renderConvs();
+  }catch(e){}
+}
 
-  // ── Send a message ──
-  async function sendMessage() {
-    if (!activeConv) return;
-    const input = document.getElementById('msg-input');
-    const text  = input.value.trim();
-    if (!text) return;
+async function sendMsg(){
+  const inp=document.getElementById('msg-input'); if(!inp)return;
+  const txt=inp.value.trim(); if(!txt)return;
+  inp.value=''; inp.style.height='auto';
+  try{
+    const r=await fetch(`/api/messages/${activeConv}/send`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
+      body:JSON.stringify({content:txt})
+    });
+    if(r.ok) await loadMsgs(activeConv);
+    else toast('Failed to send');
+  }catch(e){toast('Failed to send');}
+}
 
-    const btn = document.getElementById('send-btn');
-    btn.disabled = true;
-    input.value  = '';
-    input.style.height = '';
-
-    const { other_user_id, property_id } = activeConv;
-    const senderName = currentUser.user_metadata?.full_name || currentUser.email || 'User';
-
-    try {
-      const r = await fetch('/api/messages', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${currentToken}` },
-        body: JSON.stringify({
-          property_id:  property_id || null,
-          sender_id:    currentUser.id,
-          receiver_id:  other_user_id,
-          sender_name:  senderName,
-          message:      text
-        })
-      });
-
-      if (!r.ok) {
-        const err = await r.json();
-        throw new Error(err.error || 'Failed to send');
-      }
-
-      // Immediately append message to UI
-      const container = document.getElementById('msgs-container');
-      const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      const row = document.createElement('div');
-      row.className = 'msg-row out';
-      row.innerHTML = `<div><div class="bubble">${esc(text)}</div><div class="msg-time">${t}</div></div>`;
-      // Remove "no messages yet" placeholder if present
-      const ph = container.querySelector('div[style]');
-      if (ph) ph.remove();
-      container.appendChild(row);
-      container.scrollTop = container.scrollHeight;
-
-      // Reload conversation list to update preview
-      loadConversations().catch(() => {});
-    } catch (e) {
-      showToast('Could not send message. Please try again.');
-      input.value = text;
-    } finally {
-      btn.disabled = false;
-      input.focus();
-    }
-  }
-
-  function autoGrow(el) {
-    el.style.height = '';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-  }
-
-  function mobileBack() {
-    document.getElementById('chat-panel').classList.remove('mob-open');
-    document.getElementById('sidebar').classList.remove('mob-hide');
-    clearInterval(pollTimer);
-    activeConv = null;
-  }
-
-  function timeAgo(d) {
-    const diff = Date.now() - new Date(d).getTime();
-    const m = Math.floor(diff / 60000);
-    if (m < 1)  return 'just now';
-    if (m < 60) return `${m}m ago`;
-    const h = Math.floor(m / 60);
-    if (h < 24) return `${h}h ago`;
-    return `${Math.floor(h / 24)}d ago`;
-  }
-
-  function esc(t) {
-    return String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  function showToast(msg) {
-    const el = document.getElementById('toast');
-    el.textContent = msg;
-    el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 2800);
-  }
+function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
 </script>
 </body>
 </html>

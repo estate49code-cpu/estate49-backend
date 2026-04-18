@@ -1,724 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Property Details — Estate49</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Property — Estate49</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/auth.js"></script>
-  <script src="/nav.js"></script>
+  <script src="/auth.js"></script><script src="/nav.js"></script>
+  <link rel="stylesheet" href="/style.css"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --primary: #c0392b;
-      --primary-dark: #a93226;
-      --primary-light: #fadbd8;
-      --bg: #f7f7f8;
-      --card: #ffffff;
-      --border: #e5e5e5;
-      --text: #0d0d0d;
-      --muted: #6e6e80;
-      --success: #2e7d32;
-      --success-light: #e8f5e9;
-    }
-
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-
-    .auth-loading { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 9999; }
-    .al-icon { width: 56px; height: 56px; background: var(--primary); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 16px rgba(192,57,43,0.25); }
-    .al-spin { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .page { display: none; min-height: 100vh; }
-
-    /* Layout */
-    .content-wrap { max-width: 1100px; margin: 0 auto; padding: 28px 24px 60px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; align-items: start; }
-
-    /* ── LEFT COLUMN ── */
-    .left-col { display: flex; flex-direction: column; gap: 20px; }
-
-    /* Gallery */
-    .gallery-wrap { background: var(--card); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); position: relative; }
-    .gallery-main { position: relative; height: 420px; background: var(--bg); cursor: pointer; overflow: hidden; }
-    .gallery-main img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-    .gallery-main:hover img { transform: scale(1.02); }
-    .gallery-main-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 80px; background: var(--bg); }
-    .gallery-badge { position: absolute; top: 16px; left: 16px; padding: 5px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
-    .gallery-badge.rent { background: #e3f2fd; color: #1565c0; }
-    .gallery-badge.buy  { background: var(--success-light); color: var(--success); }
-    .gallery-count { position: absolute; bottom: 16px; right: 16px; background: rgba(0,0,0,0.6); color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; backdrop-filter: blur(4px); cursor: pointer; }
-    .gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.85); border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-    .gallery-nav:hover { background: white; transform: translateY(-50%) scale(1.08); }
-    .gallery-nav.prev { left: 14px; }
-    .gallery-nav.next { right: 14px; }
-    .gallery-thumbs { display: flex; gap: 8px; padding: 12px; overflow-x: auto; scrollbar-width: none; background: white; }
-    .gallery-thumbs::-webkit-scrollbar { display: none; }
-    .gallery-thumb { width: 72px; height: 56px; border-radius: 8px; overflow: hidden; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
-    .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .gallery-thumb.active { border-color: var(--primary); }
-    .gallery-thumb:hover { border-color: var(--primary); opacity: 0.9; }
-
-    /* Detail card */
-    .detail-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-    .detail-card-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-    .detail-card-icon { width: 28px; height: 28px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-
-    /* Key stats row */
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    .stat-box { background: var(--bg); border-radius: 14px; padding: 16px 12px; text-align: center; border: 1px solid var(--border); }
-    .stat-box-val { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
-    .stat-box-label { font-size: 11px; color: var(--muted); font-weight: 500; }
-
-    /* Property header */
-    .prop-header { margin-bottom: 20px; }
-    .prop-main-price { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 6px; }
-    .prop-main-price span { font-size: 15px; font-weight: 500; color: var(--muted); }
-    .prop-main-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
-    .prop-location-row { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); }
-
-    /* Info grid */
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .info-item { display: flex; flex-direction: column; gap: 3px; padding: 12px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border); }
-    .info-item-label { font-size: 11px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
-    .info-item-val { font-size: 14px; font-weight: 600; color: var(--text); }
-
-    /* Description */
-    .desc-text { font-size: 14px; color: var(--muted); line-height: 1.8; white-space: pre-wrap; }
-
-    /* Amenities */
-    .amenities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
-    .amenity-tag { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--success-light); border-radius: 10px; font-size: 13px; font-weight: 500; color: var(--success); border: 1px solid #a5d6a7; }
-
-    /* Map placeholder */
-    .map-placeholder { height: 200px; background: var(--bg); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: var(--muted); font-size: 13px; border: 1px dashed var(--border); cursor: pointer; transition: all 0.2s; }
-    .map-placeholder:hover { border-color: var(--primary); color: var(--primary); }
-    .map-placeholder .map-icon { font-size: 32px; }
-
-    /* ── RIGHT COLUMN ── */
-    .right-col { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 16px; }
-
-    /* Contact card */
-    .contact-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
-    .contact-price { font-size: 26px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
-    .contact-price span { font-size: 14px; font-weight: 500; color: var(--muted); }
-    .contact-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 18px; line-height: 1.4; }
-
-    .contact-owner { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--bg); border-radius: 14px; margin-bottom: 16px; border: 1px solid var(--border); }
-    .owner-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; flex-shrink: 0; }
-    .owner-name { font-size: 14px; font-weight: 600; color: var(--text); }
-    .owner-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
-    .owner-time { font-size: 11px; color: var(--muted); }
-    .owner-rera { font-size: 11px; color: var(--success); font-weight: 600; margin-top: 3px; background: var(--success-light); padding: 2px 8px; border-radius: 6px; display: inline-block; }
-
-    .contact-btns { display: flex; flex-direction: column; gap: 10px; }
-    .btn-call { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 14px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; }
-    .btn-call:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(192,57,43,0.3); }
-    .btn-whatsapp { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: #25d366; color: white; border: none; border-radius: 14px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; }
-    .btn-whatsapp:hover { background: #128c7e; transform: translateY(-1px); }
-    .btn-message { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: white; color: var(--text); border: 1.5px solid var(--border); border-radius: 14px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; }
-    .btn-message:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-    .btn-email-contact { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; background: white; color: var(--text); border: 1.5px solid var(--border); border-radius: 14px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s; text-decoration: none; }
-    .btn-email-contact:hover { border-color: var(--primary); color: var(--primary); }
-    .contact-note { text-align: center; font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
-
-    /* Share / save */
-    .action-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; display: flex; gap: 10px; }
-    .action-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 1.5px solid var(--border); border-radius: 10px; background: white; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; color: var(--muted); transition: all 0.2s; }
-    .action-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-    .action-btn.saved { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-
-    /* Similar properties */
-    .similar-section { margin-top: 8px; }
-    .similar-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-    .similar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    .sim-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
-    .sim-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); border-color: var(--primary); }
-    .sim-img { height: 130px; background: var(--bg); overflow: hidden; }
-    .sim-img img { width: 100%; height: 100%; object-fit: cover; }
-    .sim-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 32px; }
-    .sim-body { padding: 12px; }
-    .sim-price { font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
-    .sim-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
-    .sim-loc { font-size: 11px; color: var(--muted); }
-
-    /* Lightbox */
-    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1000; align-items: center; justify-content: center; }
-    .lightbox.open { display: flex; }
-    .lightbox img { max-width: 92vw; max-height: 88vh; border-radius: 8px; object-fit: contain; }
-    .lb-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.15); border: none; color: white; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; backdrop-filter: blur(4px); }
-    .lb-prev, .lb-next { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.15); border: none; color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 20px; cursor: pointer; backdrop-filter: blur(4px); transition: all 0.2s; }
-    .lb-prev { left: 20px; }
-    .lb-next { right: 20px; }
-    .lb-prev:hover, .lb-next:hover { background: rgba(255,255,255,0.3); }
-    .lb-counter { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-size: 14px; background: rgba(0,0,0,0.4); padding: 6px 16px; border-radius: 20px; }
-
-    /* Loading / not found */
-    .loading-state { text-align: center; padding: 80px 24px; color: var(--muted); }
-    .not-found { text-align: center; padding: 80px 24px; }
-    .not-found-icon { font-size: 56px; margin-bottom: 16px; }
-    .not-found-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-
-    /* Toast */
-    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px); background: #1a1a1a; color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: all 0.3s; z-index: 500; pointer-events: none; white-space: nowrap; }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    /* Mobile */
-    @media (max-width: 900px) {
-      .content-wrap { grid-template-columns: 1fr; }
-      .right-col { position: static; }
-      .similar-grid { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 600px) {
-      .content-wrap { padding: 16px 14px 60px; gap: 16px; }
-      .gallery-main { height: 260px; }
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-      .similar-grid { grid-template-columns: 1fr; }
-      .info-grid { grid-template-columns: 1fr; }
-      .amenities-grid { grid-template-columns: 1fr 1fr; }
-    }
+    .pw{max-width:1080px;margin:0 auto;padding:32px 24px;}
+    .back-btn{display:inline-flex;align-items:center;gap:8px;font-size:var(--text-sm);color:var(--muted);margin-bottom:20px;cursor:pointer;}
+    .back-btn:hover{color:var(--primary);}
+    .pgal{border-radius:var(--radius-xl);overflow:hidden;background:var(--surface-3);margin-bottom:28px;position:relative;}
+    .pgal-main{width:100%;height:420px;object-fit:cover;display:block;}
+    .pgal-ph{width:100%;height:420px;display:flex;align-items:center;justify-content:center;font-size:80px;background:var(--surface-3);}
+    .pgal-thumbs{display:flex;gap:8px;padding:10px;background:rgba(0,0,0,0.04);overflow-x:auto;}
+    .pgal-thumb{width:72px;height:54px;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:border-color var(--transition);flex-shrink:0;}
+    .pgal-thumb.active,.pgal-thumb:hover{border-color:var(--primary);}
+    .layout{display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start;}
+    .prop-title{font-size:var(--text-2xl);font-weight:800;margin-bottom:6px;}
+    .prop-loc{font-size:var(--text-base);color:var(--muted);margin-bottom:16px;}
+    .prop-price-row{display:flex;align-items:baseline;gap:10px;margin-bottom:24px;flex-wrap:wrap;}
+    .prop-price{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:900;color:var(--primary);}
+    .prop-price-sub{font-size:var(--text-sm);color:var(--muted);}
+    .prop-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px;}
+    .pstat{background:var(--surface-2);border:1px solid var(--border);padding:10px 16px;border-radius:var(--radius-lg);font-size:var(--text-sm);display:flex;flex-direction:column;align-items:center;gap:4px;min-width:80px;}
+    .pstat-icon{font-size:20px;}
+    .pstat-val{font-weight:700;font-size:var(--text-base);}
+    .pstat-lbl{font-size:var(--text-xs);color:var(--muted);}
+    .section-title{font-size:var(--text-lg);font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--divider);}
+    .desc-text{font-size:var(--text-sm);color:var(--muted);line-height:1.8;white-space:pre-wrap;}
+    .amen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+    .amen-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--primary-xlight);border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:600;color:var(--primary);border:1px solid var(--primary-light);}
+    /* Sidebar */
+    .sidebar{position:sticky;top:calc(var(--nav-h)+20px);}
+    .ccard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;box-shadow:var(--shadow-md);}
+    .price-big{font-size:clamp(1.5rem,2.5vw,2rem);font-weight:900;color:var(--primary);margin-bottom:4px;}
+    .price-note{font-size:var(--text-xs);color:var(--muted);margin-bottom:20px;}
+    .contact-row{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+    .contact-avatar{width:46px;height:46px;border-radius:50%;background:var(--primary);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+    .contact-name{font-size:var(--text-sm);font-weight:700;}
+    .contact-role{font-size:var(--text-xs);color:var(--muted);}
+    .ccard-btns{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+    .fav-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;background:var(--surface);transition:all var(--transition);}
+    .fav-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-xlight);}
+    .fav-btn.saved{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+    .info-rows{margin-top:16px;padding-top:16px;border-top:1px solid var(--divider);}
+    .info-row{display:flex;justify-content:space-between;padding:6px 0;font-size:var(--text-xs);border-bottom:1px solid var(--divider);}
+    .info-row:last-child{border-bottom:none;}
+    .info-key{color:var(--muted);}
+    .info-val{font-weight:600;}
+    .psec{margin-bottom:32px;}
+    @media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;}.pgal-main{height:260px;}.pgal-ph{height:260px;}}
+    @media(max-width:600px){.pw{padding:16px;}.prop-stats{gap:8px;}.pstat{min-width:70px;padding:8px;}}
   </style>
 </head>
 <body>
-
-<div class="auth-loading" id="auth-loading">
-  <div class="al-icon">🏠</div>
-  <div class="al-spin"></div>
-</div>
-
+<div class="auth-loading" id="al"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
 <div class="page" id="page">
-
-  <!-- Shared Navbar -->
   <div id="navbar-root"></div>
-
-  <!-- Content -->
-  <div class="content-wrap" id="content-wrap">
-    <div class="loading-state" style="grid-column:1/-1">
-      <div style="font-size:40px;margin-bottom:12px">🏠</div>
-      <div>Loading property...</div>
+  <div class="pw">
+    <div class="back-btn" onclick="history.back()">← Back</div>
+    <div id="content">
+      <div class="skeleton" style="height:420px;border-radius:var(--radius-xl);margin-bottom:28px;"></div>
+      <div class="layout">
+        <div><div class="skeleton skeleton-text" style="width:60%;height:2em;"></div><div class="skeleton skeleton-text"></div></div>
+        <div class="skeleton" style="height:360px;border-radius:var(--radius-xl);"></div>
+      </div>
     </div>
   </div>
-
 </div>
-
-<!-- Lightbox -->
-<div class="lightbox" id="lightbox">
-  <button class="lb-close" onclick="closeLb()">✕</button>
-  <button class="lb-prev"  onclick="lbNav(-1)">‹</button>
-  <img id="lb-img" src="" alt="" />
-  <button class="lb-next"  onclick="lbNav(1)">›</button>
-  <div class="lb-counter" id="lb-counter"></div>
-</div>
-
 <div class="toast" id="toast-el"></div>
 
 <script>
-  let property    = null;
-  let currentUser = null;
-  let token       = null;
-  let currentPhoto = 0;
-  let lbIndex = 0;
-  let isSaved = false;
-  let ownerProfile = null;
+let cu=null, tok=null, prop=null, isFav=false;
+const pid=new URLSearchParams(window.location.search).get('id');
 
-  // ── Auth + Boot ──────────────────────────────────
-  window.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const session = await getSession();
-      if (!session) { window.location.href = '/login.html'; return; }
-      currentUser = session.user;
-      token = session.access_token;
+window.addEventListener('DOMContentLoaded', async () => {
+  if(!pid){window.location.href='/browse.html';return;}
+  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
+  cu=s.user; tok=s.access_token;
+  document.getElementById('al').style.display='none';
+  document.getElementById('page').style.display='block';
+  await initNavbar({});
+  await Promise.all([loadProp(), checkFav()]);
+});
 
-      document.getElementById('auth-loading').style.display = 'none';
-      document.getElementById('page').style.display = 'block';
-
-      await initNavbar({ active: '' });
-
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get('id');
-      if (!id) { showNotFound(); return; }
-
-      await loadProperty(id);
-
-    } catch(e) { window.location.href = '/login.html'; }
-  });
-
-  // ── Load Property ────────────────────────────────
-  async function loadProperty(id) {
-    try {
-      const res = await fetch('/api/properties/' + id);
-      if (!res.ok) throw new Error('Not found');
-      property = await res.json();
-      await loadOwnerProfile();
-      await initFavoriteState();
-      renderProperty();
-      loadSimilar();
-    } catch(e) {
-      try {
-        const res2 = await fetch('/api/properties');
-        const all  = await res2.json();
-        const list = Array.isArray(all) ? all : (all.properties || all.data || []);
-        property   = list.find(p => String(p.id) === String(id));
-        if (!property) throw new Error('Not found');
-        await loadOwnerProfile();
-        await initFavoriteState();
-        renderProperty();
-        loadSimilar();
-      } catch(e2) { showNotFound(); }
-    }
+async function loadProp(){
+  try{
+    const r=await fetch(`/api/properties/${pid}`);
+    if(!r.ok) throw new Error();
+    prop=await r.json();
+    document.title=`${prop.title||'Property'} — Estate49`;
+    render();
+  }catch(e){
+    document.getElementById('content').innerHTML='<div class="empty-state"><div class="empty-icon">🏚️</div><div class="empty-title">Property not found</div><a href="/browse.html" class="btn btn-primary">Browse Properties</a></div>';
   }
+}
 
-  // ── Load owner profile (for RERA etc.) ──────────
-  async function loadOwnerProfile() {
-    if (!property?.listed_by) return;
-    try {
-      const res = await fetch(`/api/profiles/${property.listed_by}`);
-      ownerProfile = await res.json();
-    } catch(e) {}
-  }
+async function checkFav(){
+  try{
+    const r=await fetch('/api/favorites',{headers:{Authorization:`Bearer ${tok}`}});
+    if(r.ok){const d=await r.json(); isFav=(d||[]).some(f=>String(f.property_id)===String(pid));}
+  }catch(e){}
+}
 
-  // ── Init favorites state ────────────────────────
-  async function initFavoriteState() {
-    if (!currentUser || !property) return;
-    try {
-      const res = await fetch('/api/favorites', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) return;
-      const favs = await res.json();
-      const favIds = new Set(favs.map(f => f.property_id || f.id));
-      isSaved = favIds.has(property.id);
-    } catch(e) {}
-  }
+function render(){
+  const p=prop;
+  const rent=p.type==='rent';
+  const pr=rent?`₹${Number(p.price).toLocaleString('en-IN')}`:`₹${fp(p.price)}`;
+  const isOwn=cu&&p.listed_by===cu.id;
 
-  // ── Render ───────────────────────────────────────
-  function renderProperty() {
-    const p = property;
-    const photos  = (p.photos && p.photos.length > 0) ? p.photos : [];
-    const isRent  = p.type === 'rent';
-    const isOwnListing = currentUser && p.listed_by === currentUser.id;
+  const amenities=[
+    p.parking&&['🚗','Parking'], p.gym&&['🏋️','Gym'], p.pool&&['🏊','Pool'],
+    p.lift&&['🛗','Lift'], p.security&&['💂','Security'], p.cctv&&['📹','CCTV'],
+    p.clubhouse&&['🏢','Clubhouse'], p.garden&&['🌳','Garden'],
+    p.powerbackup&&['⚡','Power Backup'], p.ac&&['❄️','AC'],
+    p.balcony&&['🌅','Balcony'], p.modular_kitchen&&['👨‍🍳','Mod Kitchen'],
+    p.washing_machine&&['🫧','Washing M/C'], p.fridge&&['🧊','Fridge'],
+    p.wifi&&['📶','WiFi'], p.pet_friendly&&['🐾','Pet Friendly'],
+    p.gated&&['🔐','Gated'], p.no_brokerage&&['✅','Zero Brokerage'],
+  ].filter(Boolean);
 
-    document.title = `${p.title || 'Property'} — Estate49`;
+  const photos=p.photos||[];
+  const galHtml=photos.length
+    ?`<img class="pgal-main" id="main-img" src="${photos[0]}" alt="${x(p.title)}" width="1080" height="420"/>
+      ${photos.length>1?`<div class="pgal-thumbs">${photos.map((ph,i)=>`<img class="pgal-thumb ${i===0?'active':''}" src="${ph}" alt="photo ${i+1}" width="72" height="54" loading="lazy" onclick="swImg(this,'${ph}')" />`).join('')}</div>`:''}`
+    :`<div class="pgal-ph">🏠</div>`;
 
-    const amenityMap = {
-      lift: '🛗 Lift', parking: '🚗 Parking', security: '🔒 Security',
-      cctv: '📹 CCTV', gym: '💪 Gym', pool: '🏊 Pool',
-      clubhouse: '🏛️ Clubhouse', garden: '🌳 Garden',
-      powerbackup: '⚡ Power Backup', intercom: '📞 Intercom',
-      ac: '❄️ AC', balcony: '🏗️ Balcony', modular_kitchen: '🍳 Modular Kitchen',
-      washing_machine: '🫧 Washing Machine', fridge: '🧊 Refrigerator',
-      wifi: '📶 WiFi Ready', pet_friendly: '🐾 Pet Friendly',
-      gated: '🏘️ Gated Community', vastu: '🔱 Vastu', water_24: '💧 24/7 Water',
-      no_brokerage: '✅ No Brokerage'
-    };
+  const ownerIni=(p.contact_name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
 
-    const activeAmenities = Object.keys(amenityMap).filter(k => p[k]);
-
-    const price = isRent
-      ? `₹${Number(p.price).toLocaleString('en-IN')}<span>/month</span>`
-      : `₹${formatPrice(p.price)}`;
-
-    // Gallery
-    const mainImgHtml = photos.length > 0
-      ? `<img src="${photos[0]}" alt="${esc(p.title)}" id="main-photo" onclick="openLb(0)" />`
-      : `<div class="gallery-main-placeholder">🏠</div>`;
-
-    const thumbsHtml = photos.length > 1
-      ? `<div class="gallery-thumbs">${photos.map((ph, i) => `
-          <div class="gallery-thumb ${i===0?'active':''}" onclick="setPhoto(${i})" id="thumb-${i}">
-            <img src="${ph}" alt="Photo ${i+1}" loading="lazy"/>
-          </div>`).join('')}</div>` : '';
-
-    const navBtns = photos.length > 1
-      ? `<button class="gallery-nav prev" onclick="changePhoto(-1)">‹</button>
-         <button class="gallery-nav next" onclick="changePhoto(1)">›</button>` : '';
-
-    // Info items
-    const infoItems = [
-      ['Property Type', capitalize(p.property_type || 'Apartment')],
-      ['BHK',          p.bhk ? p.bhk + ' BHK' : '—'],
-      ['Bathrooms',    p.bathrooms || '—'],
-      ['Area',         p.area ? p.area + ' sq.ft' : '—'],
-      ['Carpet Area',  p.carpet_area ? p.carpet_area + ' sq.ft' : '—'],
-      ['Floor',        p.floor || '—'],
-      ['Furnished',    capitalize(p.furnished || '—')],
-      ['Available',    p.available_from || 'Immediately'],
-      ['Deposit',      p.deposit ? '₹' + Number(p.deposit).toLocaleString('en-IN') : '—'],
-      ['Maintenance',  p.maintenance ? '₹' + Number(p.maintenance).toLocaleString('en-IN') + '/mo' : 'Included'],
-    ].filter(([,v]) => v && v !== '—');
-
-    // Owner info
-    const ownerInitials = (p.contact_name || 'O').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
-    const whatsappMsg   = encodeURIComponent(`Hi, I'm interested in your property "${p.title}" listed on Estate49.`);
-    const whatsappNum   = (p.contact_phone || '').replace(/\D/g, '');
-
-    // RERA badge
-    const reraBadge = ownerProfile?.rera_number
-      ? `<div class="owner-rera">✅ RERA: ${esc(ownerProfile.rera_number)}</div>` : '';
-
-    // Agency name
-    const agencyLine = ownerProfile?.agency_name
-      ? `<div class="owner-role">${esc(ownerProfile.agency_name)}</div>` : '';
-
-    // Message button — only show if not own listing
-    const msgBtn = !isOwnListing && p.listed_by
-      ? `<button class="btn-message" id="prop-contact-btn">💬 Send Message</button>` : '';
-
-    const wrap = document.getElementById('content-wrap');
-    wrap.innerHTML = `
-      <!-- Left -->
-      <div class="left-col">
-
-        <!-- Gallery -->
-        <div class="gallery-wrap">
-          <div class="gallery-main" id="gallery-main">
-            ${mainImgHtml}
-            <span class="gallery-badge ${isRent?'rent':'buy'}">${isRent?'For Rent':'For Sale'}</span>
-            ${photos.length > 1 ? `<span class="gallery-count" onclick="openLb(0)">📸 ${photos.length} Photos</span>` : ''}
-            ${navBtns}
+  document.getElementById('content').innerHTML=`
+    <div class="pgal">${galHtml}</div>
+    <div class="layout">
+      <div>
+        <div class="psec">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <span class="badge badge-${rent?'rent':'buy'}">${rent?'For Rent':'For Sale'}</span>
+            ${p.available_from?`<span class="badge" style="background:var(--surface-3)">Available: ${x(p.available_from)}</span>`:''}
           </div>
-          ${thumbsHtml}
-        </div>
-
-        <!-- Header + Stats -->
-        <div class="detail-card">
-          <div class="prop-header">
-            <div class="prop-main-price">${price}</div>
-            <div class="prop-main-title">${esc(p.title || 'Property Listing')}</div>
-            <div class="prop-location-row">📍 ${esc((p.locality ? p.locality + ', ' : '') + (p.city || ''))}</div>
+          <h1 class="prop-title">${x(p.title||'Property')}</h1>
+          <div class="prop-loc">📍 ${x([p.locality,p.city,p.address].filter(Boolean).join(', '))}</div>
+          <div class="prop-price-row">
+            <span class="prop-price">${pr}</span>
+            <span class="prop-price-sub">${rent?'per month':''}</span>
+            ${rent&&p.deposit?`<span class="prop-price-sub">• Deposit: ₹${Number(p.deposit).toLocaleString('en-IN')}</span>`:''}
           </div>
-          <div class="stats-row">
-            <div class="stat-box">
-              <div class="stat-box-val">${p.bhk || '—'}</div>
-              <div class="stat-box-label">BHK</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-val">${p.area ? p.area + ' ft²' : '—'}</div>
-              <div class="stat-box-label">Area</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-val">${p.bathrooms || '—'}</div>
-              <div class="stat-box-label">Baths</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-val">${capitalize(p.furnished || '—').split(' ')[0]}</div>
-              <div class="stat-box-label">Furnished</div>
-            </div>
+          <div class="prop-stats">
+            ${p.bhk?`<div class="pstat"><div class="pstat-icon">🛏</div><div class="pstat-val">${p.bhk}</div><div class="pstat-lbl">BHK</div></div>`:''}
+            ${p.bathrooms?`<div class="pstat"><div class="pstat-icon">🚿</div><div class="pstat-val">${p.bathrooms}</div><div class="pstat-lbl">Baths</div></div>`:''}
+            ${p.area?`<div class="pstat"><div class="pstat-icon">📐</div><div class="pstat-val">${p.area}</div><div class="pstat-lbl">ft²</div></div>`:''}
+            ${p.floor?`<div class="pstat"><div class="pstat-icon">🏢</div><div class="pstat-val">${x(p.floor)}</div><div class="pstat-lbl">Floor</div></div>`:''}
+            ${p.furnished?`<div class="pstat"><div class="pstat-icon">🛋</div><div class="pstat-val">${x(cp(p.furnished))}</div><div class="pstat-lbl">Furnished</div></div>`:''}
           </div>
         </div>
-
-        <!-- Description -->
-        ${p.description ? `
-        <div class="detail-card">
-          <div class="detail-card-title"><div class="detail-card-icon">📝</div> About this Property</div>
-          <p class="desc-text">${esc(p.description)}</p>
-        </div>` : ''}
-
-        <!-- Details -->
-        <div class="detail-card">
-          <div class="detail-card-title"><div class="detail-card-icon">📐</div> Property Details</div>
-          <div class="info-grid">
-            ${infoItems.map(([k,v]) => `
-              <div class="info-item">
-                <span class="info-item-label">${k}</span>
-                <span class="info-item-val">${esc(String(v))}</span>
-              </div>`).join('')}
-          </div>
-        </div>
-
-        <!-- Amenities -->
-        ${activeAmenities.length > 0 ? `
-        <div class="detail-card">
-          <div class="detail-card-title"><div class="detail-card-icon">✨</div> Amenities & Features</div>
-          <div class="amenities-grid">
-            ${activeAmenities.map(k => `<div class="amenity-tag">${amenityMap[k]}</div>`).join('')}
-          </div>
-        </div>` : ''}
-
-        <!-- Location -->
-        <div class="detail-card">
-          <div class="detail-card-title"><div class="detail-card-icon">📍</div> Location</div>
-          <div style="font-size:14px;color:var(--muted);margin-bottom:12px">
-            ${esc([p.address, p.locality, p.city].filter(Boolean).join(', '))}
-          </div>
-          <div class="map-placeholder" onclick="openMap()">
-            <div class="map-icon">🗺️</div>
-            <div>Click to view on Google Maps</div>
-          </div>
-        </div>
-
-        <!-- Footer meta -->
-        <div style="font-size:12px;color:var(--muted);padding:0 4px">
-          Listed by <strong>${esc(p.contact_name || 'Owner')}</strong>
-          ${p.posted_at ? '· ' + timeAgo(p.posted_at) : ''}
-          · Estate49 Listing #${p.id}
-        </div>
-
+        ${p.description?`<div class="psec"><h2 class="section-title">About this property</h2><p class="desc-text">${x(p.description)}</p></div>`:''}
+        ${amenities.length?`<div class="psec"><h2 class="section-title">Amenities</h2><div class="amen-grid">${amenities.map(([icon,name])=>`<div class="amen-item">${icon} ${name}</div>`).join('')}</div></div>`:''}
       </div>
-
-      <!-- Right -->
-      <div class="right-col">
-
-        <!-- Contact card -->
-        <div class="contact-card">
-          <div class="contact-price">${price}</div>
-          <div class="contact-title">${esc(p.title || '')}</div>
-
-          <div class="contact-owner">
-            <div class="owner-avatar">${ownerInitials}</div>
-            <div style="flex:1;min-width:0">
-              <div class="owner-name">${esc(p.contact_name || 'Property Owner')}</div>
-              <div class="owner-role">${capitalize(p.contact_role || ownerProfile?.role || 'Owner')}</div>
-              ${agencyLine}
-              ${p.contact_time ? `<div class="owner-time">⏰ ${capitalize(p.contact_time)}</div>` : ''}
-              ${reraBadge}
-            </div>
+      <div class="sidebar">
+        <div class="ccard">
+          <div class="price-big">${pr}</div>
+          <div class="price-note">${rent?'per month':'total price'}${p.maintenance?` • ₹${Number(p.maintenance).toLocaleString('en-IN')}/mo maintenance`:''}</div>
+          <div class="contact-row">
+            <div class="contact-avatar">${p.contact_name?ownerIni:'?'}</div>
+            <div><div class="contact-name">${x(p.contact_name||'Owner')}</div><div class="contact-role">${x(p.contact_role||p.type==='rent'?'Landlord':'Seller')}</div></div>
           </div>
-
-          <div class="contact-btns">
-            ${p.contact_phone ? `
-              <a class="btn-call" href="tel:${p.contact_phone.replace(/\D/g,'')}">📞 Call Owner</a>
-              ${whatsappNum ? `
-              <a class="btn-whatsapp"
-                href="https://wa.me/${whatsappNum.startsWith('91') ? whatsappNum : '91'+whatsappNum}?text=${whatsappMsg}"
-                target="_blank">💬 WhatsApp</a>` : ''}
-            ` : `<button class="btn-call" onclick="toast('Contact info not available')">📞 Request Contact</button>`}
-            ${msgBtn}
-            ${p.contact_email ? `
-              <a class="btn-email-contact"
-                href="mailto:${p.contact_email}?subject=Enquiry: ${encodeURIComponent(p.title||'')}">
-                ✉️ Send Email
-              </a>` : ''}
+          <div class="ccard-btns">
+            ${!isOwn?`<button class="btn btn-primary btn-full btn-lg" onclick="msgOwner()">💬 Send Message</button>`:''}
+            <button class="fav-btn ${isFav?'saved':''}" id="fav-btn" onclick="toggleFav()">
+              ${isFav?'❤️ Saved':'🤍 Save Property'}
+            </button>
+            ${isOwn?`<a href="/list-property.html?edit=${p.id}" class="btn btn-secondary btn-full">✏️ Edit Listing</a>`:''}
           </div>
-          <div class="contact-note">🔒 Your info is safe. Estate49 never shares your data.</div>
+          <div class="info-rows">
+            ${p.contact_phone?`<div class="info-row"><span class="info-key">Phone</span><span class="info-val">${x(p.contact_phone)}</span></div>`:''}
+            ${p.contact_email?`<div class="info-row"><span class="info-key">Email</span><span class="info-val">${x(p.contact_email)}</span></div>`:''}
+            ${p.contact_time?`<div class="info-row"><span class="info-key">Best time</span><span class="info-val">${x(p.contact_time)}</span></div>`:''}
+            ${p.property_type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${x(cp(p.property_type))}</span></div>`:''}
+            ${p.carpet_area?`<div class="info-row"><span class="info-key">Carpet area</span><span class="info-val">${p.carpet_area} ft²</span></div>`:''}
+            ${p.vastu?`<div class="info-row"><span class="info-key">Vastu</span><span class="info-val">✅ Compliant</span></div>`:''}
+            ${p.water_24?`<div class="info-row"><span class="info-key">Water</span><span class="info-val">24/7</span></div>`:''}
+          </div>
         </div>
-
-        <!-- Save / Share / AI -->
-        <div class="action-card">
-          <button class="action-btn ${isSaved ? 'saved' : ''}" id="save-btn">${isSaved ? '❤️ Saved' : '🤍 Save'}</button>
-          <button class="action-btn" onclick="shareProperty()">🔗 Share</button>
-          <button class="action-btn" onclick="window.location.href='/chat.html?q=Tell me about ${encodeURIComponent(p.title||'this property')}'">🤖 Ask AI</button>
-        </div>
-
-        <!-- EMI Calculator (buy only) -->
-        ${!isRent ? `
-        <div class="detail-card">
-          <div class="detail-card-title"><div class="detail-card-icon">🧮</div> EMI Estimate</div>
-          <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Based on 20yr loan @ 8.5% interest</div>
-          <div style="font-size:20px;font-weight:800;color:var(--primary)">
-            ₹${calcEMI(p.price, 8.5, 20)}<span style="font-size:13px;font-weight:500;color:var(--muted)">/month</span>
-          </div>
-          <div style="font-size:11px;color:var(--muted);margin-top:6px">For 80% loan amount. Consult your bank for exact rates.</div>
-        </div>` : ''}
-
       </div>
+    </div>`;
+}
 
-      <!-- Similar (full width) -->
-      <div class="similar-section" style="grid-column:1/-1" id="similar-section">
-        <div class="loading-state">Loading similar properties...</div>
-      </div>
-    `;
+function swImg(el, src){
+  document.getElementById('main-img').src=src;
+  document.querySelectorAll('.pgal-thumb').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
 
-    // Bind buttons
-    const saveBtn = document.getElementById('save-btn');
-    if (saveBtn) saveBtn.onclick = toggleSave;
-    const msgButton = document.getElementById('prop-contact-btn');
-    if (msgButton) msgButton.onclick = contactOwner;
-  }
+function msgOwner(){
+  if(!cu){window.location.href='/login.html';return;}
+  if(!prop?.listed_by){toast('Owner info unavailable');return;}
+  window.location.href=`/messages.html?to=${prop.listed_by}&listing=${pid}`;
+}
 
-  // ── Similar ──────────────────────────────────────
-  async function loadSimilar() {
-    try {
-      const res  = await fetch('/api/properties');
-      const all  = await res.json();
-      const list = Array.isArray(all) ? all : (all.properties || all.data || []);
-      const similar = list
-        .filter(p => p.id !== property.id && (p.city === property.city || p.type === property.type))
-        .slice(0, 3);
-
-      const sec = document.getElementById('similar-section');
-      if (!similar.length) { sec.innerHTML = ''; return; }
-
-      sec.innerHTML = `
-        <div class="similar-title">Similar Properties</div>
-        <div class="similar-grid">
-          ${similar.map(p => {
-            const photo  = p.photos?.[0];
-            const isRent = p.type === 'rent';
-            return `
-              <div class="sim-card" onclick="window.location.href='/property.html?id=${p.id}'">
-                <div class="sim-img">
-                  ${photo ? `<img src="${photo}" alt="${esc(p.title)}" loading="lazy"/>` : `<div class="sim-img-placeholder">🏠</div>`}
-                </div>
-                <div class="sim-body">
-                  <div class="sim-price">${isRent ? '₹'+Number(p.price).toLocaleString('en-IN')+'/mo' : '₹'+formatPrice(p.price)}</div>
-                  <div class="sim-title">${esc(p.title||'Property')}</div>
-                  <div class="sim-loc">📍 ${esc(p.locality||p.city||'')}</div>
-                </div>
-              </div>`;
-          }).join('')}
-        </div>`;
-    } catch(e) {
-      document.getElementById('similar-section').innerHTML = '';
+async function toggleFav(){
+  if(!cu){window.location.href='/login.html';return;}
+  const btn=document.getElementById('fav-btn');
+  try{
+    if(isFav){
+      await fetch(`/api/favorites/${pid}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});
+      isFav=false; toast('Removed from saved');
+    }else{
+      await fetch('/api/favorites',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify({property_id:Number(pid)})});
+      isFav=true; toast('❤️ Saved!');
     }
-  }
+    btn.className=`fav-btn ${isFav?'saved':''}`;
+    btn.innerHTML=isFav?'❤️ Saved':'🤍 Save Property';
+  }catch(e){toast('Failed');}
+}
 
-  // ── Gallery ──────────────────────────────────────
-  function setPhoto(idx) {
-    if (!property?.photos?.length) return;
-    currentPhoto = idx;
-    const img = document.getElementById('main-photo');
-    if (img) img.src = property.photos[idx];
-    document.querySelectorAll('.gallery-thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
-  }
-
-  function changePhoto(dir) {
-    if (!property?.photos?.length) return;
-    setPhoto((currentPhoto + dir + property.photos.length) % property.photos.length);
-  }
-
-  // ── Lightbox ─────────────────────────────────────
-  function openLb(idx) {
-    if (!property?.photos?.length) return;
-    lbIndex = idx; updateLb();
-    document.getElementById('lightbox').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function closeLb() {
-    document.getElementById('lightbox').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  function lbNav(dir) {
-    if (!property?.photos?.length) return;
-    lbIndex = (lbIndex + dir + property.photos.length) % property.photos.length;
-    updateLb();
-  }
-  function updateLb() {
-    document.getElementById('lb-img').src = property.photos[lbIndex];
-    document.getElementById('lb-counter').textContent = `${lbIndex+1} / ${property.photos.length}`;
-  }
-
-  document.getElementById('lightbox').addEventListener('click', function(e) {
-    if (e.target === this) closeLb();
-  });
-  document.addEventListener('keydown', e => {
-    if (!document.getElementById('lightbox').classList.contains('open')) return;
-    if (e.key === 'ArrowRight') lbNav(1);
-    if (e.key === 'ArrowLeft')  lbNav(-1);
-    if (e.key === 'Escape')     closeLb();
-  });
-
-  // ── Save (Favorites) ─────────────────────────────
-  async function toggleSave() {
-    if (!currentUser || !token) { window.location.href = '/login.html'; return; }
-    if (!property) return;
-    const btn = document.getElementById('save-btn');
-    if (!btn) return;
-    btn.disabled = true;
-
-    try {
-      if (isSaved) {
-        const res = await fetch(`/api/favorites/${property.id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) throw new Error('Failed');
-        isSaved = false;
-        btn.textContent = '🤍 Save';
-        btn.classList.remove('saved');
-        toast('Removed from favorites');
-      } else {
-        const res = await fetch('/api/favorites', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ property_id: property.id })
-        });
-        if (!res.ok) throw new Error('Failed');
-        isSaved = true;
-        btn.textContent = '❤️ Saved';
-        btn.classList.add('saved');
-        toast('❤️ Saved to favorites!');
-      }
-    } catch(e) {
-      toast('❌ Failed to update favorites');
-    }
-    btn.disabled = false;
-  }
-
-  // ── Message Owner ─────────────────────────────────
-  function contactOwner() {
-    if (!currentUser) { window.location.href = '/login.html'; return; }
-    if (!property.listed_by) { toast('Owner contact not available'); return; }
-    const params = new URLSearchParams({
-      to: property.listed_by,
-      listing: property.id
-    });
-    window.location.href = `/messages.html?${params.toString()}`;
-  }
-
-  // ── Share ─────────────────────────────────────────
-  function shareProperty() {
-    if (navigator.share) {
-      navigator.share({ title: property?.title || 'Property on Estate49', url: window.location.href });
-    } else {
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => toast('🔗 Link copied!'))
-        .catch(() => toast('🔗 ' + window.location.href));
-    }
-  }
-
-  // ── Map ───────────────────────────────────────────
-  function openMap() {
-    const q = encodeURIComponent([property?.address, property?.locality, property?.city].filter(Boolean).join(', '));
-    window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank');
-  }
-
-  // ── EMI ───────────────────────────────────────────
-  function calcEMI(principal, rate, years) {
-    const p = principal * 0.8;
-    const r = rate / 12 / 100;
-    const n = years * 12;
-    if (!r) return Math.round(p/n).toLocaleString('en-IN');
-    return Math.round(p * r * Math.pow(1+r,n) / (Math.pow(1+r,n)-1)).toLocaleString('en-IN');
-  }
-
-  // ── Not Found ─────────────────────────────────────
-  function showNotFound() {
-    document.getElementById('content-wrap').innerHTML = `
-      <div class="not-found" style="grid-column:1/-1">
-        <div class="not-found-icon">🏚️</div>
-        <div class="not-found-title">Property Not Found</div>
-        <div style="color:var(--muted);font-size:14px;margin:8px 0 24px">This listing may have been removed.</div>
-        <a href="/browse.html" style="display:inline-block;padding:12px 24px;background:var(--primary);color:white;border-radius:12px;font-weight:600;text-decoration:none">Browse All Properties</a>
-      </div>`;
-  }
-
-  // ── Helpers ───────────────────────────────────────
-  function formatPrice(n) {
-    n = Number(n);
-    if (n >= 10000000) return (n/10000000).toFixed(1).replace(/\.0$/,'') + ' Cr';
-    if (n >= 100000)   return (n/100000).toFixed(1).replace(/\.0$/,'') + ' L';
-    return n.toLocaleString('en-IN');
-  }
-  function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
-  function esc(t) { return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function timeAgo(dateStr) {
-    const days = Math.floor((Date.now() - new Date(dateStr)) / 86400000);
-    if (days === 0) return 'today';
-    if (days === 1) return 'yesterday';
-    if (days < 7)  return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days/7)} weeks ago`;
-    return `${Math.floor(days/30)} months ago`;
-  }
-  function toast(msg) {
-    const el = document.getElementById('toast-el');
-    el.textContent = msg; el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 2500);
-  }
+function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN');}
+function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cp(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
+function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
 </script>
 </body>
 </html>

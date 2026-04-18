@@ -1,168 +1,101 @@
-const express  = require('express');
-const router   = express.Router();
-const supabase = require('../db');
+const express = require('express');
+const router = express.Router();
+const db = require('../db');
+const { authMiddleware } = require('./auth-middleware');
 
-// IMPORTANT: /inbox/:userId MUST be defined before /:propertyId
-
-// GET /api/messages/inbox/:userId — grouped conversation list for sidebar
-router.get('/inbox/:userId', async (req, res) => {
+// GET all conversations for current user
+router.get('/conversations', authMiddleware, async (req, res) => {
   try {
-    const { userId } = req.params;
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*, properties(id, title, city, locality, photos)')
-      .or(`senderid.eq.${userId},receiverid.eq.${userId}`)
-      .order('createdat', { ascending: false });
+    const uid = req.user.id;
+    const { data, error } = await db.from('conversations')
+      .select('*, properties(id,title,photos,price,type,city,locality)')
+      .or(`participant_1.eq.${uid},participant_2.eq.${uid}`)
+      .order('last_message_at', { ascending: false, nullsFirst: false });
+    if (error) throw error;
 
-    if (error) return res.json([]);
-
-    const map = new Map();
-    (data || []).forEach(msg => {
-      const otherId    = msg.senderid === userId ? msg.receiverid : msg.senderid;
-      const propId     = msg.propertyid || 'general';
-      const key        = `${propId}_${otherId}`;
-
-      if (!map.has(key)) {
-        map.set(key, {
-          key,
-          property_id:     msg.propertyid,
-          property:        msg.properties,
-          other_user_id:   otherId,
-          last_message:    msg.message || '',
-          last_message_at: msg.createdat,
-          unread_count:    0
-        });
-      }
-      if (!msg.isread && msg.receiverid === userId) {
-        map.get(key).unread_count++;
-      }
-    });
-
-    res.json(Array.from(map.values()));
-  } catch (err) {
-    console.error('GET /api/messages/inbox error:', err.message);
-    res.json([]);
-  }
-});
-
-// GET /api/messages — thread between two users for a property
-// Query params: ?user1=UUID&user2=UUID&property_id=X
-router.get('/', async (req, res) => {
-  try {
-    const { property_id, user1, user2 } = req.query;
-    if (!user1 || !user2) return res.json([]);
-
-    let query = supabase
-      .from('messages')
-      .select('*')
-      .or(
-        `and(senderid.eq.${user1},receiverid.eq.${user2}),` +
-        `and(senderid.eq.${user2},receiverid.eq.${user1})`
-      )
-      .order('createdat', { ascending: true });
-
-    if (property_id) query = query.eq('propertyid', property_id);
-
-    const { data, error } = await query;
-    if (error) return res.json([]);
-
-    // Normalize DB column names → frontend-friendly names
-    const normalized = (data || []).map(m => ({
-      ...m,
-      sender_id:   m.senderid,
-      receiver_id: m.receiverid,
-      property_id: m.propertyid,
-      sender_name: m.sendername,
-      is_read:     m.isread,
-      created_at:  m.createdat
+    const enriched = await Promise.all((data || []).map(async conv => {
+      const otherId = conv.participant_1 === uid ? conv.participant_2 : conv.participant_1;
+      const { data: profile } = await db.from('profiles')
+        .select('id,fullname,avatar_url').eq('id', otherId).single();
+      const { count } = await db.from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('conversation_id', conv.id)
+        .eq('read', false)
+        .neq('sender_id', uid);
+      return { ...conv, other_profile: profile || { id: otherId, fullname: 'User' }, unread_count: count || 0 };
     }));
-    res.json(normalized);
-  } catch (err) {
-    res.json([]);
-  }
+    res.json(enriched);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST /api/messages — send a message
-router.post('/', async (req, res) => {
+// POST get or create conversation
+router.post('/conversation', authMiddleware, async (req, res) => {
   try {
-    // Accept both snake_case (messages.html) and camelCase (legacy)
-    const propertyid  = req.body.propertyid  || req.body.property_id  || null;
-    const senderid    = req.body.senderid    || req.body.sender_id;
-    const receiverid  = req.body.receiverid  || req.body.receiver_id;
-    const sendername  = req.body.sendername  || req.body.sender_name  || 'User';
-    const { message } = req.body;
+    const uid = req.user.id;
+    const { to, property_id } = req.body;
+    if (!to) return res.status(400).json({ error: 'to (user id) required' });
+    if (uid === to) return res.status(400).json({ error: 'Cannot message yourself' });
 
-    if (!senderid || !receiverid || !message) {
-      return res.status(400).json({ error: 'senderid, receiverid, and message are required' });
-    }
+    // Find existing
+    const { data: existing } = await db.from('conversations').select('*')
+      .or(`and(participant_1.eq.${uid},participant_2.eq.${to}),and(participant_1.eq.${to},participant_2.eq.${uid})`)
+      .eq('property_id', property_id || null)
+      .maybeSingle();
+    if (existing) return res.json(existing);
 
-    const { data, error } = await supabase
-      .from('messages')
-      .insert([{
-        propertyid,
-        senderid,
-        receiverid,
-        sendername,
-        message:   message.trim(),
-        isread:    false,
-        createdat: new Date().toISOString()
-      }])
-      .select()
-      .single();
-
+    const { data, error } = await db.from('conversations')
+      .insert({ participant_1: uid, participant_2: to, property_id: property_id || null })
+      .select().single();
     if (error) throw error;
-
-    // Fire notification for receiver (non-blocking)
-    supabase.from('notifications').insert([{
-      userid:    receiverid,
-      type:      'message',
-      title:     `New message from ${sendername}`,
-      body:      message.slice(0, 80),
-      isread:    false,
-      createdat: new Date().toISOString()
-    }]).then(() => {}).catch(() => {});
-
     res.status(201).json(data);
-  } catch (err) {
-    console.error('POST /api/messages error:', err.message);
-    res.status(500).json({ error: err.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH /api/messages/read — mark messages as read
-router.patch('/read', async (req, res) => {
+// GET messages in conversation
+router.get('/:conv_id', authMiddleware, async (req, res) => {
   try {
-    const propertyid = req.body.property_id || req.body.propertyid;
-    const senderid   = req.body.sender_id   || req.body.senderid;
-    const receiverid = req.body.receiver_id || req.body.receiverid;
+    const uid = req.user.id;
+    const { data: conv } = await db.from('conversations')
+      .select('*').eq('id', req.params.conv_id).single();
+    if (!conv) return res.status(404).json({ error: 'Not found' });
+    if (conv.participant_1 !== uid && conv.participant_2 !== uid)
+      return res.status(403).json({ error: 'Forbidden' });
 
-    const { error } = await supabase
-      .from('messages')
-      .update({ isread: true })
-      .eq('receiverid', receiverid)
-      .eq('senderid',   senderid)
-      .eq('propertyid', propertyid)
-      .eq('isread', false);
+    const { data, error } = await db.from('messages')
+      .select('*').eq('conversation_id', req.params.conv_id).order('created_at');
     if (error) throw error;
-    res.json({ success: true });
-  } catch (err) {
-    res.json({ success: false });
-  }
+
+    // Mark as read
+    await db.from('messages').update({ read: true })
+      .eq('conversation_id', req.params.conv_id)
+      .neq('sender_id', uid).eq('read', false);
+
+    res.json(data || []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/messages/:propertyId — all messages for a property (legacy)
-router.get('/:propertyId', async (req, res) => {
+// POST send message
+router.post('/:conv_id/send', authMiddleware, async (req, res) => {
   try {
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('propertyid', req.params.propertyId)
-      .order('createdat', { ascending: true });
-    if (error) return res.json([]);
-    res.json(data || []);
-  } catch (err) {
-    res.json([]);
-  }
+    const uid = req.user.id;
+    const { content } = req.body;
+    if (!content?.trim()) return res.status(400).json({ error: 'content required' });
+
+    const { data: conv } = await db.from('conversations')
+      .select('*').eq('id', req.params.conv_id).single();
+    if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+    if (conv.participant_1 !== uid && conv.participant_2 !== uid)
+      return res.status(403).json({ error: 'Forbidden' });
+
+    const { data, error } = await db.from('messages')
+      .insert({
+        conversation_id: Number(req.params.conv_id),
+        sender_id: uid,
+        content: content.trim()
+      }).select().single();
+    if (error) throw error;
+    res.status(201).json(data);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;

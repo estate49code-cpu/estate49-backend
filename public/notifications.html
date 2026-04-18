@@ -1,256 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Notifications — Estate49</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/auth.js"></script>
-  <script src="/nav.js"></script>
+  <script src="/auth.js"></script><script src="/nav.js"></script>
+  <link rel="stylesheet" href="/style.css"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --primary:#c0392b; --primary-dark:#a93226; --primary-light:#fadbd8; --bg:#f7f7f8; --card:#ffffff; --border:#e5e5e5; --text:#0d0d0d; --muted:#6e6e80; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-    .auth-loading { position:fixed; inset:0; background:white; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px; z-index:9999; }
-    .al-spin { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-
-    nav { background:white; border-bottom:1px solid var(--border); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:0 1px 8px rgba(0,0,0,0.04); }
-    .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
-    .nav-logo-icon { width:32px; height:32px; background:var(--primary); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:16px; }
-    .nav-logo-text { font-size:17px; font-weight:800; color:var(--primary); }
-    .nav-right { display:flex; align-items:center; gap:10px; }
-    .nav-link { padding:6px 12px; border-radius:8px; font-size:13px; font-weight:500; color:var(--muted); text-decoration:none; transition:all 0.2s; }
-    .nav-link:hover { background:var(--bg); color:var(--text); }
-    .nav-user-wrap { position:relative; }
-    .nav-avatar { width:32px; height:32px; border-radius:50%; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; cursor:pointer; }
-    .nav-dropdown { display:none; position:absolute; top:calc(100% + 8px); right:0; background:white; border:1px solid var(--border); border-radius:14px; padding:8px; min-width:180px; box-shadow:0 8px 24px rgba(0,0,0,0.12); z-index:200; }
-    .nav-dropdown.open { display:block; }
-    .nav-dropdown-name { padding:8px 12px 4px; font-size:13px; font-weight:600; }
-    .nav-dropdown-email { padding:0 12px 8px; font-size:11px; color:var(--muted); border-bottom:1px solid var(--border); margin-bottom:6px; }
-    .nav-dropdown-item { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:8px; font-size:13px; color:var(--muted); cursor:pointer; transition:all 0.2s; border:none; background:none; width:100%; text-align:left; text-decoration:none; }
-    .nav-dropdown-item:hover { background:var(--bg); color:var(--text); }
-    .nav-dropdown-item.signout { color:var(--primary); }
-    .nav-dropdown-item.signout:hover { background:var(--primary-light); }
-
-    .page { display:none; }
-    .container { max-width: 700px; margin: 0 auto; padding: 32px 20px; }
-
-    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
-    .page-title { font-size:22px; font-weight:800; display:flex; align-items:center; gap:10px; }
-    .btn-markall { padding:8px 16px; background:white; border:1.5px solid var(--border); border-radius:10px; font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; color:var(--muted); transition:all 0.2s; }
-    .btn-markall:hover { border-color:var(--primary); color:var(--primary); }
-
-    .tab-bar { display:flex; gap:4px; margin-bottom:20px; background:white; border:1px solid var(--border); border-radius:12px; padding:4px; }
-    .tab-btn { flex:1; padding:8px; text-align:center; font-size:13px; font-weight:500; border:none; background:none; cursor:pointer; color:var(--muted); border-radius:8px; transition:all 0.2s; font-family:inherit; }
-    .tab-btn.active { background:var(--primary); color:white; font-weight:600; }
-
-    .notif-card { background:white; border:1px solid var(--border); border-radius:16px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
-    .notif-item { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.2s; }
-    .notif-item:last-child { border-bottom:none; }
-    .notif-item:hover { background:var(--bg); }
-    .notif-item.unread { background: var(--primary-light); }
-    .notif-item.unread:hover { background: #f5c6c3; }
-    .notif-icon { width:42px; height:42px; border-radius:12px; background:white; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
-    .notif-item.unread .notif-icon { background:white; }
-    .notif-body { flex:1; }
-    .notif-text { font-size:14px; font-weight:500; line-height:1.5; }
-    .notif-item.unread .notif-text { font-weight:600; }
-    .notif-meta { display:flex; align-items:center; gap:8px; margin-top:4px; }
-    .notif-time { font-size:11px; color:var(--muted); }
-    .notif-tag { font-size:10px; font-weight:600; padding:2px 8px; border-radius:20px; text-transform:uppercase; }
-    .notif-tag.enquiry { background:#e8f5e9; color:#2e7d32; }
-    .notif-tag.message { background:#e3f2fd; color:#1565c0; }
-    .notif-tag.system { background:#f3e5f5; color:#6a1b9a; }
-    .notif-dot { width:8px; height:8px; border-radius:50%; background:var(--primary); flex-shrink:0; margin-top:4px; }
-
-    .empty-state { text-align:center; padding:60px 20px; background:white; border:1px solid var(--border); border-radius:16px; }
-    .empty-icon { font-size:52px; margin-bottom:12px; }
-    .empty-title { font-size:16px; font-weight:700; margin-bottom:6px; }
-    .empty-sub { font-size:13px; color:var(--muted); }
-
-    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(10px); background:#1a1a1a; color:white; padding:10px 20px; border-radius:20px; font-size:13px; opacity:0; transition:all 0.3s; z-index:1000; pointer-events:none; }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-
-    @media (max-width: 640px) { nav { padding:0 16px; } .container { padding:20px 14px; } }
+    .nw{max-width:640px;margin:0 auto;padding:36px 24px;}
+    .nh{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+    .nh-title{font-size:var(--text-2xl);font-weight:800;}
+    .nitem{display:flex;align-items:flex-start;gap:14px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:10px;transition:all var(--transition);cursor:pointer;}
+    .nitem:hover{border-color:var(--primary);background:var(--primary-xlight);}
+    .nitem.unread{border-left:3px solid var(--primary);}
+    .nicon{font-size:26px;flex-shrink:0;}
+    .ntext{font-size:var(--text-sm);line-height:1.5;}
+    .ntime{font-size:var(--text-xs);color:var(--faint);margin-top:4px;}
+    .udot{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;}
+    @media(max-width:600px){.nw{padding:16px;}}
   </style>
 </head>
 <body>
-
-<div class="auth-loading" id="auth-loading">
-  <div style="width:56px;height:56px;background:var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;">🏠</div>
-  <div class="al-spin"></div>
-</div>
-
+<div class="auth-loading" id="al"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
 <div class="page" id="page">
-  <nav>
-    <a class="nav-logo" href="/">
-      <div class="nav-logo-icon">🏠</div>
-      <span class="nav-logo-text">Estate49</span>
-    </a>
-    <div class="nav-right">
-      <a class="nav-link" href="/">Home</a>
-      <a class="nav-link" href="/browse.html">Browse</a>
-      <a class="nav-link" href="/list-property.html">List Property</a>
-      <a class="nav-link" href="/chat.html">AI Chat</a>
-      <div class="nav-user-wrap">
-        <div class="nav-avatar" id="nav-avatar" onclick="toggleNavDropdown()">👤</div>
-        <div class="nav-dropdown" id="nav-dropdown">
-          <div class="nav-dropdown-name" id="nav-dropdown-name">Loading...</div>
-          <div class="nav-dropdown-email" id="nav-dropdown-email"></div>
-          <a class="nav-dropdown-item" href="/profile.html">👤 My Profile</a>
-          <a class="nav-dropdown-item" href="/messages.html">💬 Messages</a>
-          <button class="nav-dropdown-item signout" onclick="signOut()">🚪 Sign Out</button>
-        </div>
-      </div>
+  <div id="navbar-root"></div>
+  <div class="nw">
+    <div class="nh">
+      <div class="nh-title">🔔 Notifications</div>
+      <button class="btn btn-secondary" onclick="readAll()">Mark all read</button>
     </div>
-  </nav>
-
-  <div class="container">
-    <div class="page-header">
-      <div class="page-title">🔔 Notifications</div>
-      <button class="btn-markall" onclick="markAllRead()">✓ Mark all as read</button>
-    </div>
-
-    <div class="tab-bar">
-      <button class="tab-btn active" id="tab-all" onclick="filterTab('all')">All</button>
-      <button class="tab-btn" id="tab-messages" onclick="filterTab('messages')">💬 Messages</button>
-      <button class="tab-btn" id="tab-enquiries" onclick="filterTab('enquiries')">📋 Enquiries</button>
-    </div>
-
-    <div id="notif-container">
-      <div class="empty-state">
-        <div class="al-spin" style="margin:0 auto 16px"></div>
-        <div class="empty-sub">Loading notifications...</div>
-      </div>
+    <div id="nlist">
+      ${Array(4).fill('<div class="nitem"><div class="skeleton" style="width:26px;height:26px;border-radius:50%"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:80%"></div><div class="skeleton skeleton-text" style="width:35%"></div></div></div>').join('')}
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast-el"></div>
 
 <script>
-  let currentUser = null;
-  let allNotifs = [];
-  let activeTab = 'all';
+let tok=null;
 
-  window.addEventListener('DOMContentLoaded', async () => {
-    try {
-      const session = await getSession();
-      if (!session) { window.location.href = '/login.html'; return; }
-      currentUser = session.user;
+window.addEventListener('DOMContentLoaded', async () => {
+  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
+  tok=s.access_token;
+  document.getElementById('al').style.display='none';
+  document.getElementById('page').style.display='block';
+  await initNavbar({active:'notifications'});
+  await load();
+});
 
-      const fullName = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
-      const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
-      document.getElementById('nav-avatar').textContent = initials;
-      document.getElementById('nav-dropdown-name').textContent = fullName;
-      document.getElementById('nav-dropdown-email').textContent = currentUser.email;
-
-      document.getElementById('auth-loading').style.display = 'none';
-      document.getElementById('page').style.display = 'block';
-
-      loadNotifications();
-    } catch(e) { window.location.href = '/login.html'; }
-  });
-
-  // ── Load Notifications (Supabase direct) ──
-  async function loadNotifications() {
-    document.getElementById('notif-container').innerHTML = `<div class="empty-state"><div class="al-spin" style="margin:0 auto 16px"></div><div class="empty-sub">Loading notifications...</div></div>`;
-    try {
-      const { data, error } = await sb.from('notifications')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      allNotifs = data || [];
-      renderNotifs(allNotifs);
-    } catch(e) {
-      allNotifs = [];
-      renderNotifs([]);
-    }
-  }
-
-  function filterTab(tab) {
-    activeTab = tab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + tab).classList.add('active');
-    let filtered = allNotifs;
-    if (tab === 'messages') filtered = allNotifs.filter(n => n.type === 'message');
-    if (tab === 'enquiries') filtered = allNotifs.filter(n => n.type === 'enquiry');
-    renderNotifs(filtered);
-  }
-
-  function renderNotifs(notifs) {
-    const c = document.getElementById('notif-container');
-    if (!notifs || !notifs.length) {
-      c.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🔔</div>
-          <div class="empty-title">No notifications</div>
-          <div class="empty-sub">You're all caught up! Notifications for enquiries and messages will appear here.</div>
-        </div>`;
+async function load(){
+  try{
+    const r=await fetch('/api/notifications',{headers:{Authorization:`Bearer ${tok}`}});
+    const data=await r.json(); const el=document.getElementById('nlist');
+    if(!Array.isArray(data)||!data.length){
+      el.innerHTML='<div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-title">No notifications</div><div class="empty-sub">When owners respond or someone messages you, it will appear here</div></div>';
       return;
     }
-    c.innerHTML = `<div class="notif-card">${notifs.map(n => {
-      const icon = n.type === 'message' ? '💬' : n.type === 'enquiry' ? '📋' : '🔔';
-      const tag = n.type || 'system';
-      return `
-        <div class="notif-item ${n.read ? '' : 'unread'}" onclick="markRead('${n.id}')">
-          <div class="notif-icon">${n.icon || icon}</div>
-          <div class="notif-body">
-            <div class="notif-text">${n.message || n.text || 'New notification'}</div>
-            <div class="notif-meta">
-              <span class="notif-time">${timeAgo(n.created_at)}</span>
-              <span class="notif-tag ${tag}">${tag}</span>
-            </div>
-          </div>
-          ${!n.read ? '<div class="notif-dot"></div>' : ''}
-        </div>`; }).join('')}</div>`;
-  }
+    el.innerHTML=data.map(n=>`
+      <div class="nitem ${n.read?'':'unread'}" onclick="markRead(${n.id},this)">
+        <div class="nicon">${n.icon||'🔔'}</div>
+        <div style="flex:1"><div class="ntext">${x(n.message)}</div><div class="ntime">${timeAgo(n.created_at)}</div></div>
+        ${!n.read?'<div class="udot"></div>':''}
+      </div>`).join('');
+  }catch(e){document.getElementById('nlist').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Could not load</div></div>';}
+}
 
-  async function markRead(id) {
-    const { error } = await sb.from('notifications').update({ read: true }).eq('id', id);
-    if (!error) {
-      const n = allNotifs.find(x => x.id === id);
-      if (n) n.read = true;
-      filterTab(activeTab);
-    }
-  }
+async function markRead(id,el){
+  el.classList.remove('unread'); el.querySelector('.udot')?.remove();
+  await fetch(`/api/notifications/${id}/read`,{method:'POST',headers:{Authorization:`Bearer ${tok}`}});
+}
 
-  async function markAllRead() {
-    const { error } = await sb.from('notifications')
-      .update({ read: true })
-      .eq('user_id', currentUser.id)
-      .eq('read', false);
-    if (!error) {
-      allNotifs.forEach(n => n.read = true);
-      filterTab(activeTab);
-      toast('✓ All marked as read');
-    }
-  }
+async function readAll(){
+  await fetch('/api/notifications/read-all',{method:'POST',headers:{Authorization:`Bearer ${tok}`}});
+  document.querySelectorAll('.nitem').forEach(el=>{el.classList.remove('unread');el.querySelector('.udot')?.remove();});
+  toast('All marked as read');
+}
 
-  function timeAgo(dateStr) {
-    if (!dateStr) return '';
-    const diff = (Date.now() - new Date(dateStr)) / 1000;
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
-    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
-    return Math.floor(diff/86400) + 'd ago';
-  }
-
-  function toggleNavDropdown() { document.getElementById('nav-dropdown').classList.toggle('open'); }
-  document.addEventListener('click', e => {
-    const wrap = document.querySelector('.nav-user-wrap');
-    if (wrap && !wrap.contains(e.target)) document.getElementById('nav-dropdown')?.classList.remove('open');
-  });
-  function toast(msg) {
-    const el = document.getElementById('toast-el');
-    el.textContent = msg; el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 2800);
-  }
+function timeAgo(d){
+  const s=Math.floor((Date.now()-new Date(d))/1000);
+  if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
+}
+function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
 </script>
 </body>
 </html>
