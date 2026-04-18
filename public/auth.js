@@ -1,9 +1,13 @@
 const SUPABASE_URL  = 'https://qbbxdtbfxlliqxxlaoed.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiYnhkdGJmeGxsaXF4eGxhb2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzY0MzUsImV4cCI6MjA5MTUxMjQzNX0.g86SW28zVacKDKzb0bZcsJvGTQ1N7Ahy3Ib3DRNL90';
 
-// Safe: use a unique name _sb so it never clashes
 const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-  auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false }
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,   // ← must be true for implicit flow
+    flowType: 'implicit'        // ← force implicit flow
+  }
 });
 
 async function getSession() {
@@ -15,7 +19,10 @@ async function getSession() {
       const s = JSON.parse(stored);
       if ((s.expires_at || 0) > Date.now() / 1000) return s;
       const { data: d2 } = await _sb.auth.refreshSession({ refresh_token: s.refresh_token });
-      if (d2?.session) { localStorage.setItem('e49_session', JSON.stringify(d2.session)); return d2.session; }
+      if (d2?.session) {
+        localStorage.setItem('e49_session', JSON.stringify(d2.session));
+        return d2.session;
+      }
     }
     return null;
   } catch(e) { return null; }
@@ -24,7 +31,10 @@ async function getSession() {
 async function signInWithGoogle() {
   const { error } = await _sb.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin + '/auth/callback' }
+    options: {
+      redirectTo: window.location.origin + '/auth/callback',
+      queryParams: { access_type: 'offline', prompt: 'consent' }
+    }
   });
   if (error) alert('Google sign in failed: ' + error.message);
 }
@@ -32,7 +42,10 @@ async function signInWithGoogle() {
 async function signInWithEmail(email, password) {
   const { data, error } = await _sb.auth.signInWithPassword({ email, password });
   if (error) throw error;
-  if (data?.session) { localStorage.setItem('e49_session', JSON.stringify(data.session)); return data.session; }
+  if (data?.session) {
+    localStorage.setItem('e49_session', JSON.stringify(data.session));
+    return data.session;
+  }
   throw new Error('No session returned');
 }
 
