@@ -23,11 +23,11 @@
     .card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
     .tag{font-size:11px;padding:3px 8px;border-radius:var(--radius-full);background:var(--surface-2);color:var(--muted);font-weight:500;}
     .card-footer{display:flex;gap:8px;}
-    .btn-unfav{flex:1;padding:8px;border-radius:var(--radius-md);border:1px solid var(--border);font-size:var(--text-xs);font-weight:600;color:var(--danger,#c0392b);background:transparent;cursor:pointer;transition:all var(--transition);}
+    .btn-unfav{flex:1;padding:8px;border-radius:var(--radius-md);border:1px solid var(--border);font-size:var(--text-xs);font-weight:600;color:#c0392b;background:transparent;cursor:pointer;transition:all var(--transition);}
     .btn-unfav:hover{background:#fdf0ee;border-color:#c0392b;}
     .btn-view{flex:2;padding:8px;border-radius:var(--radius-md);background:var(--primary);color:#fff;font-size:var(--text-xs);font-weight:600;border:none;cursor:pointer;transition:all var(--transition);}
-    .btn-view:hover{background:var(--primary-dark,#0c4e54);}
-    .empty{text-align:center;padding:80px 24px;}
+    .btn-view:hover{opacity:0.9;}
+    .empty{text-align:center;padding:80px 24px;grid-column:1/-1;}
     .empty-icon{font-size:56px;margin-bottom:16px;}
     .empty h2{font-size:var(--text-lg);font-weight:700;margin-bottom:8px;}
     .empty p{color:var(--muted);font-size:var(--text-sm);margin-bottom:24px;}
@@ -50,16 +50,9 @@
     <div class="fh">❤️ Saved Properties</div>
     <div class="fsub" id="count-txt">Loading your saved properties…</div>
     <div class="cards" id="cards-grid">
-      <!-- skeletons -->
-      ${[1,2,3].map(()=>`
-        <div class="sk-card">
-          <div class="skeleton sk-img"></div>
-          <div class="sk-body">
-            <div class="skeleton sk-line short"></div>
-            <div class="skeleton sk-line full"></div>
-            <div class="skeleton sk-line"></div>
-          </div>
-        </div>`).join('')}
+      <div class="sk-card"><div class="skeleton sk-img"></div><div class="sk-body"><div class="skeleton sk-line short"></div><div class="skeleton sk-line full"></div><div class="skeleton sk-line"></div></div></div>
+      <div class="sk-card"><div class="skeleton sk-img"></div><div class="sk-body"><div class="skeleton sk-line short"></div><div class="skeleton sk-line full"></div><div class="skeleton sk-line"></div></div></div>
+      <div class="sk-card"><div class="skeleton sk-img"></div><div class="sk-body"><div class="skeleton sk-line short"></div><div class="skeleton sk-line full"></div><div class="skeleton sk-line"></div></div></div>
     </div>
   </div>
 </div>
@@ -97,7 +90,7 @@ function renderCards(items) {
   if (!items || items.length === 0) {
     countTxt.textContent = '0 saved properties';
     grid.innerHTML = `
-      <div class="empty" style="grid-column:1/-1">
+      <div class="empty">
         <div class="empty-icon">❤️</div>
         <h2>No saved properties yet</h2>
         <p>Browse properties and tap the heart icon to save them here.</p>
@@ -108,12 +101,15 @@ function renderCards(items) {
 
   countTxt.textContent = `${items.length} saved propert${items.length === 1 ? 'y' : 'ies'}`;
   grid.innerHTML = items.map(fav => {
-    const p = fav.property || fav;
+    const p = fav.properties || {};
+    const propertyId = fav.property_id;
     const img = p.photos?.[0];
-    const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '') : 'Price on request';
-    const tags = [p.bhk ? p.bhk + ' BHK' : null, p.property_type || p.prop_type, p.furnished].filter(Boolean);
+    const price = p.price
+      ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '')
+      : 'Price on request';
+    const tags = [p.bhk ? p.bhk + ' BHK' : null, p.property_type, p.furnished].filter(Boolean);
     return `
-      <div class="card" onclick="window.location.href='/property.html?id=${p.id}'">
+      <div class="card" onclick="window.location.href='/property.html?id=${propertyId}'">
         ${img
           ? `<img class="card-img" src="${img}" alt="${p.title || 'Property'}" loading="lazy"/>`
           : `<div class="card-img-ph">🏠</div>`}
@@ -123,19 +119,19 @@ function renderCards(items) {
           <div class="card-loc">📍 ${[p.locality, p.city].filter(Boolean).join(', ') || 'Location not specified'}</div>
           <div class="card-tags">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
           <div class="card-footer">
-            <button class="btn-unfav" onclick="event.stopPropagation();removeFav('${fav.id || p.id}', this)">🗑 Remove</button>
-            <button class="btn-view" onclick="event.stopPropagation();window.location.href='/property.html?id=${p.id}'">View Property →</button>
+            <button class="btn-unfav" onclick="event.stopPropagation();removeFav(${propertyId}, this)">🗑 Remove</button>
+            <button class="btn-view" onclick="event.stopPropagation();window.location.href='/property.html?id=${propertyId}'">View Property →</button>
           </div>
         </div>
       </div>`;
   }).join('');
 }
 
-async function removeFav(id, btn) {
+async function removeFav(propertyId, btn) {
   btn.disabled = true;
   btn.textContent = 'Removing…';
   try {
-    const r = await fetch(`/api/favorites/${id}`, {
+    const r = await fetch(`/api/favorites/${propertyId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${tok}` }
     });
