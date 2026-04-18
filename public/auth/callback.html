@@ -21,7 +21,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL  = 'https://qbbxdtbfxlliqxxlaoed.supabase.co';
+const SUPABASE_URL     = 'https://qbbxdtbfxlliqxxlaoed.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiYnhkdGJmeGxsaXF4eGxhb2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzY0MzUsImV4cCI6MjA5MTUxMjQzNX0.g86SW28zVacKDKzb0bZcsJvGTQ1N7Ahy3Ib3_DRNL90';
 
 const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -33,6 +33,22 @@ const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   }
 });
 
+async function createProfile(session) {
+  try {
+    await fetch('/api/profiles/me', {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        fullname:   session.user.user_metadata?.full_name || session.user.email || '',
+        avatar_url: session.user.user_metadata?.avatar_url || ''
+      })
+    });
+  } catch(e) { /* non-fatal — profile upsert fails silently */ }
+}
+
 async function handleCallback() {
   try {
     // Parse hash manually for implicit flow: #access_token=...&refresh_token=...
@@ -40,17 +56,13 @@ async function handleCallback() {
     const params = new URLSearchParams(hash);
     const access_token  = params.get('access_token');
     const refresh_token = params.get('refresh_token');
-    const expires_in    = params.get('expires_in');
 
     if (access_token) {
-      // Set the session manually from hash tokens
-      const { data, error } = await client.auth.setSession({
-        access_token,
-        refresh_token
-      });
+      const { data, error } = await client.auth.setSession({ access_token, refresh_token });
       if (error) throw error;
       if (data?.session) {
         localStorage.setItem('e49_session', JSON.stringify(data.session));
+        await createProfile(data.session);
         window.location.replace('/browse.html');
         return;
       }
@@ -64,6 +76,7 @@ async function handleCallback() {
       if (error) throw error;
       if (data?.session) {
         localStorage.setItem('e49_session', JSON.stringify(data.session));
+        await createProfile(data.session);
         window.location.replace('/browse.html');
         return;
       }
@@ -74,6 +87,7 @@ async function handleCallback() {
     const { data } = await client.auth.getSession();
     if (data?.session) {
       localStorage.setItem('e49_session', JSON.stringify(data.session));
+      await createProfile(data.session);
       window.location.replace('/browse.html');
       return;
     }
