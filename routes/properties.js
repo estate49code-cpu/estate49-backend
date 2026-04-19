@@ -9,6 +9,69 @@ async function isAdmin(userId) {
   return !!data;
 }
 
+// ─── ADMIN ROUTES (must be before /:id) ─────────────────────────────
+
+// GET all properties — admin only
+router.get('/admin/all', authMiddleware, async (req, res) => {
+  try {
+    if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
+    const status = req.query.status;
+    let q = db.from('properties').select('*').order('posted_at', { ascending: false });
+    if (status) q = q.eq('status', status);
+    const { data, error } = await q;
+    if (error) throw error;
+    res.json(data || []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET admin stats
+router.get('/admin/stats', authMiddleware, async (req, res) => {
+  try {
+    if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
+    const [all, pending, approved, rejected, usersRes] = await Promise.all([
+      db.from('properties').select('id', { count: 'exact', head: true }),
+      db.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      db.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+      db.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
+      db.from('profiles').select('id', { count: 'exact', head: true }),
+    ]);
+    res.json({
+      total: all.count || 0,
+      pending: pending.count || 0,
+      approved: approved.count || 0,
+      rejected: rejected.count || 0,
+      users: usersRes.count || 0
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// PATCH admin approve/reject
+router.patch('/admin/:id', authMiddleware, async (req, res) => {
+  try {
+    if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
+    const { status, admin_note } = req.body;
+    if (!['approved', 'rejected', 'pending'].includes(status))
+      return res.status(400).json({ error: 'Invalid status' });
+    const { data, error } = await db.from('properties')
+      .update({ status, admin_note: admin_note || null, updated_at: new Date().toISOString() })
+      .eq('id', req.params.id).select().single();
+    if (error) throw error;
+    res.json(data);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// DELETE admin — delete any property
+router.delete('/admin/:id', authMiddleware, async (req, res) => {
+  try {
+    if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
+    const { error } = await db.from('properties').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ─── PUBLIC & USER ROUTES ────────────────────────────────────────────
+
 // GET all — public (only approved)
 router.get('/', async (req, res) => {
   try {
@@ -37,65 +100,6 @@ router.get('/mine', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET all properties — admin only
-router.get('/admin/all', authMiddleware, async (req, res) => {
-  try {
-    if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
-    const status = req.query.status;
-    let q = db.from('properties').select('*').order('posted_at', { ascending: false });
-    if (status) q = q.eq('status', status);
-    const { data, error } = await q;
-    if (error) throw error;
-    res.json(data || []);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// GET admin stats
-router.get('/admin/stats', authMiddleware, async (req, res) => {
-  try {
-    if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
-    const [all, pending, approved, rejected] = await Promise.all([
-      db.from('properties').select('id', { count: 'exact', head: true }),
-      db.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      db.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
-      db.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
-    ]);
-    const usersRes = await db.from('profiles').select('id', { count: 'exact', head: true });
-    res.json({
-      total: all.count || 0,
-      pending: pending.count || 0,
-      approved: approved.count || 0,
-      rejected: rejected.count || 0,
-      users: usersRes.count || 0
-    });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// PATCH admin approve/reject
-router.patch('/admin/:id', authMiddleware, async (req, res) => {
-  try {
-    if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
-    const { status, admin_note } = req.body;
-    if (!['approved', 'rejected', 'pending'].includes(status))
-      return res.status(400).json({ error: 'Invalid status' });
-    const { data, error } = await db.from('properties')
-      .update({ status, admin_note: admin_note || null, updated_at: new Date().toISOString() })
-      .eq('id', req.params.id).select().single();
-    if (error) throw error;
-    res.json(data);
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// DELETE — admin can delete any
-router.delete('/admin/:id', authMiddleware, async (req, res) => {
-  try {
-    if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
-    const { error } = await db.from('properties').delete().eq('id', req.params.id);
-    if (error) throw error;
-    res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
 // GET single — public
 router.get('/:id', async (req, res) => {
   try {
@@ -121,7 +125,7 @@ router.post('/', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH update — auth + owner only (resets to pending)
+// PATCH update — owner only (resets to pending for re-review)
 router.patch('/:id', authMiddleware, async (req, res) => {
   try {
     const { data: ex } = await db.from('properties')
