@@ -46,7 +46,7 @@
     .badge.pending{background:#fff3cd;color:#856404;}
     .badge.approved{background:#d4edda;color:#155724;}
     .badge.rejected{background:#f8d7da;color:#721c24;}
-    .actions{display:flex;gap:6px;}
+    .actions{display:flex;gap:6px;flex-wrap:wrap;}
     .btn-approve{padding:6px 14px;background:#27ae60;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
     .btn-approve:hover{background:#219a52;}
     .btn-reject{padding:6px 14px;background:#e74c3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
@@ -68,6 +68,8 @@
     .loading{text-align:center;padding:48px;color:#888;font-size:14px;}
     .signout-btn{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:8px;font-size:13px;cursor:pointer;transition:all 0.15s;}
     .signout-btn:hover{background:rgba(255,255,255,0.2);}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
     @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr);}.wrap{padding:16px;}.topbar{padding:12px 16px;}}
   </style>
 </head>
@@ -82,7 +84,6 @@
 </div>
 
 <div class="wrap">
-  <!-- Stats -->
   <div class="stats">
     <div class="stat total"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total Listings</div></div>
     <div class="stat pending"><div class="stat-num" id="s-pending">—</div><div class="stat-label">Pending</div></div>
@@ -91,7 +92,6 @@
     <div class="stat users"><div class="stat-num" id="s-users">—</div><div class="stat-label">Total Users</div></div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
     <button class="tab active" onclick="setTab('')">All</button>
     <button class="tab pend" onclick="setTab('pending')">⏳ Pending</button>
@@ -99,12 +99,10 @@
     <button class="tab rejt" onclick="setTab('rejected')">❌ Rejected</button>
   </div>
 
-  <!-- Search -->
   <div class="search-bar">
     <input type="text" id="search" placeholder="Search by title, city, locality…" oninput="filterTable()"/>
   </div>
 
-  <!-- Table -->
   <div class="table-wrap">
     <table>
       <thead>
@@ -138,6 +136,8 @@
   </div>
 </div>
 
+<div class="toast" id="toast-el"></div>
+
 <script>
 let tok = null, allData = [], curTab = '', rejectId = null;
 
@@ -147,7 +147,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   tok = s.access_token;
   document.getElementById('admin-email').textContent = s.user.email;
 
-  // Check admin access
   const test = await fetch('/api/properties/admin/stats', { headers: { Authorization: `Bearer ${tok}` } });
   if (!test.ok) {
     document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:Inter,sans-serif">
@@ -246,14 +245,21 @@ async function updateStatus(id, status, note = null) {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
       body: JSON.stringify(body)
     });
-    if (!r.ok) throw new Error();
-    // Update in local data
-    const idx = allData.findIndex(p => p.id === id);
-    if (idx !== -1) { allData[idx].status = status; if (note) allData[idx].admin_note = note; }
+    const result = await r.json();
+    if (!r.ok) throw new Error(result.error || 'Failed');
+    // Fix: compare as strings to handle number/string mismatch
+    const idx = allData.findIndex(p => String(p.id) === String(id));
+    if (idx !== -1) {
+      allData[idx].status = status;
+      allData[idx].admin_note = note || allData[idx].admin_note;
+    }
     filterTable();
-    // Refresh stats
     refreshStats();
-  } catch (e) { alert('Failed to update status'); }
+    toast(status === 'approved' ? '✅ Approved!' : status === 'rejected' ? '❌ Rejected!' : '⏳ Set to Pending');
+  } catch (e) {
+    console.error('updateStatus error:', e);
+    toast('❌ Failed: ' + e.message);
+  }
 }
 
 async function refreshStats() {
@@ -275,10 +281,11 @@ async function deleteProp(id) {
       headers: { Authorization: `Bearer ${tok}` }
     });
     if (!r.ok) throw new Error();
-    allData = allData.filter(p => p.id !== id);
+    allData = allData.filter(p => String(p.id) !== String(id));
     filterTable();
     refreshStats();
-  } catch (e) { alert('Failed to delete'); }
+    toast('🗑 Property deleted');
+  } catch (e) { toast('Failed to delete'); }
 }
 
 function openReject(id) {
@@ -296,10 +303,16 @@ function confirmReject() {
   updateStatus(rejectId, 'rejected', note || null);
 }
 
-// Close modal on overlay click
 document.getElementById('reject-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+
+function toast(m) {
+  const el = document.getElementById('toast-el');
+  el.textContent = m;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
 </script>
 </body>
 </html>
