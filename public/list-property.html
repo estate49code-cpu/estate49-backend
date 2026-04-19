@@ -24,7 +24,6 @@
     .type-btn.sel{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
     .form-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
     .form-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    /* sticky save bar sits ABOVE bottom nav on mobile */
     .save-bar{
       position:sticky;bottom:0;
       background:rgba(255,255,255,0.96);
@@ -35,8 +34,8 @@
       z-index:100;
     }
     .prog{font-size:var(--text-xs);color:var(--muted);flex:1;}
-
-    /* ===== MOBILE PATCH ===== */
+    /* ✅ Phone field highlight */
+    #contact_phone.required-highlight{border-color:var(--primary);box-shadow:0 0 0 3px rgba(192,57,43,0.15);}
     @media(max-width:768px){
       .lw{padding:14px 14px 0;}
       .lh{font-size:var(--text-xl);}
@@ -46,19 +45,13 @@
       .photos-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;}
       .save-bar{
         padding:12px 14px;
-        /* sit above the 62px bottom nav */
         bottom:calc(62px + env(safe-area-inset-bottom,0px));
       }
       .save-bar .btn{font-size:var(--text-xs);padding:9px 14px;}
       .type-btn{padding:9px 18px;font-size:var(--text-xs);}
     }
-    @media(max-width:380px){
-      .photos-grid{grid-template-columns:repeat(3,1fr);}
-    }
-    @media(hover:none){
-      .type-btn:active{transform:scale(0.97);}
-      .photo-slot:active{opacity:0.8;}
-    }
+    @media(max-width:380px){.photos-grid{grid-template-columns:repeat(3,1fr);}}
+    @media(hover:none){.type-btn:active{transform:scale(0.97);}.photo-slot:active{opacity:0.8;}}
   </style>
 </head>
 <body>
@@ -69,7 +62,7 @@
     <div class="lh" id="page-title">List Your Property</div>
     <div class="lsub">Fill in the details below. All starred (*) fields are required.</div>
 
-    <!-- STEP 1: Type & Basic -->
+    <!-- STEP 1 -->
     <div class="step">
       <div class="step-title"><div class="step-num">1</div>Property Type &amp; Listing</div>
       <div class="form-group" style="margin-bottom:16px">
@@ -108,7 +101,7 @@
       </div>
     </div>
 
-    <!-- STEP 2: Title, Location, Description -->
+    <!-- STEP 2 -->
     <div class="step">
       <div class="step-title"><div class="step-num">2</div>Title &amp; Location</div>
       <div class="form-group" style="margin-bottom:16px">
@@ -135,7 +128,7 @@
       </div>
     </div>
 
-    <!-- STEP 3: Price & Details -->
+    <!-- STEP 3 -->
     <div class="step">
       <div class="step-title"><div class="step-num">3</div>Price &amp; Details</div>
       <div class="form-3" style="margin-bottom:16px">
@@ -168,7 +161,7 @@
       </div>
     </div>
 
-    <!-- STEP 4: Furnishing & Availability -->
+    <!-- STEP 4 -->
     <div class="step">
       <div class="step-title"><div class="step-num">4</div>Furnishing &amp; Availability</div>
       <div class="form-2" style="margin-bottom:16px">
@@ -211,7 +204,7 @@
       </div>
     </div>
 
-    <!-- STEP 5: Contact -->
+    <!-- STEP 5 -->
     <div class="step">
       <div class="step-title"><div class="step-num">5</div>Contact Details</div>
       <div class="form-2" style="margin-bottom:16px">
@@ -220,8 +213,9 @@
           <input type="text" class="form-input" id="contact_name" placeholder="Your name"/>
         </div>
         <div class="form-group">
-          <label class="form-label">Phone *</label>
-          <input type="tel" class="form-input" id="contact_phone" placeholder="9876543210"/>
+          <!-- ✅ Mobile number — required, highlighted -->
+          <label class="form-label">Mobile Number * <span style="font-size:11px;color:var(--primary);font-weight:600">(required to list)</span></label>
+          <input type="tel" class="form-input" id="contact_phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric"/>
         </div>
       </div>
       <div class="form-2" style="margin-bottom:16px">
@@ -244,7 +238,7 @@
       </div>
     </div>
 
-    <!-- STEP 6: Photos -->
+    <!-- STEP 6 -->
     <div class="step">
       <div class="step-title"><div class="step-num">6</div>Photos</div>
       <p class="form-hint" style="margin-bottom:12px">Add up to 10 photos. First photo will be the cover. JPG/PNG/WEBP, max 10MB each.</p>
@@ -255,7 +249,6 @@
       <div id="upload-status" style="margin-top:8px;font-size:var(--text-xs);color:var(--muted)"></div>
     </div>
 
-    <!-- spacer so last step not hidden behind save bar on mobile -->
     <div style="height:8px"></div>
   </div>
 
@@ -271,6 +264,7 @@
 let tok=null, cu=null, ltype='rent', photos=[], editId=null;
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // ✅ Must be signed in to list property
   const s=await getSession(); if(!s){window.location.href='/login.html';return;}
   cu=s.user; tok=s.access_token;
   document.getElementById('al').style.display='none';
@@ -354,9 +348,30 @@ function rmPhoto(i){photos.splice(i,1);renderPhotos();}
 
 async function submit(){
   const V=id=>document.getElementById(id)?.value?.trim()||'';
-  if(!V('title')||!V('price')||!V('city')||!V('locality')||!V('contact_name')||!V('contact_phone')){
+
+  // ✅ Validate required fields
+  if(!V('title')||!V('price')||!V('city')||!V('locality')||!V('contact_name')){
     toast('Fill in all required (*) fields'); return;
   }
+
+  // ✅ Mobile number mandatory validation
+  if(!V('contact_phone')){
+    const ph=document.getElementById('contact_phone');
+    ph.classList.add('required-highlight');
+    ph.focus();
+    toast('📱 Mobile number is required to publish your listing');
+    setTimeout(()=>ph.classList.remove('required-highlight'),3000);
+    return;
+  }
+  if(!/^[6-9]\d{9}$/.test(V('contact_phone'))){
+    const ph=document.getElementById('contact_phone');
+    ph.classList.add('required-highlight');
+    ph.focus();
+    toast('Enter a valid 10-digit Indian mobile number (starts with 6-9)');
+    setTimeout(()=>ph.classList.remove('required-highlight'),3000);
+    return;
+  }
+
   const btn=document.getElementById('sub-btn'); btn.disabled=true; btn.textContent='Publishing…';
   const bools=['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
     'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',

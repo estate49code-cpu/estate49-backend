@@ -50,8 +50,9 @@
     .info-key{color:var(--muted);}
     .info-val{font-weight:600;}
     .psec{margin-bottom:32px;}
-
-    /* ===== MOBILE STICKY BOTTOM CTA (shows instead of sidebar on mobile) ===== */
+    .phone-gate{color:var(--primary);font-style:italic;cursor:pointer;}
+    .phone-gate:hover{text-decoration:underline;}
+    /* Mobile sticky bottom CTA */
     .mobile-cta{
       display:none;
       position:fixed;bottom:62px;left:0;right:0;
@@ -66,16 +67,14 @@
     }
     .mobile-cta-price{font-size:var(--text-lg);font-weight:900;color:var(--primary);flex:1;}
     .mobile-cta-sub{font-size:10px;color:var(--muted);}
-
-    /* ===== RESPONSIVE ===== */
     @media(max-width:900px){
       .layout{grid-template-columns:1fr;}
-      .sidebar{display:none;} /* hide desktop sidebar, show mobile CTA instead */
+      .sidebar{display:none;}
       .pgal-main{height:260px;}
       .pgal-ph{height:260px;}
     }
     @media(max-width:768px){
-      .pw{padding:14px 14px 160px;} /* bottom padding for mobile CTA + bottom nav */
+      .pw{padding:14px 14px 160px;}
       .prop-title{font-size:var(--text-xl);}
       .prop-stats{gap:8px;}
       .pstat{min-width:68px;padding:8px 10px;}
@@ -108,8 +107,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Mobile sticky bottom CTA (rendered by JS after load) -->
   <div class="mobile-cta" id="mobile-cta" style="display:none"></div>
 </div>
 <div class="toast" id="toast-el"></div>
@@ -120,8 +117,9 @@ const pid=new URLSearchParams(window.location.search).get('id');
 
 window.addEventListener('DOMContentLoaded', async () => {
   if(!pid){window.location.href='/browse.html';return;}
-  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
-  cu=s.user; tok=s.access_token;
+  // ✅ Allow guests to view — no forced login
+  const s=await getSession();
+  if(s){ cu=s.user; tok=s.access_token; }
   document.getElementById('al').style.display='none';
   document.getElementById('page').style.display='block';
   await initNavbar({});
@@ -141,6 +139,7 @@ async function loadProp(){
 }
 
 async function checkFav(){
+  if(!tok) return; // guests skip
   try{
     const r=await fetch('/api/favorites',{headers:{Authorization:`Bearer ${tok}`}});
     if(r.ok){const d=await r.json(); isFav=(d||[]).some(f=>String(f.property_id)===String(pid));}
@@ -174,6 +173,13 @@ function render(){
 
   const ownerIni=(p.contact_name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
 
+  // ✅ Phone — show only if logged in
+  const phoneHtml=p.contact_phone
+    ? cu
+      ? `<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><a href="tel:${x(p.contact_phone)}" style="color:inherit">${x(p.contact_phone)}</a></span></div>`
+      : `<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><span class="phone-gate" onclick="showLoginPrompt('Sign in to view contact number')">🔐 Sign in to view</span></span></div>`
+    : '';
+
   const sidebarHtml=`
     <div class="ccard">
       <div class="price-big">${pr}</div>
@@ -193,7 +199,7 @@ function render(){
         ${isOwn?`<a href="/list-property.html?edit=${p.id}" class="btn btn-secondary btn-full">✏️ Edit Listing</a>`:''}
       </div>
       <div class="info-rows">
-        ${p.contact_phone?`<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><a href="tel:${x(p.contact_phone)}" style="color:inherit">${x(p.contact_phone)}</a></span></div>`:''}
+        ${phoneHtml}
         ${p.contact_email?`<div class="info-row"><span class="info-key">Email</span><span class="info-val">${x(p.contact_email)}</span></div>`:''}
         ${p.contact_time?`<div class="info-row"><span class="info-key">Best time</span><span class="info-val">${x(p.contact_time)}</span></div>`:''}
         ${p.property_type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${x(cp(p.property_type))}</span></div>`:''}
@@ -230,25 +236,20 @@ function render(){
         </div>
         ${p.description?`<div class="psec"><h2 class="section-title">About this property</h2><p class="desc-text">${x(p.description)}</p></div>`:''}
         ${amenities.length?`<div class="psec"><h2 class="section-title">Amenities</h2><div class="amen-grid">${amenities.map(([icon,name])=>`<div class="amen-item">${icon} ${name}</div>`).join('')}</div></div>`:''}
-        <!-- Show full contact card inline on mobile (inside content flow) -->
         <div class="psec" id="mobile-contact-card" style="display:none">
-          <h2 class="section-title">Contact & Details</h2>
+          <h2 class="section-title">Contact &amp; Details</h2>
           ${sidebarHtml}
         </div>
       </div>
       <div class="sidebar">${sidebarHtml}</div>
     </div>`;
 
-  // Show mobile contact card on small screens
-  if(window.innerWidth<=900){
-    document.getElementById('mobile-contact-card').style.display='block';
-  }
+  if(window.innerWidth<=900) document.getElementById('mobile-contact-card').style.display='block';
   window.addEventListener('resize',()=>{
     const mcc=document.getElementById('mobile-contact-card');
     if(mcc) mcc.style.display=window.innerWidth<=900?'block':'none';
   });
 
-  // Render mobile sticky CTA bar
   renderMobileCTA(pr, rent, isOwn, p);
 }
 
@@ -265,24 +266,30 @@ function renderMobileCTA(pr, rent, isOwn, p){
     ${!isOwn
       ?`<button class="btn btn-primary" style="flex-shrink:0" onclick="msgOwner()">💬 Message</button>`
       :`<a href="/list-property.html?edit=${p.id}" class="btn btn-secondary" style="flex-shrink:0">✏️ Edit</a>`}
-    ${p.contact_phone?`<a href="tel:${x(p.contact_phone)}" class="btn btn-primary" style="flex-shrink:0">📞 Call</a>`:''}`;
+    ${p.contact_phone
+      ? cu
+        ? `<a href="tel:${x(p.contact_phone)}" class="btn btn-primary" style="flex-shrink:0">📞 Call</a>`
+        : `<button class="btn btn-primary" style="flex-shrink:0" onclick="showLoginPrompt('Sign in to call the owner')">📞 Call</button>`
+      : ''}`;
   cta.style.display='';
 }
 
-function swImg(el, src){
+function swImg(el,src){
   document.getElementById('main-img').src=src;
   document.querySelectorAll('.pgal-thumb').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
 }
 
+// ✅ Gate: sign in to message owner
 function msgOwner(){
-  if(!cu){window.location.href='/login.html';return;}
+  if(!cu){ showLoginPrompt('Sign in to contact the owner'); return; }
   if(!prop?.listed_by){toast('Owner info unavailable');return;}
   window.location.href=`/messages.html?to=${prop.listed_by}&listing=${pid}`;
 }
 
+// ✅ Gate: sign in to save
 async function toggleFav(){
-  if(!cu){window.location.href='/login.html';return;}
+  if(!cu){ showLoginPrompt('Sign in to save this property'); return; }
   try{
     if(isFav){
       await fetch(`/api/favorites/${pid}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});
@@ -291,7 +298,6 @@ async function toggleFav(){
       await fetch('/api/favorites',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify({property_id:Number(pid)})});
       isFav=true; toast('❤️ Saved!');
     }
-    // Update all fav buttons
     ['fav-btn','fav-btn-mob'].forEach(id=>{
       const b=document.getElementById(id); if(!b)return;
       b.className=`fav-btn ${isFav?'saved':''}`;
@@ -299,6 +305,24 @@ async function toggleFav(){
       else b.innerHTML=isFav?'❤️':'🤍';
     });
   }catch(e){toast('Failed');}
+}
+
+// ✅ Login prompt modal
+function showLoginPrompt(msg){
+  document.getElementById('login-prompt')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`
+    <div id="login-prompt" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div style="background:var(--surface);border-radius:var(--radius-xl);padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:var(--shadow-lg)">
+        <div style="font-size:44px;margin-bottom:12px">🔐</div>
+        <div style="font-size:var(--text-lg);font-weight:800;margin-bottom:8px">Sign In Required</div>
+        <div style="font-size:var(--text-sm);color:var(--muted);margin-bottom:24px">${msg}</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="/login.html" class="btn btn-primary btn-full" style="text-align:center">Sign In</a>
+          <a href="/login.html?mode=signup" class="btn btn-secondary btn-full" style="text-align:center">Create Free Account</a>
+          <button onclick="document.getElementById('login-prompt').remove()" style="font-size:var(--text-sm);color:var(--muted);background:none;border:none;cursor:pointer;margin-top:2px">Maybe later</button>
+        </div>
+      </div>
+    </div>`);
 }
 
 function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN');}

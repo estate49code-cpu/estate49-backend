@@ -44,6 +44,8 @@
     .cbtn.p{background:var(--primary);color:#fff;border-color:var(--primary);}
     .cbtn.p:hover{background:var(--primary-dark);}
     .lmw{display:flex;justify-content:center;padding:32px;}
+    /* ===== Highlighted List Property button (mobile only) ===== */
+    .mob-list-btn{display:none;}
     @media(max-width:768px){
       .filters{padding:10px 14px;gap:8px;}
       .sw{min-width:0;max-width:100%;flex:1 1 100%;}
@@ -51,6 +53,16 @@
       .gwrap{padding:12px 14px;}
       .rbar{padding:8px 14px;}
       .pgrid{grid-template-columns:1fr;}
+      .mob-list-btn{
+        display:inline-flex;align-items:center;gap:6px;
+        background:var(--primary);color:#fff;
+        border:none;border-radius:var(--radius-md);
+        padding:9px 14px;font-size:var(--text-sm);font-weight:700;
+        cursor:pointer;text-decoration:none;white-space:nowrap;flex-shrink:0;
+        box-shadow:0 2px 10px rgba(192,57,43,0.4);
+        animation:pulseBtn 2.5s ease infinite;
+      }
+      @keyframes pulseBtn{0%,100%{box-shadow:0 2px 10px rgba(192,57,43,0.4);}50%{box-shadow:0 4px 20px rgba(192,57,43,0.65);}}
     }
     @media(min-width:480px) and (max-width:768px){.pgrid{grid-template-columns:repeat(2,1fr);}}
     @media(hover:none){.pc:active{transform:scale(0.98)}.cbtn:active{opacity:0.85}}
@@ -73,6 +85,8 @@
     <select class="fsel" id="fb" onchange="go()"><option value="">All BHK</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
     <select class="fsel" id="fc" onchange="go()"><option value="">All Cities</option><option>Bengaluru</option><option>Mumbai</option><option>Delhi</option><option>Hyderabad</option><option>Chennai</option><option>Pune</option></select>
     <select class="fsel ml" id="fs" onchange="go()"><option value="newest">Newest</option><option value="price_asc">Price ↑</option><option value="price_desc">Price ↓</option></select>
+    <!-- Highlighted List Property button — visible only on mobile -->
+    <a href="/list-property.html" class="mob-list-btn">🏠 List Free</a>
   </div>
   <div class="rbar"><span id="cnt">Loading…</span></div>
   <div class="gwrap">
@@ -83,33 +97,40 @@
   </div>
 </div>
 <div class="toast" id="toast-el"></div>
+
 <script>
 let all=[],fil=[],shown=0,typ='',cu=null,tok=null,favs=new Set();
 const PS=12;
+
 window.addEventListener('DOMContentLoaded', async () => {
-  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
-  cu=s.user; tok=s.access_token;
+  // ✅ Allow guests — no forced login
+  const s=await getSession();
+  if(s){ cu=s.user; tok=s.access_token; await loadFavs(); }
   document.getElementById('al').style.display='none';
   document.getElementById('page').style.display='block';
   await initNavbar({active:'browse'});
-  await Promise.all([loadAll(), loadFavs()]);
+  await loadAll();
   let t; document.getElementById('q').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(go,280);});
 });
+
 async function loadAll(){
   try{ const r=await fetch('/api/properties'); all=await r.json(); if(!Array.isArray(all))all=[]; go(); }
   catch(e){ toast('Failed to load'); }
 }
 async function loadFavs(){
+  if(!tok) return;
   try{
     const r=await fetch('/api/favorites',{headers:{Authorization:`Bearer ${tok}`}});
     if(r.ok){ const d=await r.json(); (d||[]).forEach(f=>favs.add(String(f.property_id))); }
   }catch(e){}
 }
+
 function setT(t){
   typ=t;
   document.querySelectorAll('.tt').forEach((el,i)=>el.classList.toggle('active',i===['','rent','buy'].indexOf(t)));
   go();
 }
+
 function go(){
   const q=document.getElementById('q').value.toLowerCase();
   const bhk=document.getElementById('fb').value;
@@ -129,6 +150,7 @@ function go(){
   document.getElementById('cnt').textContent=`${fil.length} propert${fil.length===1?'y':'ies'}`;
   more();
 }
+
 function more(){
   const sl=fil.slice(shown,shown+PS); const g=document.getElementById('grid');
   if(shown===0&&!sl.length){
@@ -139,6 +161,7 @@ function more(){
   shown+=sl.length;
   document.getElementById('lmw').style.display=shown<fil.length?'flex':'none';
 }
+
 function card(p){
   const rent=p.type==='rent', sv=favs.has(String(p.id)), own=cu&&p.listed_by===cu.id;
   const pr=rent?`₹${Number(p.price).toLocaleString('en-IN')}<span>/mo</span>`:`₹${fp(p.price)}`;
@@ -153,7 +176,7 @@ function card(p){
       <div class="ctitle">${x(p.title||'Property')}</div>
       <div class="cloc">📍 ${x([p.locality,p.city].filter(Boolean).join(', '))}</div>
       <div class="cstats">
-        ${p.bhk?`<span class="cstat">🛏 ${p.bhk}BHK</span>`:''}
+        ${p.bhk?`<span class="cstat">🛏 ${p.bhk}BHK`:''}
         ${p.area?`<span class="cstat">📐 ${p.area}ft²</span>`:''}
         ${p.furnished?`<span class="cstat">🛋 ${cp(p.furnished)}</span>`:''}
       </div>
@@ -165,11 +188,20 @@ function card(p){
     </div>
   </div>`;
 }
+
 function gp(e,id){if(e.target.closest('.cht,.cacts'))return;window.location.href=`/property.html?id=${id}`;}
-function gm(e,id,oid){e.stopPropagation();window.location.href=`/messages.html?to=${oid}&listing=${id}`;}
+
+// ✅ Gate: sign in required to message owner
+function gm(e,id,oid){
+  e.stopPropagation();
+  if(!cu){ showLoginPrompt('Sign in to contact the owner'); return; }
+  window.location.href=`/messages.html?to=${oid}&listing=${id}`;
+}
+
+// ✅ Gate: sign in required to save/fav
 async function tf(e,id){
   e.stopPropagation();
-  if(!cu){window.location.href='/login.html';return;}
+  if(!cu){ showLoginPrompt('Sign in to save properties'); return; }
   const sv=favs.has(String(id));
   try{
     if(sv){
@@ -184,6 +216,25 @@ async function tf(e,id){
     if(sb){sb.textContent=favs.has(String(id))?'❤️':'🤍';sb.classList.toggle('p',favs.has(String(id)));}
   }catch(ex){toast('Failed');}
 }
+
+// ✅ Login prompt modal
+function showLoginPrompt(msg){
+  document.getElementById('login-prompt')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`
+    <div id="login-prompt" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div style="background:var(--surface);border-radius:var(--radius-xl);padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:var(--shadow-lg)">
+        <div style="font-size:44px;margin-bottom:12px">🔐</div>
+        <div style="font-size:var(--text-lg);font-weight:800;margin-bottom:8px">Sign In Required</div>
+        <div style="font-size:var(--text-sm);color:var(--muted);margin-bottom:24px">${msg}</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="/login.html" class="btn btn-primary btn-full" style="text-align:center">Sign In</a>
+          <a href="/login.html?mode=signup" class="btn btn-secondary btn-full" style="text-align:center">Create Free Account</a>
+          <button onclick="document.getElementById('login-prompt').remove()" style="font-size:var(--text-sm);color:var(--muted);background:none;border:none;cursor:pointer;margin-top:2px">Maybe later</button>
+        </div>
+      </div>
+    </div>`);
+}
+
 function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN');}
 function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function cp(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
