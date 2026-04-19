@@ -22,6 +22,7 @@ app.use('/api/messages',      require('./routes/messages'));
 app.use('/api/profiles',      require('./routes/profiles'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/upload',        require('./routes/upload'));
+app.use('/api/support', require('./routes/support'));
 
 // ─── AI REST endpoint ────────────────────────
 app.post('/api/chat', async (req, res) => {
