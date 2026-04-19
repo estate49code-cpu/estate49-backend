@@ -33,25 +33,27 @@
     .search-bar{margin-bottom:20px;}
     .search-bar input{width:100%;padding:10px 16px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:14px;outline:none;}
     .search-bar input:focus{border-color:#1a1a2e;}
-    .table-wrap{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;}
-    table{width:100%;border-collapse:collapse;}
+    .table-wrap{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;min-width:900px;}
     th{background:#f8f8f8;padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e5e5e5;}
     td{padding:14px 16px;font-size:13px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
     tr:last-child td{border-bottom:none;}
     tr:hover td{background:#fafafa;}
-    .prop-img{width:60px;height:45px;object-fit:cover;border-radius:6px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;}
+    .prop-img{width:60px;height:45px;object-fit:cover;border-radius:6px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
     .prop-title{font-weight:600;font-size:13px;margin-bottom:2px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .prop-sub{font-size:11px;color:#888;}
     .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;}
     .badge.pending{background:#fff3cd;color:#856404;}
     .badge.approved{background:#d4edda;color:#155724;}
     .badge.rejected{background:#f8d7da;color:#721c24;}
+    .note-chip{display:inline-flex;align-items:center;gap:4px;margin-top:5px;background:#fff3cd;border:1px solid #f0c040;border-radius:6px;padding:3px 8px;font-size:11px;color:#856404;max-width:160px;cursor:pointer;}
+    .note-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
     .actions{display:flex;gap:6px;flex-wrap:wrap;}
-    .btn-approve{padding:6px 14px;background:#27ae60;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .btn-approve{padding:6px 12px;background:#27ae60;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
     .btn-approve:hover{background:#219a52;}
-    .btn-reject{padding:6px 14px;background:#e74c3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .btn-reject{padding:6px 12px;background:#e74c3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
     .btn-reject:hover{background:#c0392b;}
-    .btn-pending{padding:6px 14px;background:#f39c12;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .btn-pending{padding:6px 12px;background:#f39c12;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
     .btn-delete{padding:6px 10px;background:#fff;color:#e74c3c;border:1px solid #e74c3c;border-radius:6px;font-size:12px;cursor:pointer;transition:all 0.15s;}
     .btn-delete:hover{background:#e74c3c;color:#fff;}
     .btn-view{padding:6px 10px;background:#fff;color:#2980b9;border:1px solid #2980b9;border-radius:6px;font-size:12px;cursor:pointer;transition:all 0.15s;}
@@ -59,12 +61,14 @@
     .empty-row td{text-align:center;padding:48px;color:#888;}
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;}
     .modal-overlay.open{display:flex;}
-    .modal{background:#fff;border-radius:16px;padding:28px;width:440px;max-width:90vw;}
+    .modal{background:#fff;border-radius:16px;padding:28px;width:460px;max-width:92vw;}
     .modal h3{font-size:18px;font-weight:700;margin-bottom:8px;}
-    .modal p{font-size:13px;color:#666;margin-bottom:16px;}
-    .modal textarea{width:100%;padding:10px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:13px;resize:vertical;min-height:80px;outline:none;font-family:inherit;}
+    .modal p{font-size:13px;color:#666;margin-bottom:12px;}
+    .modal textarea{width:100%;padding:10px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:13px;resize:vertical;min-height:90px;outline:none;font-family:inherit;}
     .modal textarea:focus{border-color:#e74c3c;}
     .modal-btns{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
+    .prev-note-box{background:#fff8e1;border:1px solid #f0c040;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#856404;display:none;}
+    .prev-note-box strong{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;}
     .loading{text-align:center;padding:48px;color:#888;font-size:14px;}
     .signout-btn{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:8px;font-size:13px;cursor:pointer;transition:all 0.15s;}
     .signout-btn:hover{background:rgba(255,255,255,0.2);}
@@ -100,7 +104,7 @@
   </div>
 
   <div class="search-bar">
-    <input type="text" id="search" placeholder="Search by title, city, locality…" oninput="filterTable()"/>
+    <input type="text" id="search" placeholder="Search by title, city, locality, owner…" oninput="filterTable()"/>
   </div>
 
   <div class="table-wrap">
@@ -111,7 +115,7 @@
           <th>Owner</th>
           <th>Price</th>
           <th>Location</th>
-          <th>Status</th>
+          <th>Status & Note</th>
           <th>Posted</th>
           <th>Actions</th>
         </tr>
@@ -127,11 +131,16 @@
 <div class="modal-overlay" id="reject-modal">
   <div class="modal">
     <h3>❌ Reject Listing</h3>
-    <p>Optionally provide a reason for rejection. The owner will see this note.</p>
-    <textarea id="reject-note" placeholder="e.g. Incomplete information, duplicate listing, inappropriate content…"></textarea>
+    <p>Provide a reason for rejection. The owner will see this note on their listing.</p>
+    <!-- Shows existing note if re-rejecting -->
+    <div class="prev-note-box" id="prev-note-box">
+      <strong>📝 Previous note sent to owner:</strong>
+      <span id="prev-note-text"></span>
+    </div>
+    <textarea id="reject-note" placeholder="e.g. Incomplete information, duplicate listing, inappropriate content, incorrect price…"></textarea>
     <div class="modal-btns">
-      <button class="btn-approve" style="background:#888" onclick="closeModal()">Cancel</button>
-      <button class="btn-reject" onclick="confirmReject()">Reject Listing</button>
+      <button style="padding:8px 18px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px" onclick="closeModal()">Cancel</button>
+      <button class="btn-reject" onclick="confirmReject()">❌ Reject Listing</button>
     </div>
   </div>
 </div>
@@ -150,8 +159,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const test = await fetch('/api/properties/admin/stats', { headers: { Authorization: `Bearer ${tok}` } });
   if (!test.ok) {
     document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:Inter,sans-serif">
-      <div style="font-size:48px">🚫</div>
-      <h2>Access Denied</h2>
+      <div style="font-size:48px">🚫</div><h2>Access Denied</h2>
       <p style="color:#888">You don't have admin privileges.</p>
       <a href="/browse.html" style="color:#2980b9">← Go to Browse</a>
     </div>`;
@@ -190,7 +198,7 @@ function setTab(t) {
 function filterTable() {
   const q = document.getElementById('search').value.toLowerCase();
   const filtered = allData.filter(p =>
-    !q || [p.title, p.city, p.locality, p.contact_name].filter(Boolean).join(' ').toLowerCase().includes(q)
+    !q || [p.title, p.city, p.locality, p.contact_name, p.contact_phone].filter(Boolean).join(' ').toLowerCase().includes(q)
   );
   renderTable(filtered);
 }
@@ -206,32 +214,47 @@ function renderTable(data) {
     const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '') : '—';
     const posted = p.posted_at ? new Date(p.posted_at).toLocaleDateString('en-IN') : '—';
     const statusBadge = `<span class="badge ${p.status || 'pending'}">${(p.status || 'pending').toUpperCase()}</span>`;
-    const actionBtns = buildActions(p);
+    // Show admin note as clickable chip
+    const noteHtml = p.admin_note
+      ? `<div class="note-chip" onclick="openReject(${p.id})" title="Click to edit note">
+           📝 <span>${p.admin_note}</span>
+         </div>`
+      : '';
     return `<tr id="row-${p.id}">
       <td>
         <div style="display:flex;align-items:center;gap:10px">
           ${img ? `<img src="${img}" class="prop-img" loading="lazy"/>` : `<div class="prop-img">🏠</div>`}
           <div>
             <div class="prop-title" title="${p.title || ''}">${p.title || 'Untitled'}</div>
-            <div class="prop-sub">${p.type?.toUpperCase() || ''} · ${p.property_type || ''} ${p.bhk ? '· ' + p.bhk + 'BHK' : ''}</div>
+            <div class="prop-sub">${(p.type || '').toUpperCase()} · ${p.property_type || ''} ${p.bhk ? '· ' + p.bhk + 'BHK' : ''}</div>
           </div>
         </div>
       </td>
-      <td><div style="font-size:12px">${p.contact_name || '—'}</div><div style="font-size:11px;color:#888">${p.contact_phone || ''}</div></td>
+      <td>
+        <div style="font-size:12px;font-weight:600">${p.contact_name || '—'}</div>
+        <div style="font-size:11px;color:#888">${p.contact_phone || ''}</div>
+        <div style="font-size:11px;color:#aaa">${p.contact_role || ''}</div>
+      </td>
       <td style="font-weight:700;color:#27ae60">${price}</td>
-      <td><div style="font-size:12px">${p.locality || '—'}</div><div style="font-size:11px;color:#888">${p.city || ''}</div></td>
-      <td>${statusBadge}${p.admin_note ? `<div style="font-size:10px;color:#888;margin-top:4px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.admin_note}">📝 ${p.admin_note}</div>` : ''}</td>
+      <td>
+        <div style="font-size:12px">${p.locality || '—'}</div>
+        <div style="font-size:11px;color:#888">${p.city || ''}</div>
+      </td>
+      <td>
+        ${statusBadge}
+        ${noteHtml}
+      </td>
       <td style="font-size:12px;color:#888">${posted}</td>
-      <td><div class="actions">${actionBtns}</div></td>
+      <td><div class="actions">${buildActions(p)}</div></td>
     </tr>`;
   }).join('');
 }
 
 function buildActions(p) {
   let btns = `<button class="btn-view" onclick="window.open('/property.html?id=${p.id}','_blank')">View</button>`;
-  if (p.status !== 'approved') btns += `<button class="btn-approve" onclick="updateStatus(${p.id},'approved')">✅ Approve</button>`;
-  if (p.status !== 'rejected') btns += `<button class="btn-reject" onclick="openReject(${p.id})">❌ Reject</button>`;
-  if (p.status !== 'pending')  btns += `<button class="btn-pending" onclick="updateStatus(${p.id},'pending')">⏳ Pending</button>`;
+  if (p.status !== 'approved') btns += `<button class="btn-approve" onclick="updateStatus(${p.id},'approved')">✅</button>`;
+  if (p.status !== 'rejected') btns += `<button class="btn-reject" onclick="openReject(${p.id})">❌</button>`;
+  if (p.status !== 'pending')  btns += `<button class="btn-pending" onclick="updateStatus(${p.id},'pending')">⏳</button>`;
   btns += `<button class="btn-delete" onclick="deleteProp(${p.id})">🗑</button>`;
   return btns;
 }
@@ -239,7 +262,7 @@ function buildActions(p) {
 async function updateStatus(id, status, note = null) {
   try {
     const body = { status };
-    if (note) body.admin_note = note;
+    if (note !== null) body.admin_note = note;
     const r = await fetch(`/api/properties/admin/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
@@ -247,18 +270,19 @@ async function updateStatus(id, status, note = null) {
     });
     const result = await r.json();
     if (!r.ok) throw new Error(result.error || 'Failed');
-    // Fix: compare as strings to handle number/string mismatch
+    // Update local data — fix id type mismatch
     const idx = allData.findIndex(p => String(p.id) === String(id));
     if (idx !== -1) {
       allData[idx].status = status;
-      allData[idx].admin_note = note || allData[idx].admin_note;
+      if (note !== null) allData[idx].admin_note = note;
     }
     filterTable();
     refreshStats();
-    toast(status === 'approved' ? '✅ Approved!' : status === 'rejected' ? '❌ Rejected!' : '⏳ Set to Pending');
+    const msg = status === 'approved' ? '✅ Approved!' : status === 'rejected' ? '❌ Rejected!' : '⏳ Set to Pending';
+    toast(msg);
   } catch (e) {
     console.error('updateStatus error:', e);
-    toast('❌ Failed: ' + e.message);
+    toast('❌ Error: ' + e.message);
   }
 }
 
@@ -285,22 +309,37 @@ async function deleteProp(id) {
     filterTable();
     refreshStats();
     toast('🗑 Property deleted');
-  } catch (e) { toast('Failed to delete'); }
+  } catch (e) { toast('❌ Failed to delete'); }
 }
 
 function openReject(id) {
-  rejectId = id;
-  document.getElementById('reject-note').value = '';
+  rejectId = Number(id);
+  // Show existing note if any
+  const prop = allData.find(p => String(p.id) === String(id));
+  const prevBox = document.getElementById('prev-note-box');
+  const prevText = document.getElementById('prev-note-text');
+  if (prop?.admin_note) {
+    prevText.textContent = prop.admin_note;
+    prevBox.style.display = 'block';
+    document.getElementById('reject-note').value = prop.admin_note;
+  } else {
+    prevBox.style.display = 'none';
+    document.getElementById('reject-note').value = '';
+  }
   document.getElementById('reject-modal').classList.add('open');
 }
+
 function closeModal() {
   document.getElementById('reject-modal').classList.remove('open');
   rejectId = null;
 }
+
 function confirmReject() {
+  if (!rejectId) { toast('❌ No property selected'); return; }
   const note = document.getElementById('reject-note').value.trim();
+  const idToReject = rejectId; // capture before closeModal nulls it
   closeModal();
-  updateStatus(rejectId, 'rejected', note || null);
+  updateStatus(idToReject, 'rejected', note || null);
 }
 
 document.getElementById('reject-modal').addEventListener('click', function(e) {
