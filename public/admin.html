@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Admin — Estate49</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/auth.js"></script>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:#f7f6f2;color:#1a1a1a;min-height:100vh;}
+    .topbar{background:#1a1a2e;color:#fff;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;}
+    .topbar-logo{font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px;}
+    .topbar-right{display:flex;align-items:center;gap:16px;font-size:14px;}
+    .admin-badge{background:#e74c3c;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+    .wrap{max-width:1200px;margin:0 auto;padding:32px 24px;}
+    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:32px;}
+    .stat{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:20px;text-align:center;}
+    .stat-num{font-size:32px;font-weight:800;margin-bottom:4px;}
+    .stat-label{font-size:12px;color:#888;font-weight:500;}
+    .stat.pending .stat-num{color:#f39c12;}
+    .stat.approved .stat-num{color:#27ae60;}
+    .stat.rejected .stat-num{color:#e74c3c;}
+    .stat.total .stat-num{color:#2980b9;}
+    .stat.users .stat-num{color:#8e44ad;}
+    .tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:4px;width:fit-content;}
+    .tab{padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:#666;transition:all 0.15s;}
+    .tab.active{background:#1a1a2e;color:#fff;}
+    .tab.pend{color:#f39c12;} .tab.pend.active{background:#f39c12;color:#fff;}
+    .tab.appr{color:#27ae60;} .tab.appr.active{background:#27ae60;color:#fff;}
+    .tab.rejt{color:#e74c3c;} .tab.rejt.active{background:#e74c3c;color:#fff;}
+    .search-bar{margin-bottom:20px;}
+    .search-bar input{width:100%;padding:10px 16px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:14px;outline:none;}
+    .search-bar input:focus{border-color:#1a1a2e;}
+    .table-wrap{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;}
+    th{background:#f8f8f8;padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e5e5e5;}
+    td{padding:14px 16px;font-size:13px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#fafafa;}
+    .prop-img{width:60px;height:45px;object-fit:cover;border-radius:6px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;}
+    .prop-title{font-weight:600;font-size:13px;margin-bottom:2px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .prop-sub{font-size:11px;color:#888;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;}
+    .badge.pending{background:#fff3cd;color:#856404;}
+    .badge.approved{background:#d4edda;color:#155724;}
+    .badge.rejected{background:#f8d7da;color:#721c24;}
+    .actions{display:flex;gap:6px;}
+    .btn-approve{padding:6px 14px;background:#27ae60;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .btn-approve:hover{background:#219a52;}
+    .btn-reject{padding:6px 14px;background:#e74c3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .btn-reject:hover{background:#c0392b;}
+    .btn-pending{padding:6px 14px;background:#f39c12;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .btn-delete{padding:6px 10px;background:#fff;color:#e74c3c;border:1px solid #e74c3c;border-radius:6px;font-size:12px;cursor:pointer;transition:all 0.15s;}
+    .btn-delete:hover{background:#e74c3c;color:#fff;}
+    .btn-view{padding:6px 10px;background:#fff;color:#2980b9;border:1px solid #2980b9;border-radius:6px;font-size:12px;cursor:pointer;transition:all 0.15s;}
+    .btn-view:hover{background:#2980b9;color:#fff;}
+    .empty-row td{text-align:center;padding:48px;color:#888;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:#fff;border-radius:16px;padding:28px;width:440px;max-width:90vw;}
+    .modal h3{font-size:18px;font-weight:700;margin-bottom:8px;}
+    .modal p{font-size:13px;color:#666;margin-bottom:16px;}
+    .modal textarea{width:100%;padding:10px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:13px;resize:vertical;min-height:80px;outline:none;font-family:inherit;}
+    .modal textarea:focus{border-color:#e74c3c;}
+    .modal-btns{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
+    .loading{text-align:center;padding:48px;color:#888;font-size:14px;}
+    .signout-btn{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:8px;font-size:13px;cursor:pointer;transition:all 0.15s;}
+    .signout-btn:hover{background:rgba(255,255,255,0.2);}
+    @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr);}.wrap{padding:16px;}.topbar{padding:12px 16px;}}
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">🏠 Estate49 <span class="admin-badge">ADMIN</span></div>
+  <div class="topbar-right">
+    <span id="admin-email"></span>
+    <button class="signout-btn" onclick="signOut()">Sign Out</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat total"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total Listings</div></div>
+    <div class="stat pending"><div class="stat-num" id="s-pending">—</div><div class="stat-label">Pending</div></div>
+    <div class="stat approved"><div class="stat-num" id="s-approved">—</div><div class="stat-label">Approved</div></div>
+    <div class="stat rejected"><div class="stat-num" id="s-rejected">—</div><div class="stat-label">Rejected</div></div>
+    <div class="stat users"><div class="stat-num" id="s-users">—</div><div class="stat-label">Total Users</div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('')">All</button>
+    <button class="tab pend" onclick="setTab('pending')">⏳ Pending</button>
+    <button class="tab appr" onclick="setTab('approved')">✅ Approved</button>
+    <button class="tab rejt" onclick="setTab('rejected')">❌ Rejected</button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Search by title, city, locality…" oninput="filterTable()"/>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Owner</th>
+          <th>Price</th>
+          <th>Location</th>
+          <th>Status</th>
+          <th>Posted</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="7" class="loading">Loading properties…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal-overlay" id="reject-modal">
+  <div class="modal">
+    <h3>❌ Reject Listing</h3>
+    <p>Optionally provide a reason for rejection. The owner will see this note.</p>
+    <textarea id="reject-note" placeholder="e.g. Incomplete information, duplicate listing, inappropriate content…"></textarea>
+    <div class="modal-btns">
+      <button class="btn-approve" style="background:#888" onclick="closeModal()">Cancel</button>
+      <button class="btn-reject" onclick="confirmReject()">Reject Listing</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let tok = null, allData = [], curTab = '', rejectId = null;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  const s = await getSession();
+  if (!s) { window.location.href = '/login.html'; return; }
+  tok = s.access_token;
+  document.getElementById('admin-email').textContent = s.user.email;
+
+  // Check admin access
+  const test = await fetch('/api/properties/admin/stats', { headers: { Authorization: `Bearer ${tok}` } });
+  if (!test.ok) {
+    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:Inter,sans-serif">
+      <div style="font-size:48px">🚫</div>
+      <h2>Access Denied</h2>
+      <p style="color:#888">You don't have admin privileges.</p>
+      <a href="/browse.html" style="color:#2980b9">← Go to Browse</a>
+    </div>`;
+    return;
+  }
+
+  const stats = await test.json();
+  document.getElementById('s-total').textContent = stats.total;
+  document.getElementById('s-pending').textContent = stats.pending;
+  document.getElementById('s-approved').textContent = stats.approved;
+  document.getElementById('s-rejected').textContent = stats.rejected;
+  document.getElementById('s-users').textContent = stats.users;
+
+  await loadProperties();
+});
+
+async function loadProperties() {
+  try {
+    const url = curTab ? `/api/properties/admin/all?status=${curTab}` : '/api/properties/admin/all';
+    const r = await fetch(url, { headers: { Authorization: `Bearer ${tok}` } });
+    allData = await r.json();
+    filterTable();
+  } catch (e) {
+    document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="loading">Failed to load properties.</td></tr>';
+  }
+}
+
+function setTab(t) {
+  curTab = t;
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.classList.toggle('active', ['', 'pending', 'approved', 'rejected'][i] === t);
+  });
+  loadProperties();
+}
+
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = allData.filter(p =>
+    !q || [p.title, p.city, p.locality, p.contact_name].filter(Boolean).join(' ').toLowerCase().includes(q)
+  );
+  renderTable(filtered);
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('tbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No properties found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(p => {
+    const img = p.photos?.[0];
+    const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '') : '—';
+    const posted = p.posted_at ? new Date(p.posted_at).toLocaleDateString('en-IN') : '—';
+    const statusBadge = `<span class="badge ${p.status || 'pending'}">${(p.status || 'pending').toUpperCase()}</span>`;
+    const actionBtns = buildActions(p);
+    return `<tr id="row-${p.id}">
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          ${img ? `<img src="${img}" class="prop-img" loading="lazy"/>` : `<div class="prop-img">🏠</div>`}
+          <div>
+            <div class="prop-title" title="${p.title || ''}">${p.title || 'Untitled'}</div>
+            <div class="prop-sub">${p.type?.toUpperCase() || ''} · ${p.property_type || ''} ${p.bhk ? '· ' + p.bhk + 'BHK' : ''}</div>
+          </div>
+        </div>
+      </td>
+      <td><div style="font-size:12px">${p.contact_name || '—'}</div><div style="font-size:11px;color:#888">${p.contact_phone || ''}</div></td>
+      <td style="font-weight:700;color:#27ae60">${price}</td>
+      <td><div style="font-size:12px">${p.locality || '—'}</div><div style="font-size:11px;color:#888">${p.city || ''}</div></td>
+      <td>${statusBadge}${p.admin_note ? `<div style="font-size:10px;color:#888;margin-top:4px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.admin_note}">📝 ${p.admin_note}</div>` : ''}</td>
+      <td style="font-size:12px;color:#888">${posted}</td>
+      <td><div class="actions">${actionBtns}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function buildActions(p) {
+  let btns = `<button class="btn-view" onclick="window.open('/property.html?id=${p.id}','_blank')">View</button>`;
+  if (p.status !== 'approved') btns += `<button class="btn-approve" onclick="updateStatus(${p.id},'approved')">✅ Approve</button>`;
+  if (p.status !== 'rejected') btns += `<button class="btn-reject" onclick="openReject(${p.id})">❌ Reject</button>`;
+  if (p.status !== 'pending')  btns += `<button class="btn-pending" onclick="updateStatus(${p.id},'pending')">⏳ Pending</button>`;
+  btns += `<button class="btn-delete" onclick="deleteProp(${p.id})">🗑</button>`;
+  return btns;
+}
+
+async function updateStatus(id, status, note = null) {
+  try {
+    const body = { status };
+    if (note) body.admin_note = note;
+    const r = await fetch(`/api/properties/admin/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error();
+    // Update in local data
+    const idx = allData.findIndex(p => p.id === id);
+    if (idx !== -1) { allData[idx].status = status; if (note) allData[idx].admin_note = note; }
+    filterTable();
+    // Refresh stats
+    refreshStats();
+  } catch (e) { alert('Failed to update status'); }
+}
+
+async function refreshStats() {
+  const r = await fetch('/api/properties/admin/stats', { headers: { Authorization: `Bearer ${tok}` } });
+  if (r.ok) {
+    const s = await r.json();
+    document.getElementById('s-total').textContent = s.total;
+    document.getElementById('s-pending').textContent = s.pending;
+    document.getElementById('s-approved').textContent = s.approved;
+    document.getElementById('s-rejected').textContent = s.rejected;
+  }
+}
+
+async function deleteProp(id) {
+  if (!confirm('Delete this property permanently? This cannot be undone.')) return;
+  try {
+    const r = await fetch(`/api/properties/admin/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${tok}` }
+    });
+    if (!r.ok) throw new Error();
+    allData = allData.filter(p => p.id !== id);
+    filterTable();
+    refreshStats();
+  } catch (e) { alert('Failed to delete'); }
+}
+
+function openReject(id) {
+  rejectId = id;
+  document.getElementById('reject-note').value = '';
+  document.getElementById('reject-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('reject-modal').classList.remove('open');
+  rejectId = null;
+}
+function confirmReject() {
+  const note = document.getElementById('reject-note').value.trim();
+  closeModal();
+  updateStatus(rejectId, 'rejected', note || null);
+}
+
+// Close modal on overlay click
+document.getElementById('reject-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
