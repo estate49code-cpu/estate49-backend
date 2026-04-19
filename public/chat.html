@@ -29,12 +29,20 @@
     .chat-input-wrap{padding:12px 20px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:10px;}
     .chat-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-lg);font-size:var(--text-sm);resize:none;max-height:120px;transition:border-color var(--transition);}
     .chat-input:focus{outline:none;border-color:var(--primary);}
-    .send-btn{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all var(--transition);flex-shrink:0;}
+    .send-btn{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all var(--transition);flex-shrink:0;border:none;cursor:pointer;}
     .send-btn:hover{background:var(--primary-dark);transform:scale(1.05);}
     .suggestions{display:flex;flex-wrap:wrap;gap:8px;padding:10px 24px;background:var(--bg);}
     .sugg{padding:7px 14px;border:1.5px solid var(--border);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:600;color:var(--muted);cursor:pointer;background:var(--surface);transition:all var(--transition);}
     .sugg:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-xlight);}
-    @media(max-width:600px){.chat-body{padding:16px;}.chat-input-wrap{padding:10px 14px;}}
+    @media(max-width:768px){
+      .chat-wrap{height:calc(100dvh - 54px - 62px);}
+      .chat-body{padding:12px 14px;}
+      .chat-input-wrap{padding:8px 12px 10px;}
+      .chat-top{padding:12px 14px;}
+      .suggestions{padding:8px 12px;gap:6px;}
+      .sugg{font-size:11px;padding:6px 12px;}
+      .bubble{max-width:85%;}
+    }
   </style>
 </head>
 <body>
@@ -64,10 +72,8 @@
     </div>
   </div>
 </div>
-
 <script>
 let socket=null, userInitials='?', waiting=false;
-
 window.addEventListener('DOMContentLoaded', async () => {
   const s=await getSession(); if(!s){window.location.href='/login.html';return;}
   try{const r=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${s.access_token}`}});if(r.ok){const p=await r.json();const n=p.fullname||s.user.email||'U';userInitials=n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);}}catch(e){}
@@ -76,14 +82,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   await initNavbar({active:'chat'});
   connect();
 });
-
 function connect(){
   socket=io();
   socket.on('botReply', d=>{ removeTyping(); addMsg(formatMd(d.message||d),'bot'); });
   socket.on('typing', v=>{ if(v)showTyping(); else removeTyping(); });
   socket.on('connect_error', ()=>addMsg('Connection failed. Please refresh.','bot'));
 }
-
 function send(){
   const inp=document.getElementById('inp'); const txt=inp.value.trim(); if(!txt||waiting)return;
   addMsg(esc(txt),'user'); inp.value=''; inp.style.height='auto'; waiting=true;
@@ -92,31 +96,19 @@ function send(){
 }
 function qs(txt){document.getElementById('inp').value=txt;send();}
 function clearChat(){if(socket){socket.disconnect();}document.getElementById('chat-body').innerHTML='';document.getElementById('sugg-bar').style.display='flex';waiting=false;connect();}
-
 function addMsg(html,who){
-  const body=document.getElementById('chat-body');
-  const isBot=who==='bot';
-  body.insertAdjacentHTML('beforeend',`
-    <div class="msg-row ${isBot?'':'user'}">
-      <div class="msg-av ${isBot?'bot':''}">${isBot?'🤖':userInitials}</div>
-      <div class="bubble ${isBot?'bot':'user'}">${html}</div>
-    </div>`);
+  const body=document.getElementById('chat-body'); const isBot=who==='bot';
+  body.insertAdjacentHTML('beforeend',`<div class="msg-row ${isBot?'':'user'}"><div class="msg-av ${isBot?'bot':''}">${isBot?'🤖':userInitials}</div><div class="bubble ${isBot?'bot':'user'}">${html}</div></div>`);
   body.scrollTop=body.scrollHeight; waiting=false;
 }
 function showTyping(){
   removeTyping();
-  document.getElementById('chat-body').insertAdjacentHTML('beforeend',
-    `<div class="msg-row" id="typing-ind"><div class="msg-av bot">🤖</div><div class="bubble bot"><div class="typing-dot"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>`);
+  document.getElementById('chat-body').insertAdjacentHTML('beforeend',`<div class="msg-row" id="typing-ind"><div class="msg-av bot">🤖</div><div class="bubble bot"><div class="typing-dot"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>`);
   document.getElementById('chat-body').scrollTop=99999;
 }
 function removeTyping(){document.getElementById('typing-ind')?.remove();}
-
 function formatMd(t){
-  return esc(t)
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/`(.+?)`/g,'<code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:0.9em">$1</code>')
-    .replace(/\n/g,'<br/>');
+  return esc(t).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`(.+?)`/g,'<code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:0.9em">$1</code>').replace(/\n/g,'<br/>');
 }
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 </script>

@@ -14,7 +14,7 @@
     .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:box-shadow var(--transition);cursor:pointer;}
     .card:hover{box-shadow:var(--shadow-md);}
-    .card-img{width:100%;aspect-ratio:16/10;object-fit:cover;background:var(--surface-2);display:block;}
+    .card-img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;}
     .card-img-ph{width:100%;aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:40px;}
     .card-body{padding:16px;}
     .card-price{font-size:var(--text-lg);font-weight:800;color:var(--primary);}
@@ -25,21 +25,14 @@
     .card-footer{display:flex;gap:8px;}
     .btn-unfav{flex:1;padding:8px;border-radius:var(--radius-md);border:1px solid var(--border);font-size:var(--text-xs);font-weight:600;color:#c0392b;background:transparent;cursor:pointer;transition:all var(--transition);}
     .btn-unfav:hover{background:#fdf0ee;border-color:#c0392b;}
-    .btn-view{flex:2;padding:8px;border-radius:var(--radius-md);background:var(--primary);color:#fff;font-size:var(--text-xs);font-weight:600;border:none;cursor:pointer;transition:all var(--transition);}
+    .btn-view{flex:2;padding:8px;border-radius:var(--radius-md);background:var(--primary);color:#fff;font-size:var(--text-xs);font-weight:600;border:none;cursor:pointer;}
     .btn-view:hover{opacity:0.9;}
-    .empty{text-align:center;padding:80px 24px;grid-column:1/-1;}
-    .empty-icon{font-size:56px;margin-bottom:16px;}
-    .empty h2{font-size:var(--text-lg);font-weight:700;margin-bottom:8px;}
-    .empty p{color:var(--muted);font-size:var(--text-sm);margin-bottom:24px;}
-    .skeleton{background:linear-gradient(90deg,var(--surface-2) 25%,var(--border) 50%,var(--surface-2) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:var(--radius-md);}
-    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-    .sk-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;}
-    .sk-img{width:100%;aspect-ratio:16/10;}
-    .sk-body{padding:16px;display:flex;flex-direction:column;gap:10px;}
-    .sk-line{height:14px;width:60%;}
-    .sk-line.full{width:90%;}
-    .sk-line.short{width:40%;}
-    @media(max-width:600px){.fw{padding:16px;}.cards{grid-template-columns:1fr;}}
+    @media(max-width:768px){
+      .fw{padding:14px 14px 80px;}
+      .cards{grid-template-columns:1fr;}
+      .fh{font-size:var(--text-xl);}
+    }
+    @media(min-width:480px) and (max-width:768px){.cards{grid-template-columns:repeat(2,1fr);}}
   </style>
 </head>
 <body>
@@ -48,109 +41,69 @@
   <div id="navbar-root"></div>
   <div class="fw">
     <div class="fh">❤️ Saved Properties</div>
-    <div class="fsub" id="count-txt">Loading your saved properties…</div>
-    <div class="cards" id="cards-grid">
-      <div class="sk-card"><div class="skeleton sk-img"></div><div class="sk-body"><div class="skeleton sk-line short"></div><div class="skeleton sk-line full"></div><div class="skeleton sk-line"></div></div></div>
-      <div class="sk-card"><div class="skeleton sk-img"></div><div class="sk-body"><div class="skeleton sk-line short"></div><div class="skeleton sk-line full"></div><div class="skeleton sk-line"></div></div></div>
-      <div class="sk-card"><div class="skeleton sk-img"></div><div class="sk-body"><div class="skeleton sk-line short"></div><div class="skeleton sk-line full"></div><div class="skeleton sk-line"></div></div></div>
-    </div>
+    <div class="fsub" id="count-txt">Loading…</div>
+    <div class="cards" id="cards-grid"></div>
   </div>
 </div>
 <div class="toast" id="toast-el"></div>
-
 <script>
-let tok = null;
-
+let tok=null;
 window.addEventListener('DOMContentLoaded', async () => {
-  const s = await getSession();
-  if (!s) { window.location.href = '/login.html'; return; }
-  tok = s.access_token;
-  document.getElementById('al').style.display = 'none';
-  document.getElementById('page').style.display = 'block';
-  await initNavbar({ active: 'favorites' });
+  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
+  tok=s.access_token;
+  document.getElementById('al').style.display='none';
+  document.getElementById('page').style.display='block';
+  await initNavbar({active:'favorites'});
   await loadFavorites();
 });
-
-async function loadFavorites() {
-  try {
-    const r = await fetch('/api/favorites', { headers: { Authorization: `Bearer ${tok}` } });
-    if (!r.ok) throw new Error('Failed to load');
-    const data = await r.json();
-    renderCards(data);
-  } catch (e) {
-    document.getElementById('cards-grid').innerHTML = '';
-    document.getElementById('count-txt').textContent = 'Failed to load saved properties.';
-  }
+async function loadFavorites(){
+  try{
+    const r=await fetch('/api/favorites',{headers:{Authorization:`Bearer ${tok}`}});
+    if(!r.ok) throw new Error();
+    renderCards(await r.json());
+  }catch(e){document.getElementById('count-txt').textContent='Failed to load saved properties.';}
 }
-
-function renderCards(items) {
-  const grid = document.getElementById('cards-grid');
-  const countTxt = document.getElementById('count-txt');
-
-  if (!items || items.length === 0) {
-    countTxt.textContent = '0 saved properties';
-    grid.innerHTML = `
-      <div class="empty">
-        <div class="empty-icon">❤️</div>
-        <h2>No saved properties yet</h2>
-        <p>Browse properties and tap the heart icon to save them here.</p>
-        <button class="btn btn-primary" onclick="window.location.href='/browse.html'">🔍 Browse Properties</button>
-      </div>`;
+function renderCards(items){
+  const grid=document.getElementById('cards-grid');
+  const countTxt=document.getElementById('count-txt');
+  if(!items||!items.length){
+    countTxt.textContent='0 saved properties';
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:80px 24px"><div style="font-size:56px;margin-bottom:16px">❤️</div><h2 style="font-size:var(--text-lg);font-weight:700;margin-bottom:8px">No saved properties yet</h2><p style="color:var(--muted);font-size:var(--text-sm);margin-bottom:24px">Browse properties and tap the heart icon to save them here.</p><button class="btn btn-primary" onclick="window.location.href=\'/browse.html\'">🔍 Browse Properties</button></div>';
     return;
   }
-
-  countTxt.textContent = `${items.length} saved propert${items.length === 1 ? 'y' : 'ies'}`;
-  grid.innerHTML = items.map(fav => {
-    const p = fav.properties || {};
-    const propertyId = fav.property_id;
-    const img = p.photos?.[0];
-    const price = p.price
-      ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '')
-      : 'Price on request';
-    const tags = [p.bhk ? p.bhk + ' BHK' : null, p.property_type, p.furnished].filter(Boolean);
-    return `
-      <div class="card" onclick="window.location.href='/property.html?id=${propertyId}'">
-        ${img
-          ? `<img class="card-img" src="${img}" alt="${p.title || 'Property'}" loading="lazy"/>`
-          : `<div class="card-img-ph">🏠</div>`}
-        <div class="card-body">
-          <div class="card-price">${price}</div>
-          <div class="card-title">${p.title || 'Untitled Property'}</div>
-          <div class="card-loc">📍 ${[p.locality, p.city].filter(Boolean).join(', ') || 'Location not specified'}</div>
-          <div class="card-tags">${tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
-          <div class="card-footer">
-            <button class="btn-unfav" onclick="event.stopPropagation();removeFav(${propertyId}, this)">🗑 Remove</button>
-            <button class="btn-view" onclick="event.stopPropagation();window.location.href='/property.html?id=${propertyId}'">View Property →</button>
-          </div>
+  countTxt.textContent=`${items.length} saved propert${items.length===1?'y':'ies'}`;
+  grid.innerHTML=items.map(item=>{
+    const p=item.properties||item;
+    const rent=p.type==='rent';
+    const price=rent?`₹${Number(p.price).toLocaleString('en-IN')}<span style="font-size:11px;color:var(--muted);font-weight:500">/mo</span>`:`₹${fp(p.price)}`;
+    return`<div class="card" onclick="window.location.href='/property.html?id=${p.id}'">
+      ${p.photos?.[0]?`<img class="card-img" src="${p.photos[0]}" alt="${x(p.title)}" loading="lazy"/>`:'<div class="card-img-ph">🏠</div>'}
+      <div class="card-body">
+        <div class="card-price">${price}</div>
+        <div class="card-title">${x(p.title||'Property')}</div>
+        <div class="card-loc">📍 ${x([p.locality,p.city].filter(Boolean).join(', '))}</div>
+        <div class="card-tags">
+          ${p.bhk?`<span class="tag">🛏 ${p.bhk}BHK</span>`:''}
+          ${p.area?`<span class="tag">📐 ${p.area}ft²</span>`:''}
+          ${p.furnished?`<span class="tag">🛋 ${cp(p.furnished)}</span>`:''}
         </div>
-      </div>`;
+        <div class="card-footer">
+          <button class="btn-unfav" onclick="unfav(event,${p.id})">🗑 Remove</button>
+          <button class="btn-view" onclick="window.location.href='/property.html?id=${p.id}'">View →</button>
+        </div>
+      </div>
+    </div>`;
   }).join('');
 }
-
-async function removeFav(propertyId, btn) {
-  btn.disabled = true;
-  btn.textContent = 'Removing…';
-  try {
-    const r = await fetch(`/api/favorites/${propertyId}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${tok}` }
-    });
-    if (!r.ok) throw new Error();
-    toast('Removed from saved');
-    await loadFavorites();
-  } catch (e) {
-    toast('Failed to remove');
-    btn.disabled = false;
-    btn.textContent = '🗑 Remove';
-  }
+async function unfav(e,id){
+  e.stopPropagation();
+  try{await fetch(`/api/favorites/${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});toast('Removed from saved');await loadFavorites();}
+  catch(err){toast('Failed to remove');}
 }
-
-function toast(m) {
-  const el = document.getElementById('toast-el');
-  el.textContent = m;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
+function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN');}
+function cp(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
+function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
 </script>
 </body>
 </html>

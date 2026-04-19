@@ -18,7 +18,11 @@
     .ntext{font-size:var(--text-sm);line-height:1.5;}
     .ntime{font-size:var(--text-xs);color:var(--faint);margin-top:4px;}
     .udot{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;}
-    @media(max-width:600px){.nw{padding:16px;}}
+    @media(max-width:768px){
+      .nw{padding:16px 14px 80px;}
+      .nh-title{font-size:var(--text-xl);}
+      .nitem{padding:12px;}
+    }
   </style>
 </head>
 <body>
@@ -30,16 +34,12 @@
       <div class="nh-title">🔔 Notifications</div>
       <button class="btn btn-secondary" onclick="readAll()">Mark all read</button>
     </div>
-    <div id="nlist">
-      ${Array(4).fill('<div class="nitem"><div class="skeleton" style="width:26px;height:26px;border-radius:50%"></div><div style="flex:1"><div class="skeleton skeleton-text" style="width:80%"></div><div class="skeleton skeleton-text" style="width:35%"></div></div></div>').join('')}
-    </div>
+    <div id="nlist"></div>
   </div>
 </div>
 <div class="toast" id="toast-el"></div>
-
 <script>
 let tok=null;
-
 window.addEventListener('DOMContentLoaded', async () => {
   const s=await getSession(); if(!s){window.location.href='/login.html';return;}
   tok=s.access_token;
@@ -48,7 +48,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   await initNavbar({active:'notifications'});
   await load();
 });
-
 async function load(){
   try{
     const r=await fetch('/api/notifications',{headers:{Authorization:`Bearer ${tok}`}});
@@ -65,18 +64,15 @@ async function load(){
       </div>`).join('');
   }catch(e){document.getElementById('nlist').innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div><div class="empty-title">Could not load</div></div>';}
 }
-
 async function markRead(id,el){
   el.classList.remove('unread'); el.querySelector('.udot')?.remove();
   await fetch(`/api/notifications/${id}/read`,{method:'POST',headers:{Authorization:`Bearer ${tok}`}});
 }
-
 async function readAll(){
   await fetch('/api/notifications/read-all',{method:'POST',headers:{Authorization:`Bearer ${tok}`}});
   document.querySelectorAll('.nitem').forEach(el=>{el.classList.remove('unread');el.querySelector('.udot')?.remove();});
   toast('All marked as read');
 }
-
 function timeAgo(d){
   const s=Math.floor((Date.now()-new Date(d))/1000);
   if(s<60)return 'just now';if(s<3600)return Math.floor(s/60)+'m ago';

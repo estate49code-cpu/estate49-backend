@@ -20,13 +20,45 @@
     .photo-slot img{width:100%;height:100%;object-fit:cover;}
     .photo-rm{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
     .type-btns{display:flex;gap:10px;flex-wrap:wrap;}
-    .type-btn{padding:10px 24px;border:2px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;transition:all var(--transition);}
+    .type-btn{padding:10px 24px;border:2px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;transition:all var(--transition);background:var(--surface);cursor:pointer;}
     .type-btn.sel{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
     .form-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
     .form-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    .save-bar{position:sticky;bottom:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:16px 24px;display:flex;gap:12px;align-items:center;justify-content:flex-end;}
+    /* sticky save bar sits ABOVE bottom nav on mobile */
+    .save-bar{
+      position:sticky;bottom:0;
+      background:rgba(255,255,255,0.96);
+      backdrop-filter:blur(8px);
+      border-top:1px solid var(--border);
+      padding:16px 24px;
+      display:flex;gap:12px;align-items:center;justify-content:flex-end;
+      z-index:100;
+    }
     .prog{font-size:var(--text-xs);color:var(--muted);flex:1;}
-    @media(max-width:600px){.form-3,.form-2{grid-template-columns:1fr;}.lw{padding:16px;}.save-bar{padding:12px 16px;}}
+
+    /* ===== MOBILE PATCH ===== */
+    @media(max-width:768px){
+      .lw{padding:14px 14px 0;}
+      .lh{font-size:var(--text-xl);}
+      .lsub{margin-bottom:20px;}
+      .step{padding:18px 14px;}
+      .form-3,.form-2{grid-template-columns:1fr;}
+      .photos-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;}
+      .save-bar{
+        padding:12px 14px;
+        /* sit above the 62px bottom nav */
+        bottom:calc(62px + env(safe-area-inset-bottom,0px));
+      }
+      .save-bar .btn{font-size:var(--text-xs);padding:9px 14px;}
+      .type-btn{padding:9px 18px;font-size:var(--text-xs);}
+    }
+    @media(max-width:380px){
+      .photos-grid{grid-template-columns:repeat(3,1fr);}
+    }
+    @media(hover:none){
+      .type-btn:active{transform:scale(0.97);}
+      .photo-slot:active{opacity:0.8;}
+    }
   </style>
 </head>
 <body>
@@ -39,7 +71,7 @@
 
     <!-- STEP 1: Type & Basic -->
     <div class="step">
-      <div class="step-title"><div class="step-num">1</div>Property Type & Listing</div>
+      <div class="step-title"><div class="step-num">1</div>Property Type &amp; Listing</div>
       <div class="form-group" style="margin-bottom:16px">
         <label class="form-label">Listing For *</label>
         <div class="type-btns">
@@ -51,25 +83,34 @@
         <div class="form-group">
           <label class="form-label">Property Type *</label>
           <select class="form-select" id="prop_type">
-            <option value="apartment">Apartment</option><option value="house">Independent House</option>
-            <option value="villa">Villa</option><option value="plot">Plot</option>
-            <option value="pg">PG/Hostel</option><option value="commercial">Commercial</option>
+            <option value="apartment">Apartment</option>
+            <option value="house">Independent House</option>
+            <option value="villa">Villa</option>
+            <option value="plot">Plot</option>
+            <option value="pg">PG/Hostel</option>
+            <option value="commercial">Commercial</option>
           </select>
         </div>
         <div class="form-group">
           <label class="form-label">BHK</label>
-          <select class="form-select" id="bhk"><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+          <select class="form-select" id="bhk">
+            <option value="">Select</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label">Bathrooms</label>
-          <select class="form-select" id="bathrooms"><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
+          <select class="form-select" id="bathrooms">
+            <option value="">Select</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option>
+          </select>
         </div>
       </div>
     </div>
 
     <!-- STEP 2: Title, Location, Description -->
     <div class="step">
-      <div class="step-title"><div class="step-num">2</div>Title & Location</div>
+      <div class="step-title"><div class="step-num">2</div>Title &amp; Location</div>
       <div class="form-group" style="margin-bottom:16px">
         <label class="form-label">Listing Title *</label>
         <input type="text" class="form-input" id="title" placeholder="e.g. Spacious 2BHK in Koramangala with parking"/>
@@ -96,7 +137,7 @@
 
     <!-- STEP 3: Price & Details -->
     <div class="step">
-      <div class="step-title"><div class="step-num">3</div>Price & Details</div>
+      <div class="step-title"><div class="step-num">3</div>Price &amp; Details</div>
       <div class="form-3" style="margin-bottom:16px">
         <div class="form-group">
           <label class="form-label">Price (₹) *</label>
@@ -129,7 +170,7 @@
 
     <!-- STEP 4: Furnishing & Availability -->
     <div class="step">
-      <div class="step-title"><div class="step-num">4</div>Furnishing & Availability</div>
+      <div class="step-title"><div class="step-num">4</div>Furnishing &amp; Availability</div>
       <div class="form-2" style="margin-bottom:16px">
         <div class="form-group">
           <label class="form-label">Furnishing</label>
@@ -213,6 +254,9 @@
       <input type="file" id="file-inp" accept="image/*" multiple style="display:none" onchange="handleFiles(event)"/>
       <div id="upload-status" style="margin-top:8px;font-size:var(--text-xs);color:var(--muted)"></div>
     </div>
+
+    <!-- spacer so last step not hidden behind save bar on mobile -->
+    <div style="height:8px"></div>
   </div>
 
   <div class="save-bar">
@@ -235,7 +279,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   try{
     const r=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${tok}`}});
-    if(r.ok){const p=await r.json(); if(p.fullname)document.getElementById('contact_name').value=p.fullname; if(p.phone)document.getElementById('contact_phone').value=p.phone;}
+    if(r.ok){
+      const p=await r.json();
+      if(p.fullname) document.getElementById('contact_name').value=p.fullname;
+      if(p.phone)    document.getElementById('contact_phone').value=p.phone;
+    }
   }catch(e){}
 
   editId=new URLSearchParams(window.location.search).get('edit');
@@ -243,7 +291,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('page-title').textContent='Edit Listing';
     document.getElementById('sub-btn').textContent='💾 Save Changes';
     try{
-      const r=await fetch(`/api/properties/${editId}`); const p=await r.json();
+      const r=await fetch(`/api/properties/${editId}`);
+      const p=await r.json();
       if(p.listed_by!==cu.id){toast('Not your listing');return;}
       setType(p.type||'rent');
       ['title','city','locality','address','description','price','deposit','maintenance',
@@ -253,7 +302,12 @@ window.addEventListener('DOMContentLoaded', async () => {
       ['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
        'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
        'gated','vastu','water_24','no_brokerage'
-      ].forEach(k=>{if(p[k]){const el=document.getElementById(k);if(el){el.checked=true;document.getElementById('ci-'+k)?.classList.add('checked');}}});
+      ].forEach(k=>{
+        if(p[k]){
+          const el=document.getElementById(k);
+          if(el){el.checked=true;document.getElementById('ci-'+k)?.classList.add('checked');}
+        }
+      });
       photos=[...(p.photos||[])]; renderPhotos();
     }catch(e){toast('Failed to load listing');}
   }
@@ -263,19 +317,23 @@ function setType(t){
   ltype=t;
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('sel',b.dataset.t===t));
 }
-function tgl(k){const c=document.getElementById(k)?.checked;document.getElementById('ci-'+k)?.classList.toggle('checked',!!c);}
+function tgl(k){
+  const c=document.getElementById(k)?.checked;
+  document.getElementById('ci-'+k)?.classList.toggle('checked',!!c);
+}
 function pickPhoto(){document.getElementById('file-inp').click();}
 
 async function handleFiles(e){
   const files=Array.from(e.target.files||[]); e.target.value='';
-  const avail=10-photos.length; if(avail<=0){toast('Max 10 photos');return;}
+  const avail=10-photos.length;
+  if(avail<=0){toast('Max 10 photos');return;}
   const toUp=files.slice(0,avail);
   document.getElementById('upload-status').textContent=`Uploading ${toUp.length} photo(s)…`;
   for(const f of toUp){
     try{
       const fd=new FormData(); fd.append('file',f);
       const r=await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${tok}`},body:fd});
-      if(!r.ok)throw new Error(await r.text());
+      if(!r.ok) throw new Error(await r.text());
       const {url}=await r.json(); photos.push(url); renderPhotos();
     }catch(ex){toast('Upload failed: '+f.name);}
   }
@@ -290,7 +348,7 @@ function renderPhotos(){
       ${i===0?`<div style="position:absolute;bottom:4px;left:4px;background:var(--primary);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700">COVER</div>`:''}
       <div class="photo-rm" onclick="rmPhoto(${i})">✕</div>
     </div>`).join('');
-  if(photos.length<10)g.insertAdjacentHTML('beforeend','<div class="photo-slot" onclick="pickPhoto()">➕</div>');
+  if(photos.length<10) g.insertAdjacentHTML('beforeend','<div class="photo-slot" onclick="pickPhoto()">➕</div>');
 }
 function rmPhoto(i){photos.splice(i,1);renderPhotos();}
 
@@ -304,13 +362,17 @@ async function submit(){
     'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
     'gated','vastu','water_24','no_brokerage'];
   const payload={
-    type:ltype, property_type:V('prop_type'),
-    bhk:V('bhk')?parseInt(V('bhk')):null, bathrooms:V('bathrooms')?parseInt(V('bathrooms')):null,
+    type:ltype,
+    property_type:V('prop_type'),
+    bhk:V('bhk')?parseInt(V('bhk')):null,
+    bathrooms:V('bathrooms')?parseInt(V('bathrooms')):null,
     title:V('title'), city:V('city'), locality:V('locality'), address:V('address'),
-    description:V('description'), price:parseFloat(V('price')),
+    description:V('description'),
+    price:parseFloat(V('price')),
     deposit:V('deposit')?parseFloat(V('deposit')):null,
     maintenance:V('maintenance')?parseFloat(V('maintenance')):null,
-    area:V('area')?parseInt(V('area')):null, carpet_area:V('carpet_area')?parseInt(V('carpet_area')):null,
+    area:V('area')?parseInt(V('area')):null,
+    carpet_area:V('carpet_area')?parseInt(V('carpet_area')):null,
     floor:V('floor'), furnished:V('furnished'), available_from:V('available_from'),
     contact_name:V('contact_name'), contact_phone:V('contact_phone'),
     contact_email:V('contact_email'), contact_role:V('contact_role'),
@@ -321,18 +383,27 @@ async function submit(){
   try{
     const url=editId?`/api/properties/${editId}`:'/api/properties';
     const method=editId?'PATCH':'POST';
-    const r=await fetch(url,{method,headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(payload)});
+    const r=await fetch(url,{
+      method,
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
+      body:JSON.stringify(payload)
+    });
     if(!r.ok){const e=await r.json();throw new Error(e.error||'Failed');}
     const d=await r.json();
     toast(editId?'✅ Listing updated!':'✅ Listing published!');
     setTimeout(()=>window.location.href=`/property.html?id=${d.id}`,1000);
   }catch(e){
     toast('Error: '+e.message);
-    btn.disabled=false; btn.textContent=editId?'💾 Save Changes':'🏠 Publish Listing';
+    btn.disabled=false;
+    btn.textContent=editId?'💾 Save Changes':'🏠 Publish Listing';
   }
 }
 
-function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
+function toast(m){
+  const el=document.getElementById('toast-el');
+  el.textContent=m; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
 </script>
 </body>
 </html>

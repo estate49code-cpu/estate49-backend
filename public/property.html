@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="/style.css"/>
   <style>
     .pw{max-width:1080px;margin:0 auto;padding:32px 24px;}
-    .back-btn{display:inline-flex;align-items:center;gap:8px;font-size:var(--text-sm);color:var(--muted);margin-bottom:20px;cursor:pointer;}
+    .back-btn{display:inline-flex;align-items:center;gap:8px;font-size:var(--text-sm);color:var(--muted);margin-bottom:20px;cursor:pointer;border:none;background:none;font-family:inherit;}
     .back-btn:hover{color:var(--primary);}
     .pgal{border-radius:var(--radius-xl);overflow:hidden;background:var(--surface-3);margin-bottom:28px;position:relative;}
     .pgal-main{width:100%;height:420px;object-fit:cover;display:block;}
@@ -32,7 +32,6 @@
     .desc-text{font-size:var(--text-sm);color:var(--muted);line-height:1.8;white-space:pre-wrap;}
     .amen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
     .amen-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--primary-xlight);border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:600;color:var(--primary);border:1px solid var(--primary-light);}
-    /* Sidebar */
     .sidebar{position:sticky;top:calc(var(--nav-h)+20px);}
     .ccard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;box-shadow:var(--shadow-md);}
     .price-big{font-size:clamp(1.5rem,2.5vw,2rem);font-weight:900;color:var(--primary);margin-bottom:4px;}
@@ -42,7 +41,7 @@
     .contact-name{font-size:var(--text-sm);font-weight:700;}
     .contact-role{font-size:var(--text-xs);color:var(--muted);}
     .ccard-btns{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
-    .fav-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;background:var(--surface);transition:all var(--transition);}
+    .fav-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;background:var(--surface);transition:all var(--transition);cursor:pointer;width:100%;}
     .fav-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-xlight);}
     .fav-btn.saved{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
     .info-rows{margin-top:16px;padding-top:16px;border-top:1px solid var(--divider);}
@@ -51,8 +50,45 @@
     .info-key{color:var(--muted);}
     .info-val{font-weight:600;}
     .psec{margin-bottom:32px;}
-    @media(max-width:900px){.layout{grid-template-columns:1fr;}.sidebar{position:static;}.pgal-main{height:260px;}.pgal-ph{height:260px;}}
-    @media(max-width:600px){.pw{padding:16px;}.prop-stats{gap:8px;}.pstat{min-width:70px;padding:8px;}}
+
+    /* ===== MOBILE STICKY BOTTOM CTA (shows instead of sidebar on mobile) ===== */
+    .mobile-cta{
+      display:none;
+      position:fixed;bottom:62px;left:0;right:0;
+      background:rgba(255,255,255,0.97);
+      backdrop-filter:blur(8px);
+      border-top:1px solid var(--border);
+      padding:10px 16px;
+      padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));
+      z-index:150;
+      gap:10px;
+      align-items:center;
+    }
+    .mobile-cta-price{font-size:var(--text-lg);font-weight:900;color:var(--primary);flex:1;}
+    .mobile-cta-sub{font-size:10px;color:var(--muted);}
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr;}
+      .sidebar{display:none;} /* hide desktop sidebar, show mobile CTA instead */
+      .pgal-main{height:260px;}
+      .pgal-ph{height:260px;}
+    }
+    @media(max-width:768px){
+      .pw{padding:14px 14px 160px;} /* bottom padding for mobile CTA + bottom nav */
+      .prop-title{font-size:var(--text-xl);}
+      .prop-stats{gap:8px;}
+      .pstat{min-width:68px;padding:8px 10px;}
+      .pstat-icon{font-size:18px;}
+      .amen-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
+      .mobile-cta{display:flex;}
+    }
+    @media(max-width:480px){
+      .pgal-main{height:220px;}
+      .pgal-ph{height:220px;}
+      .pgal-thumbs{gap:6px;padding:8px;}
+      .pgal-thumb{width:58px;height:44px;}
+    }
   </style>
 </head>
 <body>
@@ -60,15 +96,21 @@
 <div class="page" id="page">
   <div id="navbar-root"></div>
   <div class="pw">
-    <div class="back-btn" onclick="history.back()">← Back</div>
+    <button class="back-btn" onclick="history.back()">← Back</button>
     <div id="content">
       <div class="skeleton" style="height:420px;border-radius:var(--radius-xl);margin-bottom:28px;"></div>
       <div class="layout">
-        <div><div class="skeleton skeleton-text" style="width:60%;height:2em;"></div><div class="skeleton skeleton-text"></div></div>
+        <div>
+          <div class="skeleton skeleton-text" style="width:60%;height:2em;margin-bottom:10px;"></div>
+          <div class="skeleton skeleton-text" style="width:40%;"></div>
+        </div>
         <div class="skeleton" style="height:360px;border-radius:var(--radius-xl);"></div>
       </div>
     </div>
   </div>
+
+  <!-- Mobile sticky bottom CTA (rendered by JS after load) -->
+  <div class="mobile-cta" id="mobile-cta" style="display:none"></div>
 </div>
 <div class="toast" id="toast-el"></div>
 
@@ -125,19 +167,51 @@ function render(){
   const photos=p.photos||[];
   const galHtml=photos.length
     ?`<img class="pgal-main" id="main-img" src="${photos[0]}" alt="${x(p.title)}" width="1080" height="420"/>
-      ${photos.length>1?`<div class="pgal-thumbs">${photos.map((ph,i)=>`<img class="pgal-thumb ${i===0?'active':''}" src="${ph}" alt="photo ${i+1}" width="72" height="54" loading="lazy" onclick="swImg(this,'${ph}')" />`).join('')}</div>`:''}`
+      ${photos.length>1
+        ?`<div class="pgal-thumbs">${photos.map((ph,i)=>`<img class="pgal-thumb ${i===0?'active':''}" src="${ph}" alt="photo ${i+1}" width="72" height="54" loading="lazy" onclick="swImg(this,'${ph}')"/>`).join('')}</div>`
+        :''}`
     :`<div class="pgal-ph">🏠</div>`;
 
   const ownerIni=(p.contact_name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+
+  const sidebarHtml=`
+    <div class="ccard">
+      <div class="price-big">${pr}</div>
+      <div class="price-note">${rent?'per month':'total price'}${p.maintenance?` • ₹${Number(p.maintenance).toLocaleString('en-IN')}/mo maintenance`:''}</div>
+      <div class="contact-row">
+        <div class="contact-avatar">${ownerIni}</div>
+        <div>
+          <div class="contact-name">${x(p.contact_name||'Owner')}</div>
+          <div class="contact-role">${x(cp(p.contact_role||'owner'))}</div>
+        </div>
+      </div>
+      <div class="ccard-btns">
+        ${!isOwn?`<button class="btn btn-primary btn-full btn-lg" onclick="msgOwner()">💬 Send Message</button>`:''}
+        <button class="fav-btn ${isFav?'saved':''}" id="fav-btn" onclick="toggleFav()">
+          ${isFav?'❤️ Saved':'🤍 Save Property'}
+        </button>
+        ${isOwn?`<a href="/list-property.html?edit=${p.id}" class="btn btn-secondary btn-full">✏️ Edit Listing</a>`:''}
+      </div>
+      <div class="info-rows">
+        ${p.contact_phone?`<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><a href="tel:${x(p.contact_phone)}" style="color:inherit">${x(p.contact_phone)}</a></span></div>`:''}
+        ${p.contact_email?`<div class="info-row"><span class="info-key">Email</span><span class="info-val">${x(p.contact_email)}</span></div>`:''}
+        ${p.contact_time?`<div class="info-row"><span class="info-key">Best time</span><span class="info-val">${x(p.contact_time)}</span></div>`:''}
+        ${p.property_type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${x(cp(p.property_type))}</span></div>`:''}
+        ${p.carpet_area?`<div class="info-row"><span class="info-key">Carpet area</span><span class="info-val">${p.carpet_area} ft²</span></div>`:''}
+        ${p.vastu?`<div class="info-row"><span class="info-key">Vastu</span><span class="info-val">✅ Compliant</span></div>`:''}
+        ${p.water_24?`<div class="info-row"><span class="info-key">Water</span><span class="info-val">24/7</span></div>`:''}
+        ${p.available_from?`<div class="info-row"><span class="info-key">Available</span><span class="info-val">${new Date(p.available_from).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span></div>`:''}
+      </div>
+    </div>`;
 
   document.getElementById('content').innerHTML=`
     <div class="pgal">${galHtml}</div>
     <div class="layout">
       <div>
         <div class="psec">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
             <span class="badge badge-${rent?'rent':'buy'}">${rent?'For Rent':'For Sale'}</span>
-            ${p.available_from?`<span class="badge" style="background:var(--surface-3)">Available: ${x(p.available_from)}</span>`:''}
+            ${p.no_brokerage?'<span class="badge" style="background:#d4edda;color:#155724">✅ Zero Brokerage</span>':''}
           </div>
           <h1 class="prop-title">${x(p.title||'Property')}</h1>
           <div class="prop-loc">📍 ${x([p.locality,p.city,p.address].filter(Boolean).join(', '))}</div>
@@ -156,34 +230,43 @@ function render(){
         </div>
         ${p.description?`<div class="psec"><h2 class="section-title">About this property</h2><p class="desc-text">${x(p.description)}</p></div>`:''}
         ${amenities.length?`<div class="psec"><h2 class="section-title">Amenities</h2><div class="amen-grid">${amenities.map(([icon,name])=>`<div class="amen-item">${icon} ${name}</div>`).join('')}</div></div>`:''}
-      </div>
-      <div class="sidebar">
-        <div class="ccard">
-          <div class="price-big">${pr}</div>
-          <div class="price-note">${rent?'per month':'total price'}${p.maintenance?` • ₹${Number(p.maintenance).toLocaleString('en-IN')}/mo maintenance`:''}</div>
-          <div class="contact-row">
-            <div class="contact-avatar">${p.contact_name?ownerIni:'?'}</div>
-            <div><div class="contact-name">${x(p.contact_name||'Owner')}</div><div class="contact-role">${x(p.contact_role||p.type==='rent'?'Landlord':'Seller')}</div></div>
-          </div>
-          <div class="ccard-btns">
-            ${!isOwn?`<button class="btn btn-primary btn-full btn-lg" onclick="msgOwner()">💬 Send Message</button>`:''}
-            <button class="fav-btn ${isFav?'saved':''}" id="fav-btn" onclick="toggleFav()">
-              ${isFav?'❤️ Saved':'🤍 Save Property'}
-            </button>
-            ${isOwn?`<a href="/list-property.html?edit=${p.id}" class="btn btn-secondary btn-full">✏️ Edit Listing</a>`:''}
-          </div>
-          <div class="info-rows">
-            ${p.contact_phone?`<div class="info-row"><span class="info-key">Phone</span><span class="info-val">${x(p.contact_phone)}</span></div>`:''}
-            ${p.contact_email?`<div class="info-row"><span class="info-key">Email</span><span class="info-val">${x(p.contact_email)}</span></div>`:''}
-            ${p.contact_time?`<div class="info-row"><span class="info-key">Best time</span><span class="info-val">${x(p.contact_time)}</span></div>`:''}
-            ${p.property_type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${x(cp(p.property_type))}</span></div>`:''}
-            ${p.carpet_area?`<div class="info-row"><span class="info-key">Carpet area</span><span class="info-val">${p.carpet_area} ft²</span></div>`:''}
-            ${p.vastu?`<div class="info-row"><span class="info-key">Vastu</span><span class="info-val">✅ Compliant</span></div>`:''}
-            ${p.water_24?`<div class="info-row"><span class="info-key">Water</span><span class="info-val">24/7</span></div>`:''}
-          </div>
+        <!-- Show full contact card inline on mobile (inside content flow) -->
+        <div class="psec" id="mobile-contact-card" style="display:none">
+          <h2 class="section-title">Contact & Details</h2>
+          ${sidebarHtml}
         </div>
       </div>
+      <div class="sidebar">${sidebarHtml}</div>
     </div>`;
+
+  // Show mobile contact card on small screens
+  if(window.innerWidth<=900){
+    document.getElementById('mobile-contact-card').style.display='block';
+  }
+  window.addEventListener('resize',()=>{
+    const mcc=document.getElementById('mobile-contact-card');
+    if(mcc) mcc.style.display=window.innerWidth<=900?'block':'none';
+  });
+
+  // Render mobile sticky CTA bar
+  renderMobileCTA(pr, rent, isOwn, p);
+}
+
+function renderMobileCTA(pr, rent, isOwn, p){
+  const cta=document.getElementById('mobile-cta');
+  cta.innerHTML=`
+    <div style="flex:1;min-width:0">
+      <div class="mobile-cta-price">${pr}</div>
+      <div class="mobile-cta-sub">${rent?'per month':'total price'}</div>
+    </div>
+    <button class="fav-btn ${isFav?'saved':''}" id="fav-btn-mob" style="width:auto;padding:9px 12px;font-size:18px;border-radius:var(--radius-md)" onclick="toggleFav()">
+      ${isFav?'❤️':'🤍'}
+    </button>
+    ${!isOwn
+      ?`<button class="btn btn-primary" style="flex-shrink:0" onclick="msgOwner()">💬 Message</button>`
+      :`<a href="/list-property.html?edit=${p.id}" class="btn btn-secondary" style="flex-shrink:0">✏️ Edit</a>`}
+    ${p.contact_phone?`<a href="tel:${x(p.contact_phone)}" class="btn btn-primary" style="flex-shrink:0">📞 Call</a>`:''}`;
+  cta.style.display='';
 }
 
 function swImg(el, src){
@@ -200,7 +283,6 @@ function msgOwner(){
 
 async function toggleFav(){
   if(!cu){window.location.href='/login.html';return;}
-  const btn=document.getElementById('fav-btn');
   try{
     if(isFav){
       await fetch(`/api/favorites/${pid}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});
@@ -209,8 +291,13 @@ async function toggleFav(){
       await fetch('/api/favorites',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify({property_id:Number(pid)})});
       isFav=true; toast('❤️ Saved!');
     }
-    btn.className=`fav-btn ${isFav?'saved':''}`;
-    btn.innerHTML=isFav?'❤️ Saved':'🤍 Save Property';
+    // Update all fav buttons
+    ['fav-btn','fav-btn-mob'].forEach(id=>{
+      const b=document.getElementById(id); if(!b)return;
+      b.className=`fav-btn ${isFav?'saved':''}`;
+      if(id==='fav-btn') b.innerHTML=isFav?'❤️ Saved':'🤍 Save Property';
+      else b.innerHTML=isFav?'❤️':'🤍';
+    });
   }catch(e){toast('Failed');}
 }
 

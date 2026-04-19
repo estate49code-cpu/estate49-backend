@@ -2,15 +2,113 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Estate49 — Bengaluru Real Estate</title>
+  <title>Estate49 — Smart Real Estate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/auth.js"></script>
+  <script src="/auth.js"></script><script src="/nav.js"></script>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    *{box-sizing:border-box;}
+    .hero{max-width:900px;margin:0 auto;padding:56px 24px 40px;text-align:center;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 18px;background:#fff;border:1.5px solid #e5e5e5;border-radius:99px;font-size:13px;font-weight:600;color:#6e6e80;margin-bottom:28px;box-shadow:0 1px 6px rgba(0,0,0,0.06);}
+    .hero-badge-dot{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#c0392b,#e74c3c);display:flex;align-items:center;justify-content:center;font-size:10px;}
+    .hero h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;line-height:1.15;margin-bottom:20px;color:#0d0d0d;}
+    .hero h1 span{color:#c0392b;}
+    .hero-sub{font-size:15px;color:#6e6e80;line-height:1.6;max-width:520px;margin:0 auto 44px;}
+    .modes{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:820px;margin:0 auto 48px;}
+    .mc{background:#fff;border:1.5px solid #e5e5e5;border-radius:20px;padding:28px;display:flex;flex-direction:column;align-items:flex-start;transition:all 0.2s;cursor:pointer;text-decoration:none;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+    .mc:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(0,0,0,0.1);border-color:rgba(192,57,43,0.25);}
+    .mc-icon-wrap{width:52px;height:52px;border-radius:14px;background:#fef0ee;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px;}
+    .mc h2{font-size:18px;font-weight:800;margin-bottom:8px;color:#0d0d0d;}
+    .mc p{font-size:13px;color:#6e6e80;line-height:1.55;margin-bottom:20px;}
+    .mc ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;margin-bottom:28px;width:100%;}
+    .mc ul li{font-size:12.5px;color:#6e6e80;display:flex;align-items:center;gap:7px;}
+    .mc ul li::before{content:'';width:6px;height:6px;border-radius:50%;background:#c0392b;flex-shrink:0;}
+    .mc-btn{width:100%;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:700;transition:all 0.2s;cursor:pointer;font-family:inherit;border:2px solid #c0392b;}
+    .mc-btn.primary{background:#c0392b;color:#fff;}
+    .mc-btn.primary:hover{background:#a93226;}
+    .mc-btn.outline{background:#fff;color:#c0392b;}
+    .mc-btn.outline:hover{background:#fef0ee;}
+    .pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;max-width:700px;margin:0 auto 56px;}
+    .pill{padding:9px 20px;background:#fff;border:1.5px solid #e5e5e5;border-radius:99px;font-size:13px;font-weight:600;color:#6e6e80;text-decoration:none;transition:all 0.2s;white-space:nowrap;}
+    .pill:hover{border-color:#c0392b;color:#c0392b;background:#fef0ee;}
+    .stats{background:#fff;border-top:1px solid #e5e5e5;padding:22px 24px;}
+    .stats-inner{max-width:800px;margin:0 auto;display:flex;justify-content:space-around;gap:12px;flex-wrap:wrap;}
+    .stat-item{text-align:center;}
+    .stat-num{font-size:22px;font-weight:800;color:#c0392b;}
+    .stat-lbl{font-size:12px;color:#6e6e80;margin-top:2px;}
+    @media(max-width:640px){
+      .hero{padding:32px 16px 24px;}
+      .modes{grid-template-columns:1fr;gap:14px;}
+      .hero-sub{margin-bottom:28px;}
+    }
+  </style>
 </head>
 <body>
+<div class="auth-loading" id="al"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
+<div class="page" id="page" style="display:none">
+  <div id="navbar-root"></div>
+
+  <div class="hero">
+    <div class="hero-badge">
+      <div class="hero-badge-dot">✨</div>
+      AI-Powered Real Estate Platform
+    </div>
+    <h1>Find, List &amp; Invest in<br/><span>Properties Smarter</span></h1>
+    <p class="hero-sub">Choose how you want to explore Estate49 — chat with our AI assistant or browse and list properties directly.</p>
+
+    <div class="modes">
+      <a class="mc" href="/chat.html">
+        <div class="mc-icon-wrap">💬</div>
+        <h2>Chat with AI</h2>
+        <p>Describe what you're looking for in plain language. Our AI finds the best options and guides you through everything.</p>
+        <ul>
+          <li>Ask anything in natural language</li>
+          <li>AI-powered property recommendations</li>
+          <li>Expert advice on pricing &amp; legal</li>
+          <li>List your property via conversation</li>
+        </ul>
+        <button class="mc-btn primary">💬 Start Chatting →</button>
+      </a>
+      <a class="mc" href="/browse.html">
+        <div class="mc-icon-wrap">🏠</div>
+        <h2>Browse &amp; List Direct</h2>
+        <p>Search and filter properties directly. Use advanced filters or list your property with a simple step-by-step form.</p>
+        <ul>
+          <li>Advanced filters: BHK, budget, area</li>
+          <li>Browse all listings with photos</li>
+          <li>Direct listing form for owners</li>
+          <li>Sort, filter &amp; compare properties</li>
+        </ul>
+        <button class="mc-btn outline">🏠 Browse Properties →</button>
+      </a>
+    </div>
+
+    <div class="pills">
+      <a class="pill" href="/list-property.html">🏷️ List Your Property Free</a>
+      <a class="pill" href="/browse.html?type=rent">🔑 Rent a Property</a>
+      <a class="pill" href="/browse.html?type=buy">🏡 Buy a Property</a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stats-inner">
+      <div class="stat-item"><div class="stat-num">10,000+</div><div class="stat-lbl">Properties Listed</div></div>
+      <div class="stat-item"><div class="stat-num">50,000+</div><div class="stat-lbl">Happy Users</div></div>
+      <div class="stat-item"><div class="stat-num">15+</div><div class="stat-lbl">Cities Covered</div></div>
+      <div class="stat-item"><div class="stat-num">Zero</div><div class="stat-lbl">Brokerage Listings</div></div>
+    </div>
+  </div>
+</div>
+
 <script>
-  getSession().then(s => {
-    window.location.href = s ? '/browse.html' : '/login.html';
-  });
+window.addEventListener('DOMContentLoaded', async () => {
+  const s = await getSession();
+  if (!s) { window.location.href = '/login.html'; return; }
+  document.getElementById('al').style.display = 'none';
+  document.getElementById('page').style.display = 'block';
+  await initNavbar({ active: 'home' });
+});
 </script>
 </body>
 </html>

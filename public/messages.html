@@ -21,7 +21,6 @@
     .conv-prop{font-size:10px;color:var(--primary);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .conv-time{font-size:10px;color:var(--faint);}
     .unread-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;}
-    /* Chat panel */
     .chat-panel{display:flex;flex-direction:column;background:var(--bg);}
     .chat-header{padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
     .chat-header-avatar{width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;}
@@ -39,12 +38,22 @@
     .chat-input-wrap{padding:12px 16px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:10px;}
     .chat-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-lg);font-size:var(--text-sm);resize:none;max-height:120px;transition:border-color var(--transition);}
     .chat-input:focus{outline:none;border-color:var(--primary);}
-    .send-btn{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;transition:all var(--transition);}
+    .send-btn{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;transition:all var(--transition);border:none;cursor:pointer;}
     .send-btn:hover{background:var(--primary-dark);transform:scale(1.05);}
-    .chat-empty{flex:1;display:flex;align-items:center;justify-content:center;}
     .no-conv{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px;color:var(--muted);}
     .no-conv-icon{font-size:56px;margin-bottom:16px;}
-    @media(max-width:768px){.msg-layout{grid-template-columns:1fr;}.conv-list{display:none;}.conv-list.show-mobile{display:block;}.chat-panel{display:none;}.chat-panel.show-mobile{display:flex;}}
+    .mobile-back{display:none;align-items:center;gap:8px;padding:10px 16px;font-size:13px;font-weight:600;color:var(--primary);cursor:pointer;border:none;background:var(--surface);border-bottom:1px solid var(--border);width:100%;}
+    @media(max-width:768px){
+      .msg-layout{grid-template-columns:1fr;height:calc(100dvh - 54px - 62px);}
+      .conv-list{border-right:none;}
+      .conv-list.hide-mobile{display:none;}
+      .chat-panel{display:none;}
+      .chat-panel.show-mobile{display:flex;height:calc(100dvh - 54px - 62px);}
+      .mobile-back{display:flex;}
+      .chat-body{padding:12px 14px;}
+      .chat-input-wrap{padding:8px 12px;}
+      .msg-bubble{max-width:82%;}
+    }
   </style>
 </head>
 <body>
@@ -54,24 +63,20 @@
   <div class="msg-layout">
     <div class="conv-list" id="conv-list">
       <div class="conv-header">💬 Messages</div>
-      <div id="convs">
-        <div style="padding:40px;text-align:center;color:var(--muted)"><div class="al-spin" style="margin:0 auto 12px"></div>Loading…</div>
-      </div>
+      <div id="convs"><div style="padding:40px;text-align:center;color:var(--muted)">Loading…</div></div>
     </div>
     <div class="chat-panel" id="chat-panel">
       <div class="no-conv">
         <div class="no-conv-icon">💬</div>
         <div style="font-size:var(--text-lg);font-weight:700;margin-bottom:8px">No conversation selected</div>
-        <div style="font-size:var(--text-sm)">Select a conversation from the left or message a property owner</div>
+        <div style="font-size:var(--text-sm)">Select a conversation from the list or message a property owner</div>
       </div>
     </div>
   </div>
 </div>
 <div class="toast" id="toast-el"></div>
-
 <script>
 let cu=null, tok=null, convs=[], activeConv=null, polling=null;
-
 window.addEventListener('DOMContentLoaded', async () => {
   const s=await getSession(); if(!s){window.location.href='/login.html';return;}
   cu=s.user; tok=s.access_token;
@@ -79,39 +84,25 @@ window.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('page').style.display='block';
   await initNavbar({active:'messages'});
   await loadConvs();
-
-  // Auto-open from URL params: ?to=USER_ID&listing=PROP_ID
   const params=new URLSearchParams(window.location.search);
   const to=params.get('to'), listing=params.get('listing');
   if(to){
     try{
-      const r=await fetch('/api/messages/conversation',{
-        method:'POST',
-        headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
-        body:JSON.stringify({to, property_id: listing ? Number(listing) : null})
-      });
-      if(r.ok){
-        const conv=await r.json();
-        // Reload convs to include new one
-        await loadConvs();
-        openConv(conv.id);
-      }
+      const r=await fetch('/api/messages/conversation',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify({to,property_id:listing?Number(listing):null})});
+      if(r.ok){const conv=await r.json();await loadConvs();openConv(conv.id);}
     }catch(e){}
   }
 });
-
 async function loadConvs(){
   try{
     const r=await fetch('/api/messages/conversations',{headers:{Authorization:`Bearer ${tok}`}});
-    convs=await r.json(); if(!Array.isArray(convs))convs=[];
-    renderConvs();
+    convs=await r.json(); if(!Array.isArray(convs))convs=[]; renderConvs();
   }catch(e){document.getElementById('convs').innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">Failed to load</div>';}
 }
-
 function renderConvs(){
   const el=document.getElementById('convs');
   if(!convs.length){
-    el.innerHTML='<div class="empty-state" style="padding:40px 16px"><div class="empty-icon">💬</div><div class="empty-title" style="font-size:var(--text-base)">No messages yet</div><div class="empty-sub">Message a property owner to start a conversation</div><a href="/browse.html" class="btn btn-primary">Browse Properties</a></div>';
+    el.innerHTML='<div class="empty-state" style="padding:40px 16px"><div class="empty-icon">💬</div><div class="empty-title" style="font-size:var(--text-base)">No messages yet</div><div class="empty-sub">Message a property owner to start</div><a href="/browse.html" class="btn btn-primary" style="margin-top:16px">Browse Properties</a></div>';
     return;
   }
   el.innerHTML=convs.map(c=>{
@@ -122,15 +113,19 @@ function renderConvs(){
     return`<div class="conv-item ${activeConv===c.id?'active':''}" onclick="openConv(${c.id})">
       <div class="conv-avatar">${op?.avatar_url?`<img src="${op.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`:ini}</div>
       <div class="conv-info">
-        <div class="conv-name">${x(name)} <span class="conv-time">${t}</span></div>
+        <div class="conv-name">${x(name)}<span class="conv-time">${t}</span></div>
         ${prop?`<div class="conv-prop">🏠 ${x(prop.title||'Property')}</div>`:''}
         <div class="conv-preview">${x(preview)}</div>
       </div>
-      ${c.unread_count?`<div class="unread-dot"></div>`:''}
+      ${c.unread_count?'<div class="unread-dot"></div>':''}
     </div>`;
   }).join('');
 }
-
+function goBack(){
+  document.getElementById('conv-list').classList.remove('hide-mobile');
+  document.getElementById('chat-panel').classList.remove('show-mobile');
+  activeConv=null; clearInterval(polling);
+}
 async function openConv(id){
   activeConv=id; clearInterval(polling);
   document.querySelectorAll('.conv-item').forEach(el=>el.classList.toggle('active',el.getAttribute('onclick')===`openConv(${id})`));
@@ -138,8 +133,8 @@ async function openConv(id){
   const op=conv.other_profile; const name=op?.fullname||'User';
   const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   const prop=conv.properties;
-
   document.getElementById('chat-panel').innerHTML=`
+    <button class="mobile-back" onclick="goBack()">← Back to Messages</button>
     <div class="chat-header">
       <div class="chat-header-avatar">${op?.avatar_url?`<img src="${op.avatar_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>`:ini}</div>
       <div style="flex:1;min-width:0">
@@ -147,20 +142,17 @@ async function openConv(id){
         ${prop?`<div class="chat-header-prop" onclick="window.location.href='/property.html?id=${prop.id}'">🏠 ${x(prop.title||'Property')}</div>`:''}
       </div>
     </div>
-    <div class="chat-body" id="chat-body">
-      <div style="text-align:center;color:var(--muted);padding:20px">Loading messages…</div>
-    </div>
+    <div class="chat-body" id="chat-body"><div style="text-align:center;color:var(--muted);padding:20px">Loading…</div></div>
     <div class="chat-input-wrap">
       <textarea class="chat-input" id="msg-input" placeholder="Type a message…" rows="1"
         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
       <button class="send-btn" onclick="sendMsg()">➤</button>
     </div>`;
-
+  document.getElementById('conv-list').classList.add('hide-mobile');
+  document.getElementById('chat-panel').classList.add('show-mobile');
   await loadMsgs(id);
-  // Poll every 3s
   polling=setInterval(()=>loadMsgs(id),3000);
 }
-
 async function loadMsgs(id){
   try{
     const r=await fetch(`/api/messages/${id}`,{headers:{Authorization:`Bearer ${tok}`}});
@@ -170,32 +162,21 @@ async function loadMsgs(id){
     body.innerHTML=msgs.length?msgs.map(m=>{
       const mine=m.sender_id===cu.id;
       const t=new Date(m.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-      return`<div class="msg-group ${mine?'mine':'theirs'}">
-        <div class="msg-bubble ${mine?'msg-mine':'msg-theirs'}">${x(m.content)}</div>
-        <div class="msg-time">${t}</div>
-      </div>`;
+      return`<div class="msg-group ${mine?'mine':'theirs'}"><div class="msg-bubble ${mine?'msg-mine':'msg-theirs'}">${x(m.content)}</div><div class="msg-time">${t}</div></div>`;
     }).join(''):'<div style="text-align:center;color:var(--muted);padding:40px">No messages yet. Say hi! 👋</div>';
     if(wasBottom)body.scrollTop=body.scrollHeight;
-        // mark conv unread as 0
     const ci=convs.find(c=>c.id===id); if(ci)ci.unread_count=0; renderConvs();
   }catch(e){}
 }
-
 async function sendMsg(){
   const inp=document.getElementById('msg-input'); if(!inp)return;
   const txt=inp.value.trim(); if(!txt)return;
   inp.value=''; inp.style.height='auto';
   try{
-    const r=await fetch(`/api/messages/${activeConv}/send`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
-      body:JSON.stringify({content:txt})
-    });
-    if(r.ok) await loadMsgs(activeConv);
-    else toast('Failed to send');
+    const r=await fetch(`/api/messages/${activeConv}/send`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify({content:txt})});
+    if(r.ok) await loadMsgs(activeConv); else toast('Failed to send');
   }catch(e){toast('Failed to send');}
 }
-
 function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
 </script>
