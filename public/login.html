@@ -83,72 +83,101 @@
 </div>
 
 <script>
-let mode = 'signin';
-
-// Redirect if already logged in
 window.addEventListener('DOMContentLoaded', async () => {
+  // ✅ If already signed in (or returning from OAuth), redirect away
   const s = await getSession();
-  if (s) window.location.replace('/browse.html');
+  if (s) { window.location.href = '/index.html'; return; }
+
+  document.getElementById('al').style.display = 'none';
+  document.getElementById('page').style.display = 'block';
+
+  // Check for mode=signup in URL
+  const mode = new URLSearchParams(window.location.search).get('mode');
+  if (mode === 'signup') showSignup();
 });
 
-function switchTab(t) {
-  mode = t;
-  document.getElementById('tab-signin').classList.toggle('active', t === 'signin');
-  document.getElementById('tab-signup').classList.toggle('active', t === 'signup');
-  document.getElementById('name-group').classList.toggle('show', t === 'signup');
-  document.getElementById('submit-btn').textContent = t === 'signin' ? 'Sign In' : 'Create Account';
-  document.getElementById('forgot-link').style.display = t === 'signin' ? '' : 'none';
-  document.getElementById('password').autocomplete = t === 'signin' ? 'current-password' : 'new-password';
-  hideMessages();
-}
-
-async function handleSubmit(e) {
-  e.preventDefault();
-  const email    = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
-  const fullname = document.getElementById('fullname').value.trim();
-  const btn      = document.getElementById('submit-btn');
-
-  hideMessages();
-  btn.disabled = true;
-  btn.textContent = mode === 'signin' ? 'Signing in...' : 'Creating account...';
-
+// ── Google OAuth ─────────────────────────────────────────────────────────────
+async function googleLogin() {
   try {
-    if (mode === 'signin') {
-      await signInWithEmail(email, password);
-      window.location.replace('/browse.html');
-    } else {
-      if (!fullname) { showErr('Please enter your full name.'); return; }
-      const data = await signUpWithEmail(email, password, fullname);
-      if (data?.user?.identities?.length === 0) {
-        showErr('An account with this email already exists. Please sign in.');
-      } else {
-        showSuccess('Account created! Please check your email to confirm, then sign in.');
-        switchTab('signin');
-      }
-    }
-  } catch(err) {
-    showErr(err.message || 'Something went wrong. Try again.');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+    await signInWithGoogle();
+    // Page redirects to Google, then back to /login.html automatically
+  } catch(e) {
+    showError(e.message || 'Google sign-in failed');
   }
 }
 
-async function forgotPassword(e) {
-  e.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  if (!email) { showErr('Enter your email address first.'); return; }
-  const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: window.location.origin + '/auth/callback'
-  });
-  if (error) showErr(error.message);
-  else showSuccess('Password reset email sent! Check your inbox.');
+// ── Email Sign Up ─────────────────────────────────────────────────────────────
+async function submitSignup() {
+  const email = document.getElementById('su-email').value.trim();
+  const password = document.getElementById('su-pass').value;
+  const name = document.getElementById('su-name').value.trim();
+  if (!email || !password || !name) { showError('All fields required'); return; }
+  if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
+
+  const btn = document.getElementById('su-btn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+
+  try {
+    const data = await signUpEmail(email, password);
+    // If email confirmation required
+    if (data?.user && !data?.session) {
+      showInfo('✅ Check your email for a confirmation link, then sign in.');
+    } else if (data?.session) {
+      // Auto confirmed — save name to profile then redirect
+      try {
+        await fetch('/api/profiles/me', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
+          body: JSON.stringify({ fullname: name })
+        });
+      } catch(e) {}
+      window.location.href = '/index.html';
+    }
+  } catch(e) {
+    showError(e.message || 'Sign up failed');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Account';
+  }
 }
 
-function showErr(msg)     { const e=document.getElementById('err-box');     e.textContent=msg; e.style.display='block'; }
-function showSuccess(msg) { const e=document.getElementById('success-box'); e.textContent=msg; e.style.display='block'; }
-function hideMessages()   { document.getElementById('err-box').style.display='none'; document.getElementById('success-box').style.display='none'; }
+// ── Email Sign In ─────────────────────────────────────────────────────────────
+async function submitLogin() {
+  const email = document.getElementById('si-email').value.trim();
+  const password = document.getElementById('si-pass').value;
+  if (!email || !password) { showError('Enter email and password'); return; }
+
+  const btn = document.getElementById('si-btn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+
+  try {
+    await signInEmail(email, password);
+    window.location.href = '/index.html';
+  } catch(e) {
+    showError(e.message || 'Sign in failed. Check your email and password.');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function showSignup() {
+  document.getElementById('panel-signin').style.display = 'none';
+  document.getElementById('panel-signup').style.display = 'block';
+}
+function showSignin() {
+  document.getElementById('panel-signup').style.display = 'none';
+  document.getElementById('panel-signin').style.display = 'block';
+}
+function showError(msg) {
+  const el = document.getElementById('err-msg');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+  else alert(msg);
+}
+function showInfo(msg) {
+  const el = document.getElementById('err-msg');
+  if (el) { el.textContent = msg; el.style.color = '#155724'; el.style.background = '#d4edda'; el.style.display = 'block'; }
+  else alert(msg);
+}
 </script>
 </body>
 </html>
