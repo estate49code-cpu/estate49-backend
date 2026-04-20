@@ -41,7 +41,8 @@ app.post('/api/chat', async (req, res) => {
 
 // ─── Page routes ─────────────────────────────
 const pages = ['login','browse','property','list-property','messages',
-               'profile','favorites','notifications','chat','admin'];
+               'profile','favorites','notifications','chat','admin',
+               'support','admin-support'];
 pages.forEach(p => {
   app.get(`/${p}`,      (req, res) => res.sendFile(path.join(__dirname, 'public', `${p}.html`)));
   app.get(`/${p}.html`, (req, res) => res.sendFile(path.join(__dirname, 'public', `${p}.html`)));
