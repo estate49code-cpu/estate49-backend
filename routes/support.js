@@ -64,18 +64,21 @@ router.post('/', async (req, res) => {
 });
 
 // ── ADMIN: GET /api/support/admin/all — all tickets ───────
-// ⚠️ This route MUST come before /:id to avoid conflict
 router.get('/admin/all', async (req, res) => {
   const user = await getUser(req);
   if (!isAdmin(user)) return res.status(403).json({ error: 'Forbidden' });
+
   const { status, priority, category } = req.query;
+
   let q = supabase
     .from('support_tickets')
-    .select(`*, profiles:user_id(fullname, phone)`)
+    .select('*')                      // ← no profiles join
     .order('created_at', { ascending: false });
+
   if (status)   q = q.eq('status', status);
   if (priority) q = q.eq('priority', priority);
   if (category) q = q.eq('category', category);
+
   const { data, error } = await q;
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
