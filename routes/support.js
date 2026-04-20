@@ -5,10 +5,14 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY   // service role key — bypasses RLS
+  process.env.SUPABASE_SERVICE_KEY
 );
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+// ── Admin emails — hardcoded + env var fallback ────────────
+const ADMIN_EMAILS = [
+  'estate49code@gmail.com',
+  ...(process.env.ADMIN_EMAILS || '').split(',').map(e => e.toLowerCase().trim()).filter(Boolean)
+];
 
 // ── MIDDLEWARE: get user from JWT ──────────────────────────
 async function getUser(req) {
@@ -18,8 +22,10 @@ async function getUser(req) {
   const { data: { user }, error } = await supabase.auth.getUser(token);
   return error ? null : user;
 }
+
 function isAdmin(user) {
-  return user && ADMIN_EMAILS.includes(user.email);
+  if (!user || !user.email) return false;
+  return ADMIN_EMAILS.includes(user.email.toLowerCase().trim());
 }
 
 // ── CLIENT: GET /api/support — my tickets ─────────────────
@@ -57,26 +63,11 @@ router.post('/', async (req, res) => {
   res.status(201).json(data);
 });
 
-// ── CLIENT: GET /api/support/:id — ticket detail ──────────
-router.get('/:id', async (req, res) => {
-  const user = await getUser(req);
-  if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  const { data, error } = await supabase
-    .from('support_tickets')
-    .select('*')
-    .eq('id', req.params.id)
-    .eq('user_id', user.id)
-    .single();
-  if (error || !data) return res.status(404).json({ error: 'Not found' });
-  res.json(data);
-});
-
 // ── ADMIN: GET /api/support/admin/all — all tickets ───────
+// ⚠️ This route MUST come before /:id to avoid conflict
 router.get('/admin/all', async (req, res) => {
   const user = await getUser(req);
-  console.log('Admin check — user email:', user?.email, '| ADMIN_EMAILS:', process.env.ADMIN_EMAILS);
   if (!isAdmin(user)) return res.status(403).json({ error: 'Forbidden' });
-  // ... rest of route
   const { status, priority, category } = req.query;
   let q = supabase
     .from('support_tickets')
@@ -96,7 +87,10 @@ router.patch('/admin/:id', async (req, res) => {
   if (!isAdmin(user)) return res.status(403).json({ error: 'Forbidden' });
   const { admin_reply, status, priority } = req.body;
   const updates = { updated_at: new Date().toISOString() };
-  if (admin_reply !== undefined) { updates.admin_reply = admin_reply; updates.admin_replied_at = new Date().toISOString(); }
+  if (admin_reply !== undefined) {
+    updates.admin_reply = admin_reply;
+    updates.admin_replied_at = new Date().toISOString();
+  }
   if (status)   updates.status = status;
   if (priority) updates.priority = priority;
   const { data, error } = await supabase
@@ -108,5 +102,20 @@ router.patch('/admin/:id', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
- 
+
+// ── CLIENT: GET /api/support/:id — ticket detail ──────────
+// ⚠️ This MUST come AFTER /admin/all to avoid swallowing it
+router.get('/:id', async (req, res) => {
+  const user = await getUser(req);
+  if (!user) return res.status(401).json({ error: 'Unauthorized' });
+  const { data, error } = await supabase
+    .from('support_tickets')
+    .select('*')
+    .eq('id', req.params.id)
+    .eq('user_id', user.id)
+    .single();
+  if (error || !data) return res.status(404).json({ error: 'Not found' });
+  res.json(data);
+});
+
 module.exports = router;
