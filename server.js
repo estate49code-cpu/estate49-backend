@@ -22,7 +22,7 @@ app.use('/api/messages',      require('./routes/messages'));
 app.use('/api/profiles',      require('./routes/profiles'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/upload',        require('./routes/upload'));
-app.use('/api/support', require('./routes/support'));
+app.use('/api/support',       require('./routes/support'));
 
 // ─── AI REST endpoint ────────────────────────
 app.post('/api/chat', async (req, res) => {
@@ -47,10 +47,20 @@ pages.forEach(p => {
   app.get(`/${p}`,      (req, res) => res.sendFile(path.join(__dirname, 'public', `${p}.html`)));
   app.get(`/${p}.html`, (req, res) => res.sendFile(path.join(__dirname, 'public', `${p}.html`)));
 });
+
 app.get('/auth/callback', (req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'auth', 'callback.html')));
-app.get('*', (req, res) =>
-  res.sendFile(path.join(__dirname, 'public', 'index.html')));
+
+// ─── Wildcard — serve .html files or fallback to index ───
+app.get('*', (req, res) => {
+  if (req.path.endsWith('.html')) {
+    const file = path.join(__dirname, 'public', path.basename(req.path));
+    return res.sendFile(file, err => {
+      if (err) res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+  }
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // ─── Socket.io AI Chat ────────────────────────
 const sessions = new Map();
