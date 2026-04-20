@@ -74,7 +74,9 @@ router.get('/:id', async (req, res) => {
 // ── ADMIN: GET /api/support/admin/all — all tickets ───────
 router.get('/admin/all', async (req, res) => {
   const user = await getUser(req);
+  console.log('Admin check — user email:', user?.email, '| ADMIN_EMAILS:', process.env.ADMIN_EMAILS);
   if (!isAdmin(user)) return res.status(403).json({ error: 'Forbidden' });
+  // ... rest of route
   const { status, priority, category } = req.query;
   let q = supabase
     .from('support_tickets')
@@ -106,5 +108,5 @@ router.patch('/admin/:id', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
-
+ 
 module.exports = router;

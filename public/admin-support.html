@@ -141,7 +141,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   cu=s.user; tok=s.access_token;
   document.getElementById('al').style.display='none';
   document.getElementById('page').style.display='block';
-  await initNavbar({});
+  await initNavbar({ active: 'support' });
   await loadTickets();
 });
 

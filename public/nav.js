@@ -16,9 +16,10 @@ async function initNavbar({ active = '' } = {}) {
   } catch(e) {}
 
   const navLinks = [
-    { key: 'browse', href: '/browse.html', label: 'Browse' },
-    { key: 'chat',   href: '/chat.html',   label: 'AI Chat' },
-    { key: 'list',   href: '/list-property.html', label: 'List Property' },
+    { key: 'browse',  href: '/browse.html',        label: 'Browse' },
+    { key: 'chat',    href: '/chat.html',           label: 'AI Chat' },
+    { key: 'list',    href: '/list-property.html',  label: 'List Property' },
+    { key: 'support', href: '/support.html',        label: '🎧 Support' },
   ];
 
   root.innerHTML = `
@@ -49,6 +50,7 @@ async function initNavbar({ active = '' } = {}) {
             <a class="nav-dd-item" href="/favorites.html">❤️ Saved</a>
             <a class="nav-dd-item" href="/messages.html">✉️ Messages</a>
             <a class="nav-dd-item" href="/notifications.html">🔔 Alerts</a>
+            <a class="nav-dd-item" href="/support.html">🎧 Support</a>
             <button class="nav-dd-item nav-dd-signout" onclick="signOut()">↩ Sign Out</button>
           </div>
         </div>
@@ -129,8 +131,8 @@ async function initNavbar({ active = '' } = {}) {
     { key:'home',          href:'/index.html',         icon:'🏠', label:'Home' },
     { key:'browse',        href:'/browse.html',        icon:'🔍', label:'Browse' },
     { key:'chat',          href:'/chat.html',          icon:'💬', label:'AI Chat' },
-    { key:'messages',      href:'/messages.html',      icon:'✉️',  label:'Messages', id:'bn-msg' },
-    { key:'notifications', href:'/notifications.html', icon:'🔔', label:'Alerts',    id:'bn-notif' },
+    { key:'messages',      href:'/messages.html',      icon:'✉️',  label:'Messages',  id:'bn-msg' },
+    { key:'support',       href:'/support.html',       icon:'🎧', label:'Support' },
   ];
   const bn = document.createElement('nav');
   bn.id = 'bottom-nav';
