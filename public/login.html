@@ -54,7 +54,7 @@
   <div class="success" id="success-box"></div>
 
   <!-- Google -->
-  <button class="google-btn" onclick="signInWithGoogle()">
+  <button class="google-btn" onclick="handleGoogle()">
     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"/>
     Continue with Google
   </button>
@@ -83,100 +83,134 @@
 </div>
 
 <script>
+let currentTab = 'signin';
+
 window.addEventListener('DOMContentLoaded', async () => {
-  // ✅ If already signed in (or returning from OAuth), redirect away
+  // Handle error params from OAuth redirect (e.g. ?error=server_error)
+  const params = new URLSearchParams(window.location.search);
+  const oauthError = params.get('error_description') || params.get('error');
+  if (oauthError) {
+    showError(decodeURIComponent(oauthError.replace(/\+/g,' ')));
+    // Clean the URL so error doesn't persist on refresh
+    window.history.replaceState({}, '', '/login.html');
+  }
+
+  // If already signed in, redirect away
   const s = await getSession();
   if (s) { window.location.href = '/index.html'; return; }
 
-  document.getElementById('al').style.display = 'none';
-  document.getElementById('page').style.display = 'block';
-
   // Check for mode=signup in URL
-  const mode = new URLSearchParams(window.location.search).get('mode');
-  if (mode === 'signup') showSignup();
+  if (params.get('mode') === 'signup') switchTab('signup');
 });
 
-// ── Google OAuth ─────────────────────────────────────────────────────────────
-async function googleLogin() {
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-signin').classList.toggle('active', tab === 'signin');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+  document.getElementById('name-group').classList.toggle('show', tab === 'signup');
+  document.getElementById('submit-btn').textContent = tab === 'signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('forgot-link').style.display = tab === 'signin' ? 'inline' : 'none';
+  document.getElementById('password').placeholder = tab === 'signin' ? '••••••••' : 'Min. 6 characters';
+  document.getElementById('password').autocomplete = tab === 'signin' ? 'current-password' : 'new-password';
+  clearMessages();
+}
+
+// ── Google ────────────────────────────────────────────────────────────────────
+async function handleGoogle() {
+  clearMessages();
   try {
     await signInWithGoogle();
-    // Page redirects to Google, then back to /login.html automatically
   } catch(e) {
     showError(e.message || 'Google sign-in failed');
   }
 }
 
-// ── Email Sign Up ─────────────────────────────────────────────────────────────
-async function submitSignup() {
-  const email = document.getElementById('su-email').value.trim();
-  const password = document.getElementById('su-pass').value;
-  const name = document.getElementById('su-name').value.trim();
-  if (!email || !password || !name) { showError('All fields required'); return; }
-  if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
+// ── Form submit (handles both sign in & sign up) ──────────────────────────────
+async function handleSubmit(e) {
+  e.preventDefault();
+  clearMessages();
 
-  const btn = document.getElementById('su-btn');
-  btn.disabled = true; btn.textContent = 'Creating account…';
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const name     = document.getElementById('fullname').value.trim();
+  const btn      = document.getElementById('submit-btn');
 
-  try {
-    const data = await signUpEmail(email, password);
-    // If email confirmation required
-    if (data?.user && !data?.session) {
-      showInfo('✅ Check your email for a confirmation link, then sign in.');
-    } else if (data?.session) {
-      // Auto confirmed — save name to profile then redirect
-      try {
-        await fetch('/api/profiles/me', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
-          body: JSON.stringify({ fullname: name })
-        });
-      } catch(e) {}
-      window.location.href = '/index.html';
+  if (currentTab === 'signup') {
+    if (!name)             { showError('Please enter your full name'); return; }
+    if (!email)            { showError('Please enter your email'); return; }
+    if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
+
+    btn.disabled = true; btn.textContent = 'Creating account…';
+    try {
+      const data = await signUpEmail(email, password);
+      if (data?.user && !data?.session) {
+        // Email confirmation required
+        showSuccess('✅ Check your email for a confirmation link, then sign in.');
+        switchTab('signin');
+      } else if (data?.session) {
+        // Auto-confirmed — save name then redirect
+        try {
+          await fetch('/api/profiles/me', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
+            body: JSON.stringify({ fullname: name })
+          });
+        } catch(_) {}
+        window.location.href = '/index.html';
+      }
+    } catch(err) {
+      showError(err.message || 'Sign up failed. Please try again.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Create Account';
     }
-  } catch(e) {
-    showError(e.message || 'Sign up failed');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Create Account';
+
+  } else {
+    // Sign In
+    if (!email || !password) { showError('Enter your email and password'); return; }
+
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    try {
+      await signInEmail(email, password);
+      window.location.href = '/index.html';
+    } catch(err) {
+      showError(err.message || 'Incorrect email or password.');
+    } finally {
+      btn.disabled = false; btn.textContent = 'Sign In';
+    }
   }
 }
 
-// ── Email Sign In ─────────────────────────────────────────────────────────────
-async function submitLogin() {
-  const email = document.getElementById('si-email').value.trim();
-  const password = document.getElementById('si-pass').value;
-  if (!email || !password) { showError('Enter email and password'); return; }
-
-  const btn = document.getElementById('si-btn');
-  btn.disabled = true; btn.textContent = 'Signing in…';
-
+// ── Forgot password ───────────────────────────────────────────────────────────
+async function forgotPassword(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  if (!email) { showError('Enter your email above first, then click Forgot password.'); return; }
   try {
-    await signInEmail(email, password);
-    window.location.href = '/index.html';
-  } catch(e) {
-    showError(e.message || 'Sign in failed. Check your email and password.');
-  } finally {
-    btn.disabled = false; btn.textContent = 'Sign In';
+    const { error } = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login.html'
+    });
+    if (error) throw error;
+    showSuccess('✅ Password reset email sent! Check your inbox.');
+  } catch(err) {
+    showError(err.message || 'Could not send reset email.');
   }
 }
 
-// ── UI helpers ────────────────────────────────────────────────────────────────
-function showSignup() {
-  document.getElementById('panel-signin').style.display = 'none';
-  document.getElementById('panel-signup').style.display = 'block';
-}
-function showSignin() {
-  document.getElementById('panel-signup').style.display = 'none';
-  document.getElementById('panel-signin').style.display = 'block';
-}
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function showError(msg) {
-  const el = document.getElementById('err-msg');
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
-  else alert(msg);
+  const el = document.getElementById('err-box');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('success-box').style.display = 'none';
 }
-function showInfo(msg) {
-  const el = document.getElementById('err-msg');
-  if (el) { el.textContent = msg; el.style.color = '#155724'; el.style.background = '#d4edda'; el.style.display = 'block'; }
-  else alert(msg);
+function showSuccess(msg) {
+  const el = document.getElementById('success-box');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('err-box').style.display = 'none';
+}
+function clearMessages() {
+  document.getElementById('err-box').style.display = 'none';
+  document.getElementById('success-box').style.display = 'none';
 }
 </script>
 </body>
