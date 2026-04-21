@@ -32,16 +32,9 @@
     .pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;max-width:700px;margin:0 auto 40px;}
     .pill{padding:9px 20px;background:#fff;border:1.5px solid #e5e5e5;border-radius:99px;font-size:13px;font-weight:600;color:#6e6e80;text-decoration:none;transition:all 0.2s;white-space:nowrap;}
     .pill:hover{border-color:#c0392b;color:#c0392b;background:#fef0ee;}
-    /* ✅ Highlighted List Property pill */
-    .pill-highlight{
-      background:#c0392b;color:#fff;
-      border-color:#c0392b;
-      box-shadow:0 3px 14px rgba(192,57,43,0.4);
-      animation:pillPulse 2.5s ease infinite;
-    }
+    .pill-highlight{background:#c0392b;color:#fff;border-color:#c0392b;box-shadow:0 3px 14px rgba(192,57,43,0.4);animation:pillPulse 2.5s ease infinite;}
     .pill-highlight:hover{background:#a93226;color:#fff;border-color:#a93226;}
     @keyframes pillPulse{0%,100%{box-shadow:0 3px 14px rgba(192,57,43,0.4);}50%{box-shadow:0 5px 22px rgba(192,57,43,0.65);}}
-    /* Mobile-only big CTA for List Property */
     .mob-list-cta{display:none;}
     @media(max-width:640px){
       .hero{padding:32px 16px 24px;}
@@ -49,14 +42,12 @@
       .hero-sub{margin-bottom:28px;}
       .mob-list-cta{
         display:flex;align-items:center;justify-content:center;gap:10px;
-        background:#c0392b;color:#fff;
-        border:none;border-radius:14px;
+        background:#c0392b;color:#fff;border:none;border-radius:14px;
         padding:16px 24px;font-size:16px;font-weight:800;
         text-decoration:none;width:100%;max-width:400px;
         margin:0 auto 28px;
         box-shadow:0 4px 18px rgba(192,57,43,0.45);
-        animation:pillPulse 2.5s ease infinite;
-        cursor:pointer;
+        animation:pillPulse 2.5s ease infinite;cursor:pointer;
       }
     }
     .stats{background:#fff;border-top:1px solid #e5e5e5;padding:22px 24px;}
@@ -64,6 +55,34 @@
     .stat-item{text-align:center;}
     .stat-num{font-size:22px;font-weight:800;color:#c0392b;}
     .stat-lbl{font-size:12px;color:#6e6e80;margin-top:2px;}
+
+    /* ── Footer ── */
+    .site-footer{background:#fff;border-top:1px solid #e5e5e5;padding:32px 24px 24px;}
+    .footer-inner{max-width:900px;margin:0 auto;}
+    .footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;margin-bottom:28px;}
+    .footer-brand{}
+    .footer-logo{font-size:20px;font-weight:800;color:#0d0d0d;margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+    .footer-tagline{font-size:13px;color:#6e6e80;line-height:1.6;margin-bottom:14px;max-width:240px;}
+    .footer-contact{font-size:12.5px;color:#6e6e80;display:flex;flex-direction:column;gap:5px;}
+    .footer-contact a{color:#6e6e80;text-decoration:none;}
+    .footer-contact a:hover{color:#c0392b;}
+    .footer-col h4{font-size:13px;font-weight:700;color:#0d0d0d;margin-bottom:12px;}
+    .footer-col a{display:block;font-size:13px;color:#6e6e80;text-decoration:none;margin-bottom:7px;transition:color .15s;}
+    .footer-col a:hover{color:#c0392b;}
+    .footer-bottom{border-top:1px solid #e5e5e5;padding-top:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+    .footer-copy{font-size:12px;color:#9a9aaa;}
+    .footer-legal{display:flex;gap:16px;flex-wrap:wrap;}
+    .footer-legal a{font-size:12px;color:#9a9aaa;text-decoration:none;}
+    .footer-legal a:hover{color:#c0392b;}
+    .footer-gstin{font-size:11px;color:#b0b0c0;margin-top:4px;}
+    @media(max-width:680px){
+      .footer-top{grid-template-columns:1fr 1fr;gap:24px;}
+      .footer-brand{grid-column:1/-1;}
+      .footer-bottom{flex-direction:column;align-items:flex-start;gap:8px;}
+    }
+    @media(max-width:380px){
+      .footer-top{grid-template-columns:1fr;}
+    }
   </style>
 </head>
 <body>
@@ -79,7 +98,7 @@
     <h1>Find, List &amp; Invest in<br/><span>Properties Smarter</span></h1>
     <p class="hero-sub">Choose how you want to explore Estate49 — chat with our AI assistant or browse and list properties directly.</p>
 
-    <!-- ✅ Mobile-only big List Property CTA button -->
+    <!-- Mobile-only big List Property CTA -->
     <a href="/list-property.html" class="mob-list-cta">🏠 List Your Property Free →</a>
 
     <div class="modes">
@@ -110,7 +129,6 @@
     </div>
 
     <div class="pills">
-      <!-- ✅ Highlighted List Property pill (desktop) -->
       <a class="pill pill-highlight" href="/list-property.html">🏠 List Your Property Free</a>
       <a class="pill" href="/browse.html?type=rent">🔑 Rent a Property</a>
       <a class="pill" href="/browse.html?type=buy">🏡 Buy a Property</a>
@@ -125,11 +143,71 @@
       <div class="stat-item"><div class="stat-num">Zero</div><div class="stat-lbl">Brokerage Listings</div></div>
     </div>
   </div>
+
+  <!-- ── Footer ── -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+
+        <!-- Brand -->
+        <div class="footer-brand">
+          <div class="footer-logo">🏠 Estate49</div>
+          <div class="footer-tagline">India's trusted AI-powered real estate platform. Find, list, and invest in properties smarter.</div>
+          <div class="footer-contact">
+            <span>📧 <a href="mailto:support@estate49.com">support@estate49.com</a></span>
+            <span>📞 <a href="tel:+919480901941">+91 94809 01941</a></span>
+            <span>📍 Hulimavu, Bengaluru – 560076</span>
+          </div>
+          <div class="footer-gstin">A division of Stenkepler Corporation · GSTIN: 29AEJFS5946L1Z5</div>
+        </div>
+
+        <!-- Explore -->
+        <div class="footer-col">
+          <h4>Explore</h4>
+          <a href="/browse.html">Browse Properties</a>
+          <a href="/browse.html?type=rent">Rent a Home</a>
+          <a href="/browse.html?type=buy">Buy a Property</a>
+          <a href="/chat.html">AI Assistant</a>
+          <a href="/list-property.html">List Property</a>
+        </div>
+
+        <!-- Company -->
+        <div class="footer-col">
+          <h4>Company</h4>
+          <a href="/about.html">About Us</a>
+          <a href="/contact.html">Contact</a>
+          <a href="/support.html">Support</a>
+        </div>
+
+        <!-- Legal -->
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="/privacy-policy.html">Privacy Policy</a>
+          <a href="/terms.html">Terms &amp; Conditions</a>
+          <a href="/refund-policy.html">Refund Policy</a>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          <div class="footer-copy">© 2026 Estate49 · A division of Stenkepler Corporation. All rights reserved.</div>
+          <div class="footer-gstin">Registered: No.16/17/1, 72 G-006, Prabhavathi Divine, DR Rajkumar Road, Hulimavu, Bengaluru – 560076, Karnataka, India</div>
+        </div>
+        <div class="footer-legal">
+          <a href="/privacy-policy.html">Privacy Policy</a>
+          <a href="/terms.html">Terms</a>
+          <a href="/refund-policy.html">Refunds</a>
+          <a href="/contact.html">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
 </div>
 
 <script>
 window.addEventListener('DOMContentLoaded', async () => {
-  // ✅ Allow guests on landing page — no forced login
   const s = await getSession();
   document.getElementById('al').style.display = 'none';
   document.getElementById('page').style.display = 'block';
