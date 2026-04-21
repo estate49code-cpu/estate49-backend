@@ -9,39 +9,90 @@
   <script src="/auth.js"></script><script src="/nav.js"></script>
   <link rel="stylesheet" href="/style.css"/>
   <style>
-    .chat-wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;height:calc(100dvh - var(--nav-h));padding:0;}
-    .chat-top{padding:16px 24px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
-    .ai-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#e74c3c);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+    :root{--chat-bubble-bot:#ffffff;--chat-bubble-user:var(--primary);}
+    .chat-wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;height:calc(100dvh - var(--nav-h));padding:0;}
+
+    /* ── Header ── */
+    .chat-top{padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .ai-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#e74c3c);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
     .ai-name{font-size:var(--text-base);font-weight:700;}
-    .ai-sub{font-size:var(--text-xs);color:var(--muted);}
-    .chat-body{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px;background:var(--bg);}
-    .msg-row{display:flex;gap:10px;align-items:flex-end;}
-    .msg-row.user{flex-direction:row-reverse;}
-    .msg-av{width:30px;height:30px;border-radius:50%;background:var(--primary);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-    .msg-av.bot{background:linear-gradient(135deg,var(--primary),#e74c3c);}
-    .bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:var(--text-sm);line-height:1.6;word-break:break-word;}
-    .bubble.bot{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;}
-    .bubble.user{background:var(--primary);color:#fff;border-bottom-right-radius:4px;}
-    .typing-dot{display:flex;gap:4px;padding:12px 16px;}
-    .dot{width:8px;height:8px;background:var(--muted);border-radius:50%;animation:dotbounce 1.2s ease infinite;}
-    .dot:nth-child(2){animation-delay:0.2s;}.dot:nth-child(3){animation-delay:0.4s;}
-    @keyframes dotbounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
-    .chat-input-wrap{padding:12px 20px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:10px;}
-    .chat-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-lg);font-size:var(--text-sm);resize:none;max-height:120px;transition:border-color var(--transition);}
-    .chat-input:focus{outline:none;border-color:var(--primary);}
-    .send-btn{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all var(--transition);flex-shrink:0;border:none;cursor:pointer;}
-    .send-btn:hover{background:var(--primary-dark);transform:scale(1.05);}
-    .suggestions{display:flex;flex-wrap:wrap;gap:8px;padding:10px 24px;background:var(--bg);}
-    .sugg{padding:7px 14px;border:1.5px solid var(--border);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:600;color:var(--muted);cursor:pointer;background:var(--surface);transition:all var(--transition);}
+    .ai-sub{font-size:11px;color:var(--muted);}
+    .online-dot{width:8px;height:8px;border-radius:50%;background:#27ae60;display:inline-block;margin-right:5px;}
+
+    /* ── Quick starts ── */
+    .sugg-bar{display:flex;flex-wrap:wrap;gap:8px;padding:12px 20px 8px;background:var(--bg);flex-shrink:0;}
+    .sugg{padding:7px 14px;border:1.5px solid var(--border);border-radius:var(--radius-full);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;background:var(--surface);transition:all var(--transition);white-space:nowrap;}
     .sugg:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-xlight);}
+
+    /* ── Messages ── */
+    .chat-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;background:var(--bg);}
+    .msg-row{display:flex;gap:10px;align-items:flex-start;max-width:100%;}
+    .msg-row.user{flex-direction:row-reverse;}
+    .msg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px;}
+    .msg-av.bot{background:linear-gradient(135deg,var(--primary),#e74c3c);font-size:16px;color:#fff;}
+    .msg-av.usr{background:var(--primary);color:#fff;}
+
+    /* ── Bubble ── */
+    .bubble{max-width:78%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.75;word-break:break-word;position:relative;}
+    .bubble.bot{background:var(--surface);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text);}
+    .bubble.user{background:var(--primary);color:#fff;border-top-right-radius:4px;}
+
+    /* ── Bubble rich content ── */
+    .bubble strong{font-weight:700;}
+    .bubble em{font-style:italic;}
+    .bubble code{background:rgba(0,0,0,0.06);padding:2px 6px;border-radius:4px;font-size:0.88em;font-family:monospace;}
+    .bubble .bul{display:flex;flex-direction:column;gap:5px;margin:8px 0;}
+    .bubble .bul-item{display:flex;gap:8px;align-items:flex-start;}
+    .bubble .bul-dot{flex-shrink:0;margin-top:5px;width:6px;height:6px;border-radius:50%;background:var(--primary);}
+    .bubble.user .bul-dot{background:#fff;}
+    .bubble hr.divider{border:none;border-top:1px solid var(--border);margin:10px 0;}
+    .bubble .section-gap{height:8px;}
+
+    /* ── Property card inside bubble ── */
+    .prop-card{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin:10px 0;font-size:13px;}
+    .prop-card-title{font-weight:700;font-size:14px;margin-bottom:6px;color:var(--text);}
+    .prop-card-row{display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:8px;color:var(--muted);font-size:12px;}
+    .prop-card-why{background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:7px 10px;border-radius:4px;font-size:12px;margin-bottom:8px;color:var(--text);}
+    .prop-card-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--primary);color:#fff;border-radius:var(--radius-full);font-size:12px;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:all var(--transition);}
+    .prop-card-btn:hover{background:var(--primary-dark);}
+
+    /* ── Action buttons below bot message ── */
+    .msg-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+    .action-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-full);font-size:12px;font-weight:700;cursor:pointer;transition:all var(--transition);border:2px solid;text-decoration:none;}
+    .action-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .action-btn.primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
+    .action-btn.outline{background:transparent;color:var(--primary);border-color:var(--primary);}
+    .action-btn.outline:hover{background:var(--primary-xlight);}
+    .action-btn.green{background:#27ae60;color:#fff;border-color:#27ae60;}
+    .action-btn.green:hover{background:#219a52;}
+
+    /* ── Confirm listing card ── */
+    .listing-confirm{background:linear-gradient(135deg,#f0fff4,#e8f5e9);border:2px solid #27ae60;border-radius:14px;padding:16px 18px;margin:10px 0;}
+    .listing-confirm-title{font-weight:800;font-size:15px;color:#155724;margin-bottom:12px;}
+    .listing-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:13px;}
+    .listing-row:last-of-type{border-bottom:none;}
+    .listing-row span:first-child{color:var(--muted);font-weight:600;}
+    .listing-row span:last-child{font-weight:700;color:var(--text);}
+
+    /* ── Typing indicator ── */
+    .typing-dot{display:flex;gap:5px;padding:4px 2px;}
+    .dot{width:8px;height:8px;background:var(--muted);border-radius:50%;animation:dotbounce 1.2s ease infinite;}
+    .dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+    @keyframes dotbounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+
+    /* ── Input area ── */
+    .chat-input-wrap{padding:12px 16px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:10px;flex-shrink:0;}
+    .chat-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-lg);font-size:14px;resize:none;max-height:120px;transition:border-color var(--transition);font-family:inherit;line-height:1.5;}
+    .chat-input:focus{outline:none;border-color:var(--primary);}
+    .send-btn{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;border:none;cursor:pointer;transition:all var(--transition);flex-shrink:0;}
+    .send-btn:hover{background:var(--primary-dark);transform:scale(1.05);}
+    .send-btn:disabled{background:var(--muted);cursor:not-allowed;transform:none;}
+
     @media(max-width:768px){
-      .chat-wrap{height:calc(100dvh - 54px - 62px);}
-      .chat-body{padding:12px 14px;}
-      .chat-input-wrap{padding:8px 12px 10px;}
-      .chat-top{padding:12px 14px;}
-      .suggestions{padding:8px 12px;gap:6px;}
-      .sugg{font-size:11px;padding:6px 12px;}
-      .bubble{max-width:85%;}
+      .chat-body{padding:12px 12px;}
+      .chat-input-wrap{padding:8px 12px 12px;}
+      .bubble{max-width:88%;font-size:13px;}
+      .sugg-bar{padding:10px 12px 6px;}
     }
   </style>
 </head>
@@ -50,67 +101,295 @@
 <div class="page" id="page">
   <div id="navbar-root"></div>
   <div class="chat-wrap">
+
+    <!-- Header -->
     <div class="chat-top">
       <div class="ai-avatar">🤖</div>
       <div>
-        <div class="ai-name">Estate49 AI Assistant</div>
-        <div class="ai-sub">Powered by Groq · Bengaluru Real Estate Expert</div>
+        <div class="ai-name">Estate49 AI</div>
+        <div class="ai-sub"><span class="online-dot"></span>Online · Real Estate Expert</div>
       </div>
-      <button class="btn btn-secondary" style="margin-left:auto;font-size:var(--text-xs)" onclick="clearChat()">🔄 New Chat</button>
+      <button class="btn btn-secondary" style="margin-left:auto;font-size:12px;padding:7px 14px;" onclick="clearChat()">🔄 New Chat</button>
     </div>
-    <div class="suggestions" id="sugg-bar">
-      <span class="sugg" onclick="qs('Find 2BHK flat under ₹20,000/month in Koramangala')">2BHK Koramangala &lt;₹20k</span>
-      <span class="sugg" onclick="qs('I want to list my apartment for rent')">List my apartment</span>
-      <span class="sugg" onclick="qs('Best localities in Bengaluru for families')">Family-friendly areas</span>
-      <span class="sugg" onclick="qs('What is a reasonable deposit for a 3BHK?')">Deposit norms</span>
+
+    <!-- Quick start chips -->
+    <div class="sugg-bar" id="sugg-bar">
+      <span class="sugg" onclick="qs('I want to find a 2BHK flat to rent in Bengaluru under ₹25,000')">🔍 Find 2BHK in Bengaluru</span>
+      <span class="sugg" onclick="qs('I want to list my property for rent')">🏗️ List my property</span>
+      <span class="sugg" onclick="qs('Best areas in Bengaluru for families with good schools')">🏘️ Family-friendly areas</span>
+      <span class="sugg" onclick="qs('What is a fair rent for a 3BHK in Whitefield?')">💰 Rent price advice</span>
+      <span class="sugg" onclick="qs('Tell me about Estate49 and how it works')">ℹ️ About Estate49</span>
     </div>
+
+    <!-- Messages -->
     <div class="chat-body" id="chat-body"></div>
+
+    <!-- Input -->
     <div class="chat-input-wrap">
-      <textarea class="chat-input" id="inp" rows="1" placeholder="Ask anything about Bengaluru real estate…"
+      <textarea class="chat-input" id="inp" rows="1" placeholder="Ask about properties, areas, prices…"
+        oninput="autoResize(this)"
         onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}"></textarea>
-      <button class="send-btn" onclick="send()">➤</button>
+      <button class="send-btn" id="send-btn" onclick="send()">➤</button>
     </div>
+
   </div>
 </div>
+
 <script>
-let socket=null, userInitials='?', waiting=false;
+let socket = null, userInitials = '?', waiting = false;
+let accessToken = null, pendingListing = null;
+
 window.addEventListener('DOMContentLoaded', async () => {
-  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
-  try{const r=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${s.access_token}`}});if(r.ok){const p=await r.json();const n=p.fullname||s.user.email||'U';userInitials=n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);}}catch(e){}
-  document.getElementById('al').style.display='none';
-  document.getElementById('page').style.display='block';
-  await initNavbar({active:'chat'});
+  const s = await getSession();
+  if (!s) { window.location.href = '/login.html'; return; }
+  accessToken = s.access_token;
+  try {
+    const r = await fetch('/api/profiles/me', { headers: { Authorization: `Bearer ${s.access_token}` }});
+    if (r.ok) {
+      const p = await r.json();
+      const n = p.fullname || s.user.email || 'U';
+      userInitials = n.split(' ').map(x => x[0]).join('').toUpperCase().slice(0, 2);
+    }
+  } catch(e) {}
+  document.getElementById('al').style.display = 'none';
+  document.getElementById('page').style.display = 'block';
+  await initNavbar({ active: 'chat' });
   connect();
 });
-function connect(){
-  socket=io();
-  socket.on('botReply', d=>{ removeTyping(); addMsg(formatMd(d.message||d),'bot'); });
-  socket.on('typing', v=>{ if(v)showTyping(); else removeTyping(); });
-  socket.on('connect_error', ()=>addMsg('Connection failed. Please refresh.','bot'));
+
+// ── Socket ────────────────────────────────────────────────
+function connect() {
+  socket = io();
+  socket.on('botReply', d => {
+    removeTyping();
+    waiting = false;
+    setSendBtn(false);
+    const msg = d.message || d;
+    const listing = d.listingData || null;
+    renderBotMsg(msg, listing);
+  });
+  socket.on('typing', v => {
+    if (v) showTyping(); else removeTyping();
+  });
+  socket.on('connect_error', () => {
+    removeTyping();
+    waiting = false;
+    setSendBtn(false);
+    addSimpleBotMsg('⚠️ Connection lost. Please refresh the page.');
+  });
 }
-function send(){
-  const inp=document.getElementById('inp'); const txt=inp.value.trim(); if(!txt||waiting)return;
-  addMsg(esc(txt),'user'); inp.value=''; inp.style.height='auto'; waiting=true;
-  document.getElementById('sugg-bar').style.display='none';
-  socket.emit('userMessage',{message:txt});
+
+function send() {
+  const inp = document.getElementById('inp');
+  const txt = inp.value.trim();
+  if (!txt || waiting) return;
+  addUserMsg(txt);
+  inp.value = '';
+  inp.style.height = 'auto';
+  waiting = true;
+  setSendBtn(true);
+  document.getElementById('sugg-bar').style.display = 'none';
+  socket.emit('userMessage', { message: txt });
 }
-function qs(txt){document.getElementById('inp').value=txt;send();}
-function clearChat(){if(socket){socket.disconnect();}document.getElementById('chat-body').innerHTML='';document.getElementById('sugg-bar').style.display='flex';waiting=false;connect();}
-function addMsg(html,who){
-  const body=document.getElementById('chat-body'); const isBot=who==='bot';
-  body.insertAdjacentHTML('beforeend',`<div class="msg-row ${isBot?'':'user'}"><div class="msg-av ${isBot?'bot':''}">${isBot?'🤖':userInitials}</div><div class="bubble ${isBot?'bot':'user'}">${html}</div></div>`);
-  body.scrollTop=body.scrollHeight; waiting=false;
+
+function qs(txt) {
+  document.getElementById('inp').value = txt;
+  send();
 }
-function showTyping(){
+
+function clearChat() {
+  if (socket) socket.disconnect();
+  document.getElementById('chat-body').innerHTML = '';
+  document.getElementById('sugg-bar').style.display = 'flex';
+  waiting = false;
+  pendingListing = null;
+  setSendBtn(false);
+  connect();
+}
+
+// ── Render user message ───────────────────────────────────
+function addUserMsg(text) {
+  const body = document.getElementById('chat-body');
+  body.insertAdjacentHTML('beforeend', `
+    <div class="msg-row user">
+      <div class="msg-av usr">${userInitials}</div>
+      <div class="bubble user">${esc(text)}</div>
+    </div>`);
+  body.scrollTop = body.scrollHeight;
+}
+
+// ── Render bot message ────────────────────────────────────
+function renderBotMsg(rawText, listingData) {
+  const body = document.getElementById('chat-body');
+
+  // Strip [LISTING_READY]...[/LISTING_READY] from display text
+  let displayText = rawText.replace(/\[LISTING_READY\][\s\S]*?\[\/LISTING_READY\]/g, '').trim();
+
+  // Parse listing JSON if present
+  const listingMatch = rawText.match(/\[LISTING_READY\]([\s\S]*?)\[\/LISTING_READY\]/);
+  let listing = null;
+  if (listingMatch) {
+    try { listing = JSON.parse(listingMatch[1].trim()); } catch(e) {}
+  }
+  if (listingData) listing = listingData;
+
+  // Build bubble content
+  let html = formatMessage(displayText);
+
+  // Append listing confirm card if present
+  if (listing) {
+    pendingListing = listing;
+    html += buildListingCard(listing);
+  }
+
+  // Build action buttons
+  let actions = '';
+  if (listing) {
+    actions = `
+      <div class="msg-actions">
+        <button class="action-btn green" onclick="confirmListing()">✅ Confirm &amp; Publish Listing</button>
+        <button class="action-btn outline" onclick="qs('I want to make some changes to the listing')">✏️ Edit Details</button>
+      </div>`;
+  } else if (displayText.toLowerCase().includes('list property') || displayText.toLowerCase().includes('list your property')) {
+    actions = `
+      <div class="msg-actions">
+        <button class="action-btn primary" onclick="qs('I want to list my property through chat')">🤖 List via AI Chat</button>
+        <a class="action-btn outline" href="/list-property.html">📝 Use Listing Form</a>
+      </div>`;
+  }
+
+  body.insertAdjacentHTML('beforeend', `
+    <div class="msg-row">
+      <div class="msg-av bot">🤖</div>
+      <div>
+        <div class="bubble bot">${html}</div>
+        ${actions}
+      </div>
+    </div>`);
+  body.scrollTop = body.scrollHeight;
+}
+
+function addSimpleBotMsg(text) {
+  renderBotMsg(text, null);
+}
+
+// ── Format markdown-like text into clean HTML ─────────────
+function formatMessage(text) {
+  const lines = esc(text).split('\n');
+  let html = '';
+  let inList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    // Apply inline formatting
+    line = line
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code>$1</code>');
+
+    const isBullet = /^[•\-\*]\s/.test(line.trim());
+    const isNumbered = /^\d+\.\s/.test(line.trim());
+    const isDivider = /^[━─=]{3,}/.test(line.trim());
+    const isEmpty = line.trim() === '';
+
+    if (isDivider) {
+      if (inList) { html += '</div>'; inList = false; }
+      html += '<hr class="divider"/>';
+      continue;
+    }
+
+    if (isBullet || isNumbered) {
+      if (!inList) { html += '<div class="bul">'; inList = true; }
+      const content = line.replace(/^[•\-\*\d\.]\s+/, '').trim();
+      html += `<div class="bul-item"><div class="bul-dot"></div><div>${content}</div></div>`;
+      continue;
+    }
+
+    if (inList) { html += '</div>'; inList = false; }
+
+    if (isEmpty) {
+      html += '<div class="section-gap"></div>';
+    } else {
+      html += `<div>${line}</div>`;
+    }
+  }
+
+  if (inList) html += '</div>';
+
+  // Detect property cards (lines with 🏠 bold title + 📍 🛏️ 🔗 pattern)
+  html = html.replace(
+    /<div>🏠 <strong>(.+?)<\/strong><\/div>([\s\S]*?)<div>🔗 \[View Property →\]\(\/property\?id=(\d+)\)<\/div>/g,
+    (match, title, middle, id) => buildPropertyCard(title, middle, id)
+  );
+
+  return html;
+}
+
+// ── Property card ─────────────────────────────────────────
+function buildPropertyCard(title, middle, id) {
+  return `
+    <div class="prop-card">
+      <div class="prop-card-title">🏠 ${title}</div>
+      <div class="prop-card-row">${middle.replace(/<div[^>]*>/g,'').replace(/<\/div>/g,' · ').replace(/\s·\s*$/,'').trim()}</div>
+      <a class="prop-card-btn" href="/property.html?id=${id}" target="_blank">View Property →</a>
+    </div>`;
+}
+
+// ── Listing confirm card ──────────────────────────────────
+function buildListingCard(l) {
+  const fmt = v => v ? `₹${Number(v).toLocaleString('en-IN')}` : '—';
+  return `
+    <div class="listing-confirm">
+      <div class="listing-confirm-title">📋 Listing Preview — Ready to Publish</div>
+      <div class="listing-row"><span>Title</span><span>${esc(l.title||'')}</span></div>
+      <div class="listing-row"><span>Type</span><span>${esc(l.type||'')}</span></div>
+      <div class="listing-row"><span>City</span><span>${esc(l.city||'')} · ${esc(l.location||'')}</span></div>
+      <div class="listing-row"><span>Price</span><span>${fmt(l.price)}</span></div>
+      <div class="listing-row"><span>Size</span><span>${l.bedrooms||0} Bed · ${l.bathrooms||0} Bath · ${l.area||0} sqft</span></div>
+      <div class="listing-row"><span>Amenities</span><span>${(l.amenities||[]).join(', ')||'—'}</span></div>
+    </div>`;
+}
+
+// ── Confirm & publish listing ─────────────────────────────
+async function confirmListing() {
+  if (!pendingListing || !accessToken) return;
+  try {
+    const r = await fetch('/api/properties', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify(pendingListing)
+    });
+    if (!r.ok) throw new Error((await r.json()).error || 'Failed');
+    const data = await r.json();
+    pendingListing = null;
+    addSimpleBotMsg(`🎉 **Your property is now live on Estate49!**\n\nYou can view and manage it from your Profile → My Listings.\n\n🔗 [View your listing →](/property.html?id=${data.id})`);
+  } catch(e) {
+    addSimpleBotMsg(`⚠️ Could not publish: ${e.message}. Please try the [listing form](/list-property.html) instead.`);
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function showTyping() {
   removeTyping();
-  document.getElementById('chat-body').insertAdjacentHTML('beforeend',`<div class="msg-row" id="typing-ind"><div class="msg-av bot">🤖</div><div class="bubble bot"><div class="typing-dot"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div></div>`);
-  document.getElementById('chat-body').scrollTop=99999;
+  document.getElementById('chat-body').insertAdjacentHTML('beforeend', `
+    <div class="msg-row" id="typing-ind">
+      <div class="msg-av bot">🤖</div>
+      <div class="bubble bot"><div class="typing-dot"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+    </div>`);
+  document.getElementById('chat-body').scrollTop = 99999;
 }
-function removeTyping(){document.getElementById('typing-ind')?.remove();}
-function formatMd(t){
-  return esc(t).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`(.+?)`/g,'<code style="background:var(--surface-3);padding:1px 5px;border-radius:3px;font-size:0.9em">$1</code>').replace(/\n/g,'<br/>');
+function removeTyping() { document.getElementById('typing-ind')?.remove(); }
+function setSendBtn(disabled) {
+  const btn = document.getElementById('send-btn');
+  btn.disabled = disabled;
+  btn.style.opacity = disabled ? '0.5' : '1';
 }
-function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+function esc(t) { return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
 </body>
 </html>

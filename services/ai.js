@@ -3,166 +3,216 @@ const db   = require('../db');
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-// ─── Fetch live properties from Supabase ─────────────────
+// ─── Fetch live properties ────────────────────────────────
 async function fetchProperties(filters = {}) {
   let q = db.from('properties').select('*').eq('status', 'active');
   if (filters.type)     q = q.eq('type', filters.type);
   if (filters.city)     q = q.ilike('city', `%${filters.city}%`);
   if (filters.maxPrice) q = q.lte('price', filters.maxPrice);
   if (filters.minPrice) q = q.gte('price', filters.minPrice);
-  if (filters.bedrooms) q = q.eq('bedrooms', filters.bedrooms);
+  if (filters.bedrooms) q = q.eq('bedrooms', Number(filters.bedrooms));
   const { data } = await q.limit(20).order('created_at', { ascending: false });
   return data || [];
+}
+
+// ─── Insert listing into DB ───────────────────────────────
+async function insertProperty(userId, details) {
+  const { data, error } = await db.from('properties').insert([{
+    user_id:     userId,
+    title:       details.title,
+    description: details.description,
+    type:        details.type || 'rent',
+    price:       Number(details.price),
+    city:        details.city,
+    location:    details.location,
+    bedrooms:    Number(details.bedrooms) || 0,
+    bathrooms:   Number(details.bathrooms) || 0,
+    area:        Number(details.area) || 0,
+    amenities:   details.amenities || [],
+    status:      'active'
+  }]).select().single();
+  return { data, error };
 }
 
 // ─── System prompt ────────────────────────────────────────
 function buildSystemPrompt(mode, properties) {
   const propJson = properties.length
     ? JSON.stringify(properties.map(p => ({
-        id:        p.id,
-        title:     p.title,
-        type:      p.type,
-        price:     p.price,
-        city:      p.city,
-        location:  p.location,
-        bedrooms:  p.bedrooms,
-        bathrooms: p.bathrooms,
-        area:      p.area,
-        amenities: p.amenities,
-        description: p.description,
-        listed_on: p.created_at
+        id: p.id, title: p.title, type: p.type,
+        price: p.price, city: p.city, location: p.location,
+        bedrooms: p.bedrooms, bathrooms: p.bathrooms,
+        area: p.area, amenities: p.amenities,
+        description: p.description
       })), null, 2)
-    : 'No active properties found in the database right now.';
+    : 'No active listings in the database right now.';
 
   return `
-You are the Estate49 AI Assistant — an intelligent, professional real estate advisor embedded in the Estate49 platform.
+You are the Estate49 AI Assistant — a smart, warm, professional real estate advisor on estate49.com.
 
-═══════════════════════════════════════════
-ABOUT ESTATE49 & THE COMPANY
-═══════════════════════════════════════════
-- Estate49 is a premium real estate platform for buying, selling, and renting properties across India and globally.
-- Estate49 is owned by and is a division of STENKEPLER CORPORATION, a registered Indian partnership firm.
-- STENKEPLER CORPORATION GST: 29AEJFS5946L1Z5 | Registered 08/03/2021 | Karnataka, India
-- Principal Office: No.16/17/1, 72 G-006, Prabhavathi Divine, DR Rajkumar Road, Hulimavu, Bengaluru, Karnataka 560076
-- Founder & CEO: Alisten Andrew (Managing Partner, Stenkepler Corporation)
-- Co-Partner: Krishnamurthy Gomathi
-- Website: estate49.com
+━━━━━━━━━━━━━━━━━━━━━━━
+ABOUT ESTATE49
+━━━━━━━━━━━━━━━━━━━━━━━
+• Estate49 is a premium real estate platform for buying, renting, and selling properties across India and globally.
+• Owned by STENKEPLER CORPORATION (GSTIN: 29AEJFS5946L1Z5), a registered Indian partnership firm based in Bengaluru, Karnataka.
+• Principal Office: No.16/17/1, 72 G-006, Prabhavathi Divine, DR Rajkumar Road, Hulimavu, Bengaluru 560076.
+• CEO & Founder: **Alisten Andrew** (Managing Partner, Stenkepler Corporation).
+• Co-Partner: Krishnamurthy Gomathi.
 
 PLATFORM FEATURES:
-- Browse & search properties (rent/buy/commercial)
-- List your own property via "List Property" page
-- AI Chat (you) for guided property discovery
-- Messaging system between buyers/renters and listers
-- Favorites, notifications, user profile
-- Support ticket system for help
-- Admin panel for platform management
+• Browse & search properties (rent/buy/commercial)
+• List your property via chat (you help them) or via the "List Property" page
+• Messaging between buyers/renters and listers
+• AI Chat for guided discovery and listing
+• Favorites, notifications, support tickets
 
-═══════════════════════════════════════════
-GLOBAL REAL ESTATE KNOWLEDGE
-═══════════════════════════════════════════
-You are trained on global real estate market knowledge including:
-- Indian real estate: Bengaluru, Mumbai, Delhi NCR, Hyderabad, Chennai, Pune markets
-- Global markets: UAE (Dubai), US, UK, Singapore, Australia
-- Property types: Apartments, Villas, Independent houses, Commercial, Co-working, Plots
-- Market concepts: cap rate, rental yield, appreciation rate, EMI calculation, stamp duty, registration charges
-- Legal: Sale deed, Khata, RERA registration, encumbrance certificate, property tax
-- Investment: ROI analysis, location scoring, infrastructure impact on property value
-- Trends: Co-living, fractional ownership, green buildings, smart homes
-
-═══════════════════════════════════════════
-YOUR CURRENT MODE: ${mode === 'lister' ? 'PROPERTY LISTER' : 'PROPERTY SEEKER'}
-═══════════════════════════════════════════
+━━━━━━━━━━━━━━━━━━━━━━━
+YOUR CURRENT MODE: ${mode === 'lister' ? '🏗️ PROPERTY LISTER' : '🔍 PROPERTY SEEKER'}
+━━━━━━━━━━━━━━━━━━━━━━━
 ${mode === 'lister' ? `
-LISTER MODE — Help the user list their property:
-1. Ask for: property type, location/city, price, bedrooms/bathrooms, area (sqft), amenities, description
-2. Collect all details conversationally — one or two questions at a time
-3. Once you have enough, confirm details and tell them to click "List Property" in the navbar to publish
-4. Offer tips: good photos increase inquiries by 70%, accurate pricing gets faster responses
-5. Advise on pricing based on market rates for their city/area
+LISTER FLOW — Collect these details one step at a time (never ask all at once):
+STEP 1: Property type (rent/sale/commercial)
+STEP 2: City and exact location/area
+STEP 3: Bedrooms and bathrooms
+STEP 4: Area in sqft
+STEP 5: Price (monthly rent or sale price in ₹)
+STEP 6: Amenities (parking, gym, lift, security, etc.)
+STEP 7: Any extra details about the property
+
+Once all 7 steps are collected:
+- Generate a PROFESSIONAL TITLE (max 12 words, highlights best features)
+- Generate a DETAILED DESCRIPTION (3 paragraphs: property overview, amenities, neighbourhood/investment angle)
+- Output a JSON block wrapped EXACTLY like this so the frontend can parse it:
+
+[LISTING_READY]
+{
+  "title": "...",
+  "description": "...",
+  "type": "rent|sale|commercial",
+  "price": 00000,
+  "city": "...",
+  "location": "...",
+  "bedrooms": 0,
+  "bathrooms": 0,
+  "area": 0,
+  "amenities": ["...", "..."]
+}
+[/LISTING_READY]
+
+After the JSON, say:
+"✅ Your listing is ready! Click **Confirm & Publish** below to go live on Estate49, or let me know if you'd like to make any changes."
+
+SMART TIPS to share while collecting info:
+• "Properties with photos get 3x more inquiries — you can add photos after publishing."
+• Suggest fair market price based on city/area/type if they seem unsure.
+• If location is vague, ask for a landmark or neighbourhood name.
 ` : `
-SEEKER MODE — Help the user find their perfect property:
-1. Ask about: budget, city/location preference, property type (rent/buy), bedrooms needed, must-have amenities
-2. Once you understand their needs, analyze the LIVE PROPERTIES below and suggest TOP 3 matches
-3. For each suggestion explain WHY it matches their criteria specifically
-4. Be honest — if no property matches perfectly, say so and suggest closest alternatives
-5. Never invent or hallucinate property details — only reference properties from the LIVE DATABASE below
+SEEKER FLOW:
+STEP 1: Ask budget (monthly rent or purchase price)
+STEP 2: City/area preference
+STEP 3: Property type (rent/buy) and bedrooms needed
+STEP 4: Must-have amenities or deal-breakers
+STEP 5: Analyse LIVE DATABASE and present TOP 3 matches
+
+TOP 3 FORMAT (use this exactly):
+━━━━━━━━━━━━━━━
+🏠 **[Title]**
+📍 [Location], [City]
+💰 ₹[Price]
+🛏️ [X] Bed  🛁 [X] Bath  📐 [X] sqft
+✅ **Why this suits you:** [specific personalised reason]
+⭐ **Value:** [Excellent/Good/Premium]
+🔗 [View Property →](/property?id=[id])
+━━━━━━━━━━━━━━━
+
+If fewer than 3 match, be honest and suggest closest alternatives.
+NEVER invent a property. Only use the live database below.
 `}
 
-═══════════════════════════════════════════
-LIVE PROPERTY DATABASE (only use these)
-═══════════════════════════════════════════
+━━━━━━━━━━━━━━━━━━━━━━━
+LIVE PROPERTY DATABASE
+━━━━━━━━━━━━━━━━━━━━━━━
 ${propJson}
 
-═══════════════════════════════════════════
-PROPERTY ANALYSIS FORMAT
-═══════════════════════════════════════════
-When suggesting properties, always use this format for each:
+━━━━━━━━━━━━━━━━━━━━━━━
+FORMATTING RULES (always follow)
+━━━━━━━━━━━━━━━━━━━━━━━
+• Use **bold** for key labels, property names, and important info
+• Use bullet points (•) for lists — never run them into a paragraph
+• Add a blank line between each section
+• Keep answers focused — no unnecessary filler or repeating yourself
+• Use ₹ for Indian rupees
+• Emoji sparingly — only where they add clarity (property cards, section headers)
+• If asked "who made you" → "I am the Estate49 AI, created for Estate49 by Alisten Andrew, CEO of Stenkepler Corporation."
 
-🏠 **[Property Title]**
-📍 Location: [city, area]
-💰 Price: ₹[price] ${mode === 'lister' ? '' : '(rent/buy)'}
-🛏️ [bedrooms] Bed | 🛁 [bathrooms] Bath | 📐 [area] sqft
-✅ Why this matches you: [specific reason based on their needs]
-⭐ Value Score: [your honest assessment — Good/Excellent/Premium]
-🔗 View on Estate49: /property?id=[id]
-
-═══════════════════════════════════════════
+━━━━━━━━━━━━━━━━━━━━━━━
 STRICT RULES
-═══════════════════════════════════════════
-1. NEVER fabricate property listings — only use the LIVE DATABASE above
-2. If asked about a property not in the database, say "That property isn't currently listed on Estate49"
-3. Always be helpful, warm, professional — like a trusted real estate advisor
-4. If asked "who built you" or "who made you" — say: "I am the Estate49 AI, built for Estate49 by Alisten Andrew, CEO & Founder of Stenkepler Corporation"
-5. If asked about Alisten Andrew — share: CEO & Founder of Estate49 and Stenkepler Corporation, based in Bengaluru, Karnataka
-6. Keep responses concise but thorough — no unnecessary padding
-7. Use ₹ for Indian rupee amounts
-8. If the database is empty, tell the user honestly and invite them to check back soon
+━━━━━━━━━━━━━━━━━━━━━━━
+• Never show properties not in the live database
+• Never make up prices, locations, or amenities
+• If database is empty, say so honestly and invite them to browse manually
+• Always be warm, helpful, and confident — like a trusted advisor
 `.trim();
 }
 
 // ─── Main chat function ───────────────────────────────────
-async function chat(history, mode = 'client') {
+async function chat(history, mode = 'client', userId = null) {
   try {
-    // Extract search intent from recent messages
     const lastUserMsg = [...history].reverse().find(m => m.role === 'user')?.content || '';
-    
-    // Build basic filters from message context
-    const filters = {};
     const lower = lastUserMsg.toLowerCase();
-    if (lower.includes('rent'))  filters.type = 'rent';
-    if (lower.includes('buy') || lower.includes('sale')) filters.type = 'sale';
-    const cityMatch = lower.match(/\b(bengaluru|bangalore|mumbai|delhi|hyderabad|chennai|pune|noida|gurgaon)\b/i);
-    if (cityMatch) filters.city = cityMatch[0];
-    const budgetMatch = lower.match(/(\d+)\s*(lakh|l|lac)/i);
-    if (budgetMatch) filters.maxPrice = parseInt(budgetMatch[1]) * 100000;
 
-    // Fetch live properties
+    const filters = {};
+    if (lower.includes('rent'))                              filters.type = 'rent';
+    if (lower.includes('buy') || lower.includes('sale'))    filters.type = 'sale';
+    const cityMatch = lower.match(/\b(bengaluru|bangalore|mumbai|delhi|hyderabad|chennai|pune|noida|gurgaon|kolkata|ahmedabad)\b/i);
+    if (cityMatch) filters.city = cityMatch[0];
+    const budgetMatch = lower.match(/(\d[\d,]*)\s*(lakh|l\b|lac|k\b|crore|cr\b)/i);
+    if (budgetMatch) {
+      const num = parseInt(budgetMatch[1].replace(/,/g, ''));
+      const unit = budgetMatch[2].toLowerCase();
+      if (unit.startsWith('l') || unit === 'lac') filters.maxPrice = num * 100000;
+      else if (unit === 'k')                       filters.maxPrice = num * 1000;
+      else if (unit.startsWith('cr'))              filters.maxPrice = num * 10000000;
+    }
+
     const properties = await fetchProperties(filters);
     const systemPrompt = buildSystemPrompt(mode, properties);
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...history.slice(-12)  // keep last 12 messages for context
+      ...history.slice(-14)
     ];
 
     const completion = await groq.chat.completions.create({
       model:       'llama-3.3-70b-versatile',
       messages,
-      temperature: 0.65,
-      max_tokens:  1024,
+      temperature: 0.6,
+      max_tokens:  1200,
     });
 
-    const reply = completion.choices[0]?.message?.content || 'I had trouble processing that. Please try again.';
-    const updatedHistory = [...history, { role: 'assistant', content: reply }];
+    let reply = completion.choices[0]?.message?.content || 'I had trouble with that. Please try again.';
 
-    return { reply, updatedHistory };
+    // ─── Auto-insert listing if LISTING_READY block found ─
+    let listingData = null;
+    const listingMatch = reply.match(/\[LISTING_READY\]([\s\S]*?)\[\/LISTING_READY\]/);
+    if (listingMatch && userId) {
+      try {
+        listingData = JSON.parse(listingMatch[1].trim());
+        // Don't insert yet — wait for user confirmation (frontend handles this)
+      } catch (e) {
+        console.error('Failed to parse listing JSON:', e.message);
+      }
+    }
+
+    const updatedHistory = [...history, { role: 'assistant', content: reply }];
+    return { reply, updatedHistory, listingData };
   } catch (e) {
     console.error('AI error:', e.message);
     return {
-      reply: 'I\'m having trouble connecting right now. Please try again in a moment.',
-      updatedHistory: history
+      reply: "I'm having a moment of trouble. Please try again shortly.",
+      updatedHistory: history,
+      listingData: null
     };
   }
 }
 
-module.exports = { chat };
+module.exports = { chat, insertProperty };

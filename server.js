@@ -70,7 +70,8 @@ const LISTER_KW = ['list','listing','sell','rent out','add property','post prope
 io.on('connection', socket => {
   sessions.set(socket.id, { mode: null, history: [] });
   socket.emit('botReply', {
-    message: "Welcome to Estate49! 🏠\nAre you looking to **find** a property to rent/buy, or do you want to **list** your own property?",
+    message: "Welcome to Estate49! 🏠\n\nAre you looking to **find** a property to rent or buy, or do you want to **list** your own property?",
+    listingData: null,
     timestamp: new Date()
   });
 
@@ -78,20 +79,44 @@ io.on('connection', socket => {
     try {
       const text = (typeof data === 'string' ? data : data?.message || '').trim();
       if (!text) return;
+
       const sess = sessions.get(socket.id) || { mode: null, history: [] };
+
+      // Detect mode from first message
       if (!sess.mode) {
         sess.mode = LISTER_KW.some(k => text.toLowerCase().includes(k)) ? 'lister' : 'client';
       }
+
+      // Allow mid-conversation mode switch
+      if (text.toLowerCase().includes('i want to list') || text.toLowerCase().includes('list my property')) {
+        sess.mode = 'lister';
+      }
+      if (text.toLowerCase().includes('i want to find') || text.toLowerCase().includes('looking for a property')) {
+        sess.mode = 'client';
+      }
+
       sess.history.push({ role: 'user', content: text });
       socket.emit('typing', true);
+
       const result = await chat(sess.history, sess.mode);
       sess.history = result.updatedHistory;
       sessions.set(socket.id, sess);
+
       socket.emit('typing', false);
-      socket.emit('botReply', { message: result.reply, timestamp: new Date() });
+      socket.emit('botReply', {
+        message:     result.reply,
+        listingData: result.listingData || null,   // ← passes listing JSON to frontend
+        timestamp:   new Date()
+      });
+
     } catch (e) {
+      console.error('Socket chat error:', e.message);
       socket.emit('typing', false);
-      socket.emit('botReply', { message: 'I had trouble with that. Please try again.', timestamp: new Date() });
+      socket.emit('botReply', {
+        message: 'I had trouble with that. Please try again.',
+        listingData: null,
+        timestamp: new Date()
+      });
     }
   });
 
