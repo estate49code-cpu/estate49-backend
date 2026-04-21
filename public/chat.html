@@ -9,90 +9,100 @@
   <script src="/auth.js"></script><script src="/nav.js"></script>
   <link rel="stylesheet" href="/style.css"/>
   <style>
-    :root{--chat-bubble-bot:#ffffff;--chat-bubble-user:var(--primary);}
     .chat-wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;height:calc(100dvh - var(--nav-h));padding:0;}
 
-    /* ── Header ── */
-    .chat-top{padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
-    .ai-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#e74c3c);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-    .ai-name{font-size:var(--text-base);font-weight:700;}
-    .ai-sub{font-size:11px;color:var(--muted);}
-    .online-dot{width:8px;height:8px;border-radius:50%;background:#27ae60;display:inline-block;margin-right:5px;}
+    /* Header */
+    .chat-top{padding:13px 18px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+    .ai-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#e74c3c);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .ai-name{font-size:15px;font-weight:700;line-height:1.2;}
+    .ai-sub{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-top:2px;}
+    .online-dot{width:7px;height:7px;border-radius:50%;background:#27ae60;flex-shrink:0;}
 
-    /* ── Quick starts ── */
-    .sugg-bar{display:flex;flex-wrap:wrap;gap:8px;padding:12px 20px 8px;background:var(--bg);flex-shrink:0;}
-    .sugg{padding:7px 14px;border:1.5px solid var(--border);border-radius:var(--radius-full);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;background:var(--surface);transition:all var(--transition);white-space:nowrap;}
+    /* Quick chips */
+    .sugg-bar{display:flex;flex-wrap:wrap;gap:7px;padding:10px 18px 8px;background:var(--bg);flex-shrink:0;border-bottom:1px solid var(--border);}
+    .sugg{padding:6px 13px;border:1.5px solid var(--border);border-radius:99px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;background:var(--surface);transition:all .18s;white-space:nowrap;}
     .sugg:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-xlight);}
 
-    /* ── Messages ── */
-    .chat-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;background:var(--bg);}
-    .msg-row{display:flex;gap:10px;align-items:flex-start;max-width:100%;}
+    /* Messages */
+    .chat-body{flex:1;overflow-y:auto;padding:18px 18px 10px;display:flex;flex-direction:column;gap:16px;background:var(--bg);}
+    .msg-row{display:flex;gap:9px;align-items:flex-start;}
     .msg-row.user{flex-direction:row-reverse;}
-    .msg-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px;}
-    .msg-av.bot{background:linear-gradient(135deg,var(--primary),#e74c3c);font-size:16px;color:#fff;}
-    .msg-av.usr{background:var(--primary);color:#fff;}
+    .msg-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px;}
+    .msg-av.bot{background:linear-gradient(135deg,var(--primary),#e74c3c);font-size:15px;color:#fff;}
+    .msg-av.usr{background:var(--primary);color:#fff;font-size:11px;}
+    .msg-col{display:flex;flex-direction:column;gap:8px;max-width:80%;}
+    .msg-row.user .msg-col{align-items:flex-end;}
 
-    /* ── Bubble ── */
-    .bubble{max-width:78%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.75;word-break:break-word;position:relative;}
+    /* Bubbles */
+    .bubble{padding:11px 15px;border-radius:18px;font-size:14px;line-height:1.75;word-break:break-word;}
     .bubble.bot{background:var(--surface);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text);}
     .bubble.user{background:var(--primary);color:#fff;border-top-right-radius:4px;}
-
-    /* ── Bubble rich content ── */
     .bubble strong{font-weight:700;}
     .bubble em{font-style:italic;}
-    .bubble code{background:rgba(0,0,0,0.06);padding:2px 6px;border-radius:4px;font-size:0.88em;font-family:monospace;}
-    .bubble .bul{display:flex;flex-direction:column;gap:5px;margin:8px 0;}
-    .bubble .bul-item{display:flex;gap:8px;align-items:flex-start;}
-    .bubble .bul-dot{flex-shrink:0;margin-top:5px;width:6px;height:6px;border-radius:50%;background:var(--primary);}
-    .bubble.user .bul-dot{background:#fff;}
-    .bubble hr.divider{border:none;border-top:1px solid var(--border);margin:10px 0;}
-    .bubble .section-gap{height:8px;}
+    .bubble code{background:rgba(0,0,0,0.07);padding:1px 5px;border-radius:4px;font-size:12px;font-family:monospace;}
+    .bubble hr{border:none;border-top:1px solid var(--border);margin:10px 0;}
+    .b-gap{height:6px;}
+    .b-list{display:flex;flex-direction:column;gap:5px;margin:6px 0;}
+    .b-item{display:flex;gap:8px;align-items:flex-start;line-height:1.6;}
+    .b-dot{width:6px;height:6px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;}
+    .bubble.user .b-dot{background:rgba(255,255,255,0.8);}
 
-    /* ── Property card inside bubble ── */
-    .prop-card{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:13px 15px;margin:10px 0;font-size:13px;}
-    .prop-card-title{font-weight:700;font-size:14px;margin-bottom:6px;color:var(--text);}
-    .prop-card-row{display:flex;flex-wrap:wrap;gap:6px 14px;margin-bottom:8px;color:var(--muted);font-size:12px;}
-    .prop-card-why{background:rgba(39,174,96,0.08);border-left:3px solid #27ae60;padding:7px 10px;border-radius:4px;font-size:12px;margin-bottom:8px;color:var(--text);}
-    .prop-card-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--primary);color:#fff;border-radius:var(--radius-full);font-size:12px;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:all var(--transition);}
-    .prop-card-btn:hover{background:var(--primary-dark);}
+    /* Property card inside bubble */
+    .prop-card{background:var(--surface-2,#f8f9fa);border:1.5px solid var(--border);border-radius:12px;padding:13px 14px;margin:8px 0;}
+    .pc-title{font-weight:800;font-size:14px;margin-bottom:7px;}
+    .pc-meta{display:flex;flex-wrap:wrap;gap:5px 12px;font-size:12px;color:var(--muted);margin-bottom:8px;}
+    .pc-why{background:rgba(39,174,96,0.09);border-left:3px solid #27ae60;padding:7px 10px;border-radius:0 6px 6px 0;font-size:12px;margin-bottom:10px;line-height:1.55;}
+    .pc-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;background:var(--primary-xlight);color:var(--primary);margin-bottom:8px;}
+    .pc-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:var(--primary);color:#fff;border-radius:99px;font-size:12px;font-weight:700;text-decoration:none;transition:.15s;}
+    .pc-btn:hover{background:var(--primary-dark);}
 
-    /* ── Action buttons below bot message ── */
-    .msg-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
-    .action-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-full);font-size:12px;font-weight:700;cursor:pointer;transition:all var(--transition);border:2px solid;text-decoration:none;}
-    .action-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
-    .action-btn.primary:hover{background:var(--primary-dark);border-color:var(--primary-dark);}
-    .action-btn.outline{background:transparent;color:var(--primary);border-color:var(--primary);}
-    .action-btn.outline:hover{background:var(--primary-xlight);}
-    .action-btn.green{background:#27ae60;color:#fff;border-color:#27ae60;}
-    .action-btn.green:hover{background:#219a52;}
+    /* Listing preview card */
+    .listing-card{background:linear-gradient(135deg,#f0fff4,#e8f5e9);border:2px solid #27ae60;border-radius:14px;padding:15px 17px;margin:8px 0;}
+    .lc-title{font-weight:800;font-size:14px;color:#155724;margin-bottom:11px;display:flex;align-items:center;gap:7px;}
+    .lc-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:13px;gap:12px;}
+    .lc-row:last-of-type{border-bottom:none;}
+    .lc-label{color:var(--muted);font-weight:600;white-space:nowrap;flex-shrink:0;}
+    .lc-val{font-weight:700;text-align:right;}
 
-    /* ── Confirm listing card ── */
-    .listing-confirm{background:linear-gradient(135deg,#f0fff4,#e8f5e9);border:2px solid #27ae60;border-radius:14px;padding:16px 18px;margin:10px 0;}
-    .listing-confirm-title{font-weight:800;font-size:15px;color:#155724;margin-bottom:12px;}
-    .listing-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:13px;}
-    .listing-row:last-of-type{border-bottom:none;}
-    .listing-row span:first-child{color:var(--muted);font-weight:600;}
-    .listing-row span:last-child{font-weight:700;color:var(--text);}
+    /* Photo upload zone */
+    .photo-upload-zone{border:2px dashed #27ae60;border-radius:12px;padding:16px;margin:10px 0;background:rgba(39,174,96,0.04);text-align:center;}
+    .photo-upload-zone p{font-size:13px;color:var(--muted);margin-bottom:10px;}
+    .photos-preview{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;justify-content:center;}
+    .photo-thumb{width:70px;height:70px;border-radius:8px;object-fit:cover;border:2px solid var(--border);position:relative;}
+    .photo-thumb-wrap{position:relative;}
+    .photo-rm{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#e74c3c;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700;}
+    .upload-prog{font-size:12px;color:var(--muted);margin-top:6px;}
 
-    /* ── Typing indicator ── */
+    /* Action buttons */
+    .msg-actions{display:flex;flex-wrap:wrap;gap:8px;}
+    .act-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;border:2px solid;text-decoration:none;}
+    .act-btn.green{background:#27ae60;color:#fff;border-color:#27ae60;}
+    .act-btn.green:hover{background:#219a52;}
+    .act-btn.green:disabled{background:#aaa;border-color:#aaa;cursor:not-allowed;}
+    .act-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .act-btn.primary:hover{background:var(--primary-dark);}
+    .act-btn.outline{background:transparent;color:var(--primary);border-color:var(--primary);}
+    .act-btn.outline:hover{background:var(--primary-xlight);}
+
+    /* Typing */
     .typing-dot{display:flex;gap:5px;padding:4px 2px;}
-    .dot{width:8px;height:8px;background:var(--muted);border-radius:50%;animation:dotbounce 1.2s ease infinite;}
+    .dot{width:8px;height:8px;background:var(--muted);border-radius:50%;animation:db 1.2s ease infinite;}
     .dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
-    @keyframes dotbounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+    @keyframes db{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
 
-    /* ── Input area ── */
-    .chat-input-wrap{padding:12px 16px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:10px;flex-shrink:0;}
-    .chat-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-lg);font-size:14px;resize:none;max-height:120px;transition:border-color var(--transition);font-family:inherit;line-height:1.5;}
+    /* Input */
+    .chat-input-wrap{padding:10px 14px 12px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:flex-end;gap:9px;flex-shrink:0;}
+    .chat-input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-lg);font-size:14px;resize:none;max-height:110px;transition:border-color .18s;font-family:inherit;line-height:1.55;background:var(--bg);}
     .chat-input:focus{outline:none;border-color:var(--primary);}
-    .send-btn{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;border:none;cursor:pointer;transition:all var(--transition);flex-shrink:0;}
-    .send-btn:hover{background:var(--primary-dark);transform:scale(1.05);}
-    .send-btn:disabled{background:var(--muted);cursor:not-allowed;transform:none;}
+    .send-btn{width:40px;height:40px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;border:none;cursor:pointer;transition:.15s;flex-shrink:0;}
+    .send-btn:hover:not(:disabled){background:var(--primary-dark);transform:scale(1.05);}
+    .send-btn:disabled{background:var(--muted);cursor:not-allowed;}
 
-    @media(max-width:768px){
-      .chat-body{padding:12px 12px;}
-      .chat-input-wrap{padding:8px 12px 12px;}
-      .bubble{max-width:88%;font-size:13px;}
-      .sugg-bar{padding:10px 12px 6px;}
+    @media(max-width:600px){
+      .chat-body{padding:12px 11px 8px;}
+      .bubble{font-size:13px;}
+      .msg-col{max-width:88%;}
+      .sugg-bar{padding:8px 11px 6px;}
     }
   </style>
 </head>
@@ -102,29 +112,25 @@
   <div id="navbar-root"></div>
   <div class="chat-wrap">
 
-    <!-- Header -->
     <div class="chat-top">
       <div class="ai-avatar">🤖</div>
       <div>
         <div class="ai-name">Estate49 AI</div>
-        <div class="ai-sub"><span class="online-dot"></span>Online · Real Estate Expert</div>
+        <div class="ai-sub"><div class="online-dot"></div>Online · Real Estate Expert</div>
       </div>
-      <button class="btn btn-secondary" style="margin-left:auto;font-size:12px;padding:7px 14px;" onclick="clearChat()">🔄 New Chat</button>
+      <button class="btn btn-secondary" style="margin-left:auto;font-size:12px;padding:6px 13px;" onclick="clearChat()">🔄 New Chat</button>
     </div>
 
-    <!-- Quick start chips -->
     <div class="sugg-bar" id="sugg-bar">
-      <span class="sugg" onclick="qs('I want to find a 2BHK flat to rent in Bengaluru under ₹25,000')">🔍 Find 2BHK in Bengaluru</span>
-      <span class="sugg" onclick="qs('I want to list my property for rent')">🏗️ List my property</span>
-      <span class="sugg" onclick="qs('Best areas in Bengaluru for families with good schools')">🏘️ Family-friendly areas</span>
-      <span class="sugg" onclick="qs('What is a fair rent for a 3BHK in Whitefield?')">💰 Rent price advice</span>
-      <span class="sugg" onclick="qs('Tell me about Estate49 and how it works')">ℹ️ About Estate49</span>
+      <span class="sugg" onclick="qs('I want to find a 2BHK flat to rent in Bengaluru under ₹25,000')">🔍 Find 2BHK</span>
+      <span class="sugg" onclick="qs('I want to list my property for rent')">🏗️ List Property</span>
+      <span class="sugg" onclick="qs('Best areas in Bengaluru for families')">🏘️ Family Areas</span>
+      <span class="sugg" onclick="qs('What is a fair rent for a 3BHK in Whitefield?')">💰 Price Advice</span>
+      <span class="sugg" onclick="qs('Tell me about Estate49')">ℹ️ About Us</span>
     </div>
 
-    <!-- Messages -->
     <div class="chat-body" id="chat-body"></div>
 
-    <!-- Input -->
     <div class="chat-input-wrap">
       <textarea class="chat-input" id="inp" rows="1" placeholder="Ask about properties, areas, prices…"
         oninput="autoResize(this)"
@@ -135,9 +141,12 @@
   </div>
 </div>
 
+<input type="file" id="photo-file-inp" accept="image/*" multiple style="display:none" onchange="handlePhotoFiles(event)"/>
+<div class="toast" id="toast-el"></div>
+
 <script>
 let socket = null, userInitials = '?', waiting = false;
-let accessToken = null, pendingListing = null;
+let accessToken = null, pendingListing = null, pendingPhotos = [];
 
 window.addEventListener('DOMContentLoaded', async () => {
   const s = await getSession();
@@ -157,24 +166,18 @@ window.addEventListener('DOMContentLoaded', async () => {
   connect();
 });
 
-// ── Socket ────────────────────────────────────────────────
+// ── Socket ─────────────────────────────────────────────────
 function connect() {
   socket = io();
   socket.on('botReply', d => {
     removeTyping();
     waiting = false;
     setSendBtn(false);
-    const msg = d.message || d;
-    const listing = d.listingData || null;
-    renderBotMsg(msg, listing);
+    renderBotMsg(d.message || d, d.listingData || null);
   });
-  socket.on('typing', v => {
-    if (v) showTyping(); else removeTyping();
-  });
+  socket.on('typing', v => { if (v) showTyping(); else removeTyping(); });
   socket.on('connect_error', () => {
-    removeTyping();
-    waiting = false;
-    setSendBtn(false);
+    removeTyping(); waiting = false; setSendBtn(false);
     addSimpleBotMsg('⚠️ Connection lost. Please refresh the page.');
   });
 }
@@ -184,212 +187,288 @@ function send() {
   const txt = inp.value.trim();
   if (!txt || waiting) return;
   addUserMsg(txt);
-  inp.value = '';
-  inp.style.height = 'auto';
-  waiting = true;
-  setSendBtn(true);
+  inp.value = ''; inp.style.height = 'auto';
+  waiting = true; setSendBtn(true);
   document.getElementById('sugg-bar').style.display = 'none';
   socket.emit('userMessage', { message: txt });
 }
 
-function qs(txt) {
-  document.getElementById('inp').value = txt;
-  send();
-}
+function qs(txt) { document.getElementById('inp').value = txt; send(); }
 
 function clearChat() {
   if (socket) socket.disconnect();
   document.getElementById('chat-body').innerHTML = '';
   document.getElementById('sugg-bar').style.display = 'flex';
-  waiting = false;
-  pendingListing = null;
-  setSendBtn(false);
-  connect();
+  waiting = false; pendingListing = null; pendingPhotos = [];
+  setSendBtn(false); connect();
 }
 
-// ── Render user message ───────────────────────────────────
+// ── Render user message ─────────────────────────────────────
 function addUserMsg(text) {
   const body = document.getElementById('chat-body');
   body.insertAdjacentHTML('beforeend', `
     <div class="msg-row user">
       <div class="msg-av usr">${userInitials}</div>
-      <div class="bubble user">${esc(text)}</div>
+      <div class="msg-col"><div class="bubble user">${esc(text)}</div></div>
     </div>`);
   body.scrollTop = body.scrollHeight;
 }
 
-// ── Render bot message ────────────────────────────────────
-function renderBotMsg(rawText, listingData) {
+// ── Render bot message ──────────────────────────────────────
+function renderBotMsg(rawText, listingDataFromServer) {
   const body = document.getElementById('chat-body');
 
-  // Strip [LISTING_READY]...[/LISTING_READY] from display text
-  let displayText = rawText.replace(/\[LISTING_READY\][\s\S]*?\[\/LISTING_READY\]/g, '').trim();
+  // Strip [LISTING_READY] block from display
+  let display = rawText.replace(/\[LISTING_READY\][\s\S]*?\[\/LISTING_READY\]/g, '').trim();
 
-  // Parse listing JSON if present
-  const listingMatch = rawText.match(/\[LISTING_READY\]([\s\S]*?)\[\/LISTING_READY\]/);
-  let listing = null;
-  if (listingMatch) {
-    try { listing = JSON.parse(listingMatch[1].trim()); } catch(e) {}
+  // Parse listing JSON
+  let listing = listingDataFromServer || null;
+  if (!listing) {
+    const m = rawText.match(/\[LISTING_READY\]([\s\S]*?)\[\/LISTING_READY\]/);
+    if (m) { try { listing = JSON.parse(m[1].trim()); } catch(e) {} }
   }
-  if (listingData) listing = listingData;
+  if (listing) { pendingListing = listing; pendingPhotos = []; }
 
-  // Build bubble content
-  let html = formatMessage(displayText);
+  const bubbleHtml = formatMessage(display);
 
-  // Append listing confirm card if present
-  if (listing) {
-    pendingListing = listing;
-    html += buildListingCard(listing);
-  }
+  let extraHtml = '';
+  // Listing preview card
+  if (listing) extraHtml += buildListingCard(listing);
+  // Photo upload zone after listing card
+  if (listing) extraHtml += buildPhotoZone();
 
-  // Build action buttons
+  // Action buttons
   let actions = '';
   if (listing) {
     actions = `
       <div class="msg-actions">
-        <button class="action-btn green" onclick="confirmListing()">✅ Confirm &amp; Publish Listing</button>
-        <button class="action-btn outline" onclick="qs('I want to make some changes to the listing')">✏️ Edit Details</button>
+        <button class="act-btn green" id="publish-btn" onclick="confirmListing()">✅ Confirm &amp; Publish</button>
+        <button class="act-btn outline" onclick="qs('I want to change some details in the listing')">✏️ Edit Details</button>
       </div>`;
-  } else if (displayText.toLowerCase().includes('list property') || displayText.toLowerCase().includes('list your property')) {
+  } else if (/list.*property|add.*property|want to list/i.test(display) && !listing) {
     actions = `
       <div class="msg-actions">
-        <button class="action-btn primary" onclick="qs('I want to list my property through chat')">🤖 List via AI Chat</button>
-        <a class="action-btn outline" href="/list-property.html">📝 Use Listing Form</a>
+        <button class="act-btn primary" onclick="qs('I want to list my property through AI chat')">🤖 List via AI Chat</button>
+        <a class="act-btn outline" href="/list-property.html">📝 Use Listing Form</a>
       </div>`;
   }
 
   body.insertAdjacentHTML('beforeend', `
     <div class="msg-row">
       <div class="msg-av bot">🤖</div>
-      <div>
-        <div class="bubble bot">${html}</div>
+      <div class="msg-col">
+        <div class="bubble bot">${bubbleHtml}${extraHtml}</div>
         ${actions}
       </div>
     </div>`);
   body.scrollTop = body.scrollHeight;
 }
 
-function addSimpleBotMsg(text) {
-  renderBotMsg(text, null);
-}
+function addSimpleBotMsg(text) { renderBotMsg(text, null); }
 
-// ── Format markdown-like text into clean HTML ─────────────
+// ── Format message text → HTML ──────────────────────────────
 function formatMessage(text) {
-  const lines = esc(text).split('\n');
-  let html = '';
-  let inList = false;
+  const escaped = esc(text);
+  const lines = escaped.split('\n');
+  let html = '', inList = false;
 
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i];
-
-    // Apply inline formatting
+  for (let line of lines) {
+    // Inline styles
     line = line
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/`(.+?)`/g, '<code>$1</code>');
 
-    const isBullet = /^[•\-\*]\s/.test(line.trim());
-    const isNumbered = /^\d+\.\s/.test(line.trim());
-    const isDivider = /^[━─=]{3,}/.test(line.trim());
-    const isEmpty = line.trim() === '';
+    const isDivider = /^[━─=─]{3,}/.test(line.trim());
+    const isBullet  = /^[•\-]\s/.test(line.trim());
+    const isEmpty   = line.trim() === '';
 
     if (isDivider) {
       if (inList) { html += '</div>'; inList = false; }
-      html += '<hr class="divider"/>';
+      html += '<hr/>'; continue;
+    }
+    if (isBullet) {
+      if (!inList) { html += '<div class="b-list">'; inList = true; }
+      html += `<div class="b-item"><div class="b-dot"></div><div>${line.replace(/^[•\-]\s+/,'')}</div></div>`;
       continue;
     }
-
-    if (isBullet || isNumbered) {
-      if (!inList) { html += '<div class="bul">'; inList = true; }
-      const content = line.replace(/^[•\-\*\d\.]\s+/, '').trim();
-      html += `<div class="bul-item"><div class="bul-dot"></div><div>${content}</div></div>`;
-      continue;
-    }
-
     if (inList) { html += '</div>'; inList = false; }
-
-    if (isEmpty) {
-      html += '<div class="section-gap"></div>';
-    } else {
-      html += `<div>${line}</div>`;
-    }
+    if (isEmpty) { html += '<div class="b-gap"></div>'; }
+    else          { html += `<div>${line}</div>`; }
   }
-
   if (inList) html += '</div>';
 
-  // Detect property cards (lines with 🏠 bold title + 📍 🛏️ 🔗 pattern)
+  // Property card detection
   html = html.replace(
-    /<div>🏠 <strong>(.+?)<\/strong><\/div>([\s\S]*?)<div>🔗 \[View Property →\]\(\/property\?id=(\d+)\)<\/div>/g,
-    (match, title, middle, id) => buildPropertyCard(title, middle, id)
+    /<div>🏠 <strong>(.+?)<\/strong><\/div>([\s\S]*?)<div>🔗 \[View Property →\]\(\/property\.html\?id=(\d+)\)<\/div>/g,
+    (_, title, mid, id) => buildPropertyCard(title, mid, id)
   );
 
   return html;
 }
 
-// ── Property card ─────────────────────────────────────────
-function buildPropertyCard(title, middle, id) {
-  return `
-    <div class="prop-card">
-      <div class="prop-card-title">🏠 ${title}</div>
-      <div class="prop-card-row">${middle.replace(/<div[^>]*>/g,'').replace(/<\/div>/g,' · ').replace(/\s·\s*$/,'').trim()}</div>
-      <a class="prop-card-btn" href="/property.html?id=${id}" target="_blank">View Property →</a>
-    </div>`;
+// ── Property card ───────────────────────────────────────────
+function buildPropertyCard(title, mid, id) {
+  const clean = mid.replace(/<div[^>]*>/g,'').replace(/<\/div>/g,' ').replace(/\s+/g,' ').trim();
+  return `<div class="prop-card">
+    <div class="pc-title">🏠 ${title}</div>
+    <div class="pc-meta">${clean}</div>
+    <a class="pc-btn" href="/property.html?id=${id}" target="_blank">View Property →</a>
+  </div>`;
 }
 
-// ── Listing confirm card ──────────────────────────────────
+// ── Listing preview card ────────────────────────────────────
 function buildListingCard(l) {
   const fmt = v => v ? `₹${Number(v).toLocaleString('en-IN')}` : '—';
-  return `
-    <div class="listing-confirm">
-      <div class="listing-confirm-title">📋 Listing Preview — Ready to Publish</div>
-      <div class="listing-row"><span>Title</span><span>${esc(l.title||'')}</span></div>
-      <div class="listing-row"><span>Type</span><span>${esc(l.type||'')}</span></div>
-      <div class="listing-row"><span>City</span><span>${esc(l.city||'')} · ${esc(l.location||'')}</span></div>
-      <div class="listing-row"><span>Price</span><span>${fmt(l.price)}</span></div>
-      <div class="listing-row"><span>Size</span><span>${l.bedrooms||0} Bed · ${l.bathrooms||0} Bath · ${l.area||0} sqft</span></div>
-      <div class="listing-row"><span>Amenities</span><span>${(l.amenities||[]).join(', ')||'—'}</span></div>
-    </div>`;
+  const amenList = (l.amenities||[]).join(', ') || '—';
+  return `<div class="listing-card">
+    <div class="lc-title">📋 Listing Preview</div>
+    <div class="lc-row"><span class="lc-label">Title</span><span class="lc-val">${esc(l.title||'')}</span></div>
+    <div class="lc-row"><span class="lc-label">Type</span><span class="lc-val">${esc(l.type||'')} · ${esc(l.property_type||'')}</span></div>
+    <div class="lc-row"><span class="lc-label">Location</span><span class="lc-val">${esc(l.locality||'')}${l.city?', '+esc(l.city):''}</span></div>
+    <div class="lc-row"><span class="lc-label">Price</span><span class="lc-val">${fmt(l.price)}</span></div>
+    ${l.deposit?`<div class="lc-row"><span class="lc-label">Deposit</span><span class="lc-val">${fmt(l.deposit)}</span></div>`:''}
+    <div class="lc-row"><span class="lc-label">Size</span><span class="lc-val">${l.bhk||0} BHK · ${l.bathrooms||0} Bath · ${l.area||0} sqft</span></div>
+    <div class="lc-row"><span class="lc-label">Furnishing</span><span class="lc-val">${esc(l.furnished||'—')}</span></div>
+    <div class="lc-row"><span class="lc-label">Contact</span><span class="lc-val">${esc(l.contact_name||'')} · ${esc(l.contact_phone||'')}</span></div>
+    <div class="lc-row"><span class="lc-label">Amenities</span><span class="lc-val">${esc(amenList)}</span></div>
+  </div>`;
 }
 
-// ── Confirm & publish listing ─────────────────────────────
+// ── Photo upload zone ───────────────────────────────────────
+function buildPhotoZone() {
+  return `<div class="photo-upload-zone" id="photo-zone">
+    <p>📸 <strong>Upload property photos</strong> — good photos get 3× more inquiries<br/>
+    <span style="font-size:11px">Max 10 photos · Auto compressed &amp; watermarked with E49</span></p>
+    <button class="act-btn primary" type="button" onclick="document.getElementById('photo-file-inp').click()">📷 Choose Photos</button>
+    <div class="photos-preview" id="photos-preview"></div>
+    <div class="upload-prog" id="upload-prog"></div>
+  </div>`;
+}
+
+// ── Handle photo files ──────────────────────────────────────
+async function handlePhotoFiles(e) {
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  const avail = 10 - pendingPhotos.length;
+  if (avail <= 0) { showToast('Max 10 photos allowed'); return; }
+  const toUp = files.slice(0, avail);
+  const prog = document.getElementById('upload-prog');
+  if (prog) prog.textContent = `Uploading ${toUp.length} photo(s)…`;
+
+  for (const f of toUp) {
+    try {
+      const fd = new FormData(); fd.append('file', f);
+      const r = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: fd
+      });
+      if (!r.ok) throw new Error(await r.text());
+      // upload.js returns a string URL directly
+      let url = await r.json();
+      if (typeof url === 'object' && url.url) url = url.url;
+      pendingPhotos.push(url);
+      renderPhotoThumbs();
+    } catch(ex) { showToast('Upload failed: ' + f.name); }
+  }
+  if (prog) prog.textContent = pendingPhotos.length ? `${pendingPhotos.length} photo(s) ready ✅` : '';
+}
+
+function renderPhotoThumbs() {
+  const preview = document.getElementById('photos-preview');
+  if (!preview) return;
+  preview.innerHTML = pendingPhotos.map((url, i) => `
+    <div class="photo-thumb-wrap">
+      <img class="photo-thumb" src="${url}" alt="photo ${i+1}"/>
+      ${i===0?'<div style="position:absolute;bottom:2px;left:2px;background:var(--primary);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700">COVER</div>':''}
+      <div class="photo-rm" onclick="removeThumb(${i})">✕</div>
+    </div>`).join('');
+}
+
+function removeThumb(i) { pendingPhotos.splice(i, 1); renderPhotoThumbs(); }
+
+// ── Confirm & publish listing ───────────────────────────────
 async function confirmListing() {
   if (!pendingListing || !accessToken) return;
+
+  const btn = document.getElementById('publish-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Publishing…'; }
+
   try {
+    // Build boolean amenities map from array
+    const ALL_AMENITIES = ['parking','lift','wifi','ac','balcony','security','gym','pool',
+      'gated','vastu','water_24','no_brokerage','powerbackup','cctv','clubhouse',
+      'garden','modular_kitchen','washing_machine','fridge','pet_friendly'];
+    const amenityObj = {};
+    ALL_AMENITIES.forEach(k => {
+      amenityObj[k] = (pendingListing.amenities || []).map(a => a.toLowerCase()).includes(k);
+    });
+
+    const payload = {
+      type:          pendingListing.type || 'rent',
+      property_type: pendingListing.property_type || 'apartment',
+      bhk:           Number(pendingListing.bhk) || null,
+      bathrooms:     Number(pendingListing.bathrooms) || null,
+      title:         pendingListing.title,
+      city:          pendingListing.city,
+      locality:      pendingListing.locality,
+      description:   pendingListing.description,
+      price:         Number(pendingListing.price),
+      deposit:       pendingListing.deposit ? Number(pendingListing.deposit) : null,
+      area:          pendingListing.area ? Number(pendingListing.area) : null,
+      furnished:     pendingListing.furnished || null,
+      contact_name:  pendingListing.contact_name,
+      contact_phone: pendingListing.contact_phone,
+      contact_role:  pendingListing.contact_role || 'owner',
+      contact_time:  pendingListing.contact_time || null,
+      photos:        pendingPhotos,
+      ...amenityObj
+    };
+
     const r = await fetch('/api/properties', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-      body: JSON.stringify(pendingListing)
+      body: JSON.stringify(payload)
     });
-    if (!r.ok) throw new Error((await r.json()).error || 'Failed');
+    if (!r.ok) throw new Error((await r.json()).error || 'Failed to publish');
     const data = await r.json();
-    pendingListing = null;
-    addSimpleBotMsg(`🎉 **Your property is now live on Estate49!**\n\nYou can view and manage it from your Profile → My Listings.\n\n🔗 [View your listing →](/property.html?id=${data.id})`);
+    pendingListing = null; pendingPhotos = [];
+
+    addSimpleBotMsg(
+      `🎉 **Your property is now submitted for review!**\n\n` +
+      `Our team will approve it shortly and it will appear on Estate49 for everyone to see.\n\n` +
+      (data.id ? `🔗 [View your listing →](/property.html?id=${data.id})` : '') +
+      `\n\nYou can also manage all your listings from **Profile → My Listings**.`
+    );
   } catch(e) {
-    addSimpleBotMsg(`⚠️ Could not publish: ${e.message}. Please try the [listing form](/list-property.html) instead.`);
+    showToast('Could not publish: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Confirm & Publish'; }
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────
+// ── Typing indicator ────────────────────────────────────────
 function showTyping() {
   removeTyping();
   document.getElementById('chat-body').insertAdjacentHTML('beforeend', `
     <div class="msg-row" id="typing-ind">
       <div class="msg-av bot">🤖</div>
-      <div class="bubble bot"><div class="typing-dot"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+      <div class="msg-col"><div class="bubble bot"><div class="typing-dot">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div></div></div>
     </div>`);
   document.getElementById('chat-body').scrollTop = 99999;
 }
 function removeTyping() { document.getElementById('typing-ind')?.remove(); }
-function setSendBtn(disabled) {
-  const btn = document.getElementById('send-btn');
-  btn.disabled = disabled;
-  btn.style.opacity = disabled ? '0.5' : '1';
-}
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
+function setSendBtn(d) { const b = document.getElementById('send-btn'); b.disabled = d; b.style.opacity = d ? '.5':'1'; }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; }
 function esc(t) { return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showToast(m) {
+  const el = document.getElementById('toast-el');
+  if (!el) return;
+  el.textContent = m; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
 </script>
 </body>
 </html>
