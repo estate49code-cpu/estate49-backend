@@ -20,8 +20,7 @@
     .m-icon{font-size:32px;margin-bottom:12px;}
     .m-title{font-size:15px;font-weight:700;margin-bottom:8px;}
     .m-text{font-size:13px;color:var(--muted);line-height:1.6;}
-    .team-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:48px;}
-    .team-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;display:flex;gap:18px;align-items:flex-start;}
+    .team-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;display:flex;gap:18px;align-items:flex-start;max-width:480px;}
     .team-av{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),#e74c3c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;flex-shrink:0;}
     .team-name{font-size:16px;font-weight:800;margin-bottom:3px;}
     .team-role{font-size:13px;color:var(--primary);font-weight:600;margin-bottom:6px;}
@@ -38,8 +37,8 @@
     .svc-text{font-size:12px;color:var(--muted);line-height:1.55;}
     @media(max-width:680px){
       .mission-grid{grid-template-columns:1fr;}
-      .team-grid{grid-template-columns:1fr;}
       .services-grid{grid-template-columns:1fr;}
+      .team-card{max-width:100%;}
       .pg{padding:28px 16px 48px;}
     }
   </style>
@@ -109,25 +108,15 @@
       </div>
     </div>
 
-    <!-- Team -->
+    <!-- Leadership -->
     <div class="section">
       <div class="section-title">Leadership</div>
-      <div class="team-grid">
-        <div class="team-card">
-          <div class="team-av">AA</div>
-          <div>
-            <div class="team-name">Alisten Andrew</div>
-            <div class="team-role">CEO &amp; Founder — Stenkepler Corporation</div>
-            <div class="team-bio">Founder of Stenkepler Corporation and the driving force behind Estate49. Alisten is passionate about using technology to simplify real estate for everyday Indians.</div>
-          </div>
-        </div>
-        <div class="team-card">
-          <div class="team-av">KG</div>
-          <div>
-            <div class="team-name">Krishnamurthy Gomathi</div>
-            <div class="team-role">Co-Partner — Stenkepler Corporation</div>
-            <div class="team-bio">Co-partner at Stenkepler Corporation, bringing strategic vision and operational expertise to Estate49's growth and expansion.</div>
-          </div>
+      <div class="team-card">
+        <div class="team-av">AA</div>
+        <div>
+          <div class="team-name">Alisten Andrew</div>
+          <div class="team-role">CEO &amp; Founder — Stenkepler Corporation</div>
+          <div class="team-bio">Founder of Stenkepler Corporation and the driving force behind Estate49. Alisten is passionate about using technology to simplify real estate for everyday Indians.</div>
         </div>
       </div>
     </div>
@@ -139,6 +128,7 @@
         <div class="company-row"><span class="c-label">Legal Name</span><span class="c-val">Stenkepler Corporation</span></div>
         <div class="company-row"><span class="c-label">Brand / Division</span><span class="c-val">Estate49</span></div>
         <div class="company-row"><span class="c-label">GSTIN</span><span class="c-val">29AEJFS5946L1Z5</span></div>
+        <div class="company-row"><span class="c-label">CEO &amp; Founder</span><span class="c-val">Alisten Andrew</span></div>
         <div class="company-row"><span class="c-label">Registered Address</span><span class="c-val" style="max-width:340px">No.16/17/1, 72 G-006, Prabhavathi Divine, DR Rajkumar Road, Hulimavu, Bengaluru – 560076, Karnataka, India</span></div>
         <div class="company-row"><span class="c-label">Email</span><span class="c-val"><a href="mailto:support@estate49.com" style="color:var(--primary)">support@estate49.com</a></span></div>
         <div class="company-row"><span class="c-label">Phone</span><span class="c-val">+91 94809 01941</span></div>
