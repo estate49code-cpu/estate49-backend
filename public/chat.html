@@ -47,41 +47,41 @@
     .b-dot{width:6px;height:6px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;}
     .bubble.user .b-dot{background:rgba(255,255,255,0.8);}
 
-    /* Property card inside bubble */
+    /* Property card */
     .prop-card{background:var(--surface-2,#f8f9fa);border:1.5px solid var(--border);border-radius:12px;padding:13px 14px;margin:8px 0;}
     .pc-title{font-weight:800;font-size:14px;margin-bottom:7px;}
     .pc-meta{display:flex;flex-wrap:wrap;gap:5px 12px;font-size:12px;color:var(--muted);margin-bottom:8px;}
     .pc-why{background:rgba(39,174,96,0.09);border-left:3px solid #27ae60;padding:7px 10px;border-radius:0 6px 6px 0;font-size:12px;margin-bottom:10px;line-height:1.55;}
-    .pc-badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;background:var(--primary-xlight);color:var(--primary);margin-bottom:8px;}
     .pc-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:var(--primary);color:#fff;border-radius:99px;font-size:12px;font-weight:700;text-decoration:none;transition:.15s;}
     .pc-btn:hover{background:var(--primary-dark);}
 
     /* Listing preview card */
     .listing-card{background:linear-gradient(135deg,#f0fff4,#e8f5e9);border:2px solid #27ae60;border-radius:14px;padding:15px 17px;margin:8px 0;}
-    .lc-title{font-weight:800;font-size:14px;color:#155724;margin-bottom:11px;display:flex;align-items:center;gap:7px;}
+    .lc-title{font-weight:800;font-size:14px;color:#155724;margin-bottom:11px;}
     .lc-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:13px;gap:12px;}
     .lc-row:last-of-type{border-bottom:none;}
     .lc-label{color:var(--muted);font-weight:600;white-space:nowrap;flex-shrink:0;}
     .lc-val{font-weight:700;text-align:right;}
 
     /* Photo upload zone */
-    .photo-upload-zone{border:2px dashed #27ae60;border-radius:12px;padding:16px;margin:10px 0;background:rgba(39,174,96,0.04);text-align:center;}
-    .photo-upload-zone p{font-size:13px;color:var(--muted);margin-bottom:10px;}
+    .photo-upload-zone{border:2px dashed #27ae60;border-radius:12px;padding:15px;margin:10px 0;background:rgba(39,174,96,0.04);text-align:center;}
+    .photo-upload-zone p{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.55;}
     .photos-preview{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;justify-content:center;}
-    .photo-thumb{width:70px;height:70px;border-radius:8px;object-fit:cover;border:2px solid var(--border);position:relative;}
     .photo-thumb-wrap{position:relative;}
+    .photo-thumb{width:70px;height:70px;border-radius:8px;object-fit:cover;border:2px solid var(--border);display:block;}
+    .photo-cover-label{position:absolute;bottom:2px;left:2px;background:var(--primary);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700;}
     .photo-rm{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;background:#e74c3c;color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700;}
-    .upload-prog{font-size:12px;color:var(--muted);margin-top:6px;}
+    .upload-prog{font-size:12px;color:var(--muted);margin-top:8px;}
 
     /* Action buttons */
     .msg-actions{display:flex;flex-wrap:wrap;gap:8px;}
-    .act-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;border:2px solid;text-decoration:none;}
+    .act-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;border:2px solid;text-decoration:none;background:transparent;}
     .act-btn.green{background:#27ae60;color:#fff;border-color:#27ae60;}
-    .act-btn.green:hover{background:#219a52;}
-    .act-btn.green:disabled{background:#aaa;border-color:#aaa;cursor:not-allowed;}
+    .act-btn.green:hover:not(:disabled){background:#219a52;}
+    .act-btn.green:disabled{background:#aaa;border-color:#aaa;cursor:not-allowed;opacity:.7;}
     .act-btn.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
     .act-btn.primary:hover{background:var(--primary-dark);}
-    .act-btn.outline{background:transparent;color:var(--primary);border-color:var(--primary);}
+    .act-btn.outline{color:var(--primary);border-color:var(--primary);}
     .act-btn.outline:hover{background:var(--primary-xlight);}
 
     /* Typing */
@@ -166,7 +166,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   connect();
 });
 
-// ── Socket ─────────────────────────────────────────────────
+// ── Socket ──────────────────────────────────────────────────
 function connect() {
   socket = io();
   socket.on('botReply', d => {
@@ -203,7 +203,7 @@ function clearChat() {
   setSendBtn(false); connect();
 }
 
-// ── Render user message ─────────────────────────────────────
+// ── User message ────────────────────────────────────────────
 function addUserMsg(text) {
   const body = document.getElementById('chat-body');
   body.insertAdjacentHTML('beforeend', `
@@ -214,28 +214,28 @@ function addUserMsg(text) {
   body.scrollTop = body.scrollHeight;
 }
 
-// ── Render bot message ──────────────────────────────────────
+// ── Bot message ─────────────────────────────────────────────
 function renderBotMsg(rawText, listingDataFromServer) {
   const body = document.getElementById('chat-body');
 
-  // Strip [LISTING_READY] block from display
+  // Strip [LISTING_READY] block from display text
   let display = rawText.replace(/\[LISTING_READY\][\s\S]*?\[\/LISTING_READY\]/g, '').trim();
 
   // Parse listing JSON
   let listing = listingDataFromServer || null;
   if (!listing) {
     const m = rawText.match(/\[LISTING_READY\]([\s\S]*?)\[\/LISTING_READY\]/);
-    if (m) { try { listing = JSON.parse(m[1].trim()); } catch(e) {} }
+    if (m) { try { listing = JSON.parse(m[1].trim()); } catch(e) { console.error('Listing parse error:', e); } }
   }
   if (listing) { pendingListing = listing; pendingPhotos = []; }
 
   const bubbleHtml = formatMessage(display);
 
   let extraHtml = '';
-  // Listing preview card
-  if (listing) extraHtml += buildListingCard(listing);
-  // Photo upload zone after listing card
-  if (listing) extraHtml += buildPhotoZone();
+  if (listing) {
+    extraHtml += buildListingCard(listing);
+    extraHtml += buildPhotoZone();
+  }
 
   // Action buttons
   let actions = '';
@@ -243,13 +243,13 @@ function renderBotMsg(rawText, listingDataFromServer) {
     actions = `
       <div class="msg-actions">
         <button class="act-btn green" id="publish-btn" onclick="confirmListing()">✅ Confirm &amp; Publish</button>
-        <button class="act-btn outline" onclick="qs('I want to change some details in the listing')">✏️ Edit Details</button>
+        <button class="act-btn outline" onclick="qs('I want to change some details')">✏️ Edit Details</button>
       </div>`;
-  } else if (/list.*property|add.*property|want to list/i.test(display) && !listing) {
+  } else if (/list.*property|add.*property|want to list/i.test(display)) {
     actions = `
       <div class="msg-actions">
-        <button class="act-btn primary" onclick="qs('I want to list my property through AI chat')">🤖 List via AI Chat</button>
-        <a class="act-btn outline" href="/list-property.html">📝 Use Listing Form</a>
+        <button class="act-btn primary" onclick="qs('I want to list my property through AI chat')">🤖 List via AI</button>
+        <a class="act-btn outline" href="/list-property.html">📝 Listing Form</a>
       </div>`;
   }
 
@@ -266,20 +266,18 @@ function renderBotMsg(rawText, listingDataFromServer) {
 
 function addSimpleBotMsg(text) { renderBotMsg(text, null); }
 
-// ── Format message text → HTML ──────────────────────────────
+// ── Format markdown → HTML ──────────────────────────────────
 function formatMessage(text) {
-  const escaped = esc(text);
-  const lines = escaped.split('\n');
+  const lines = esc(text).split('\n');
   let html = '', inList = false;
 
   for (let line of lines) {
-    // Inline styles
     line = line
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/`(.+?)`/g, '<code>$1</code>');
 
-    const isDivider = /^[━─=─]{3,}/.test(line.trim());
+    const isDivider = /^[━─=]{3,}/.test(line.trim());
     const isBullet  = /^[•\-]\s/.test(line.trim());
     const isEmpty   = line.trim() === '';
 
@@ -289,64 +287,62 @@ function formatMessage(text) {
     }
     if (isBullet) {
       if (!inList) { html += '<div class="b-list">'; inList = true; }
-      html += `<div class="b-item"><div class="b-dot"></div><div>${line.replace(/^[•\-]\s+/,'')}</div></div>`;
+      html += `<div class="b-item"><div class="b-dot"></div><div>${line.replace(/^[•\-]\s+/, '')}</div></div>`;
       continue;
     }
     if (inList) { html += '</div>'; inList = false; }
-    if (isEmpty) { html += '<div class="b-gap"></div>'; }
-    else          { html += `<div>${line}</div>`; }
+    isEmpty ? (html += '<div class="b-gap"></div>') : (html += `<div>${line}</div>`);
   }
   if (inList) html += '</div>';
 
   // Property card detection
   html = html.replace(
     /<div>🏠 <strong>(.+?)<\/strong><\/div>([\s\S]*?)<div>🔗 \[View Property →\]\(\/property\.html\?id=(\d+)\)<\/div>/g,
-    (_, title, mid, id) => buildPropertyCard(title, mid, id)
+    (_, title, mid, id) => {
+      const clean = mid.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+      return `<div class="prop-card">
+        <div class="pc-title">🏠 ${title}</div>
+        <div class="pc-meta">${clean}</div>
+        <a class="pc-btn" href="/property.html?id=${id}" target="_blank">View Property →</a>
+      </div>`;
+    }
   );
-
   return html;
-}
-
-// ── Property card ───────────────────────────────────────────
-function buildPropertyCard(title, mid, id) {
-  const clean = mid.replace(/<div[^>]*>/g,'').replace(/<\/div>/g,' ').replace(/\s+/g,' ').trim();
-  return `<div class="prop-card">
-    <div class="pc-title">🏠 ${title}</div>
-    <div class="pc-meta">${clean}</div>
-    <a class="pc-btn" href="/property.html?id=${id}" target="_blank">View Property →</a>
-  </div>`;
 }
 
 // ── Listing preview card ────────────────────────────────────
 function buildListingCard(l) {
   const fmt = v => v ? `₹${Number(v).toLocaleString('en-IN')}` : '—';
-  const amenList = (l.amenities||[]).join(', ') || '—';
   return `<div class="listing-card">
-    <div class="lc-title">📋 Listing Preview</div>
+    <div class="lc-title">📋 Listing Preview — Ready to Publish</div>
     <div class="lc-row"><span class="lc-label">Title</span><span class="lc-val">${esc(l.title||'')}</span></div>
     <div class="lc-row"><span class="lc-label">Type</span><span class="lc-val">${esc(l.type||'')} · ${esc(l.property_type||'')}</span></div>
     <div class="lc-row"><span class="lc-label">Location</span><span class="lc-val">${esc(l.locality||'')}${l.city?', '+esc(l.city):''}</span></div>
     <div class="lc-row"><span class="lc-label">Price</span><span class="lc-val">${fmt(l.price)}</span></div>
-    ${l.deposit?`<div class="lc-row"><span class="lc-label">Deposit</span><span class="lc-val">${fmt(l.deposit)}</span></div>`:''}
+    ${l.deposit ? `<div class="lc-row"><span class="lc-label">Deposit</span><span class="lc-val">${fmt(l.deposit)}</span></div>` : ''}
     <div class="lc-row"><span class="lc-label">Size</span><span class="lc-val">${l.bhk||0} BHK · ${l.bathrooms||0} Bath · ${l.area||0} sqft</span></div>
     <div class="lc-row"><span class="lc-label">Furnishing</span><span class="lc-val">${esc(l.furnished||'—')}</span></div>
     <div class="lc-row"><span class="lc-label">Contact</span><span class="lc-val">${esc(l.contact_name||'')} · ${esc(l.contact_phone||'')}</span></div>
-    <div class="lc-row"><span class="lc-label">Amenities</span><span class="lc-val">${esc(amenList)}</span></div>
+    <div class="lc-row"><span class="lc-label">Amenities</span><span class="lc-val">${esc((l.amenities||[]).join(', ')||'—')}</span></div>
   </div>`;
 }
 
 // ── Photo upload zone ───────────────────────────────────────
 function buildPhotoZone() {
   return `<div class="photo-upload-zone" id="photo-zone">
-    <p>📸 <strong>Upload property photos</strong> — good photos get 3× more inquiries<br/>
-    <span style="font-size:11px">Max 10 photos · Auto compressed &amp; watermarked with E49</span></p>
-    <button class="act-btn primary" type="button" onclick="document.getElementById('photo-file-inp').click()">📷 Choose Photos</button>
+    <p>📸 <strong>Upload property photos</strong><br/>
+    Good photos get 3× more inquiries.<br/>
+    <span style="font-size:11px;color:var(--muted)">Max 10 · Auto-compressed &amp; E49 watermarked · JPG/PNG/WEBP</span></p>
+    <button class="act-btn primary" type="button"
+      onclick="document.getElementById('photo-file-inp').click()" style="margin:0 auto;">
+      📷 Choose Photos
+    </button>
     <div class="photos-preview" id="photos-preview"></div>
     <div class="upload-prog" id="upload-prog"></div>
   </div>`;
 }
 
-// ── Handle photo files ──────────────────────────────────────
+// ── Handle photo upload ─────────────────────────────────────
 async function handlePhotoFiles(e) {
   const files = Array.from(e.target.files || []);
   e.target.value = '';
@@ -358,21 +354,40 @@ async function handlePhotoFiles(e) {
 
   for (const f of toUp) {
     try {
-      const fd = new FormData(); fd.append('file', f);
+      const fd = new FormData();
+      fd.append('file', f);
+
       const r = await fetch('/api/upload', {
         method: 'POST',
         headers: { Authorization: `Bearer ${accessToken}` },
         body: fd
+        // ← NO Content-Type header: browser sets multipart/form-data with boundary
       });
-      if (!r.ok) throw new Error(await r.text());
-      // upload.js returns a string URL directly
-      let url = await r.json();
-      if (typeof url === 'object' && url.url) url = url.url;
+
+      if (!r.ok) {
+        const errText = await r.text();
+        console.error('Upload failed:', errText);
+        showToast(`Failed: ${f.name}`);
+        continue;
+      }
+
+      const result = await r.json();
+      // upload.js returns { url: '...' }
+      const url = typeof result === 'string' ? result : (result.url || result.publicUrl || null);
+      if (!url) throw new Error('No URL in response');
+
       pendingPhotos.push(url);
       renderPhotoThumbs();
-    } catch(ex) { showToast('Upload failed: ' + f.name); }
+    } catch(ex) {
+      console.error('Upload exception:', ex);
+      showToast('Upload failed: ' + f.name);
+    }
   }
-  if (prog) prog.textContent = pendingPhotos.length ? `${pendingPhotos.length} photo(s) ready ✅` : '';
+
+  const prog2 = document.getElementById('upload-prog');
+  if (prog2) prog2.textContent = pendingPhotos.length
+    ? `✅ ${pendingPhotos.length} photo(s) ready`
+    : '⚠️ Upload failed — check console';
 }
 
 function renderPhotoThumbs() {
@@ -380,48 +395,45 @@ function renderPhotoThumbs() {
   if (!preview) return;
   preview.innerHTML = pendingPhotos.map((url, i) => `
     <div class="photo-thumb-wrap">
-      <img class="photo-thumb" src="${url}" alt="photo ${i+1}"/>
-      ${i===0?'<div style="position:absolute;bottom:2px;left:2px;background:var(--primary);color:#fff;font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700">COVER</div>':''}
+      <img class="photo-thumb" src="${url}" alt="photo ${i+1}" loading="lazy"/>
+      ${i === 0 ? '<div class="photo-cover-label">COVER</div>' : ''}
       <div class="photo-rm" onclick="removeThumb(${i})">✕</div>
     </div>`).join('');
 }
 
 function removeThumb(i) { pendingPhotos.splice(i, 1); renderPhotoThumbs(); }
 
-// ── Confirm & publish listing ───────────────────────────────
+// ── Confirm & Publish ───────────────────────────────────────
 async function confirmListing() {
   if (!pendingListing || !accessToken) return;
-
   const btn = document.getElementById('publish-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Publishing…'; }
 
   try {
-    // Build boolean amenities map from array
     const ALL_AMENITIES = ['parking','lift','wifi','ac','balcony','security','gym','pool',
       'gated','vastu','water_24','no_brokerage','powerbackup','cctv','clubhouse',
       'garden','modular_kitchen','washing_machine','fridge','pet_friendly'];
     const amenityObj = {};
-    ALL_AMENITIES.forEach(k => {
-      amenityObj[k] = (pendingListing.amenities || []).map(a => a.toLowerCase()).includes(k);
-    });
+    const confirmedAmenities = (pendingListing.amenities || []).map(a => a.toLowerCase().replace(/\s+/g,'_'));
+    ALL_AMENITIES.forEach(k => { amenityObj[k] = confirmedAmenities.includes(k); });
 
     const payload = {
-      type:          pendingListing.type || 'rent',
+      type:          pendingListing.type          || 'rent',
       property_type: pendingListing.property_type || 'apartment',
-      bhk:           Number(pendingListing.bhk) || null,
+      bhk:           Number(pendingListing.bhk)   || null,
       bathrooms:     Number(pendingListing.bathrooms) || null,
       title:         pendingListing.title,
       city:          pendingListing.city,
       locality:      pendingListing.locality,
       description:   pendingListing.description,
       price:         Number(pendingListing.price),
-      deposit:       pendingListing.deposit ? Number(pendingListing.deposit) : null,
-      area:          pendingListing.area ? Number(pendingListing.area) : null,
+      deposit:       pendingListing.deposit  ? Number(pendingListing.deposit)  : null,
+      area:          pendingListing.area     ? Number(pendingListing.area)     : null,
       furnished:     pendingListing.furnished || null,
       contact_name:  pendingListing.contact_name,
       contact_phone: pendingListing.contact_phone,
-      contact_role:  pendingListing.contact_role || 'owner',
-      contact_time:  pendingListing.contact_time || null,
+      contact_role:  pendingListing.contact_role  || 'owner',
+      contact_time:  pendingListing.contact_time  || null,
       photos:        pendingPhotos,
       ...amenityObj
     };
@@ -431,43 +443,44 @@ async function confirmListing() {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
       body: JSON.stringify(payload)
     });
-    if (!r.ok) throw new Error((await r.json()).error || 'Failed to publish');
+    if (!r.ok) throw new Error((await r.json()).error || 'Publish failed');
     const data = await r.json();
-    pendingListing = null; pendingPhotos = [];
 
+    pendingListing = null; pendingPhotos = [];
     addSimpleBotMsg(
-      `🎉 **Your property is now submitted for review!**\n\n` +
-      `Our team will approve it shortly and it will appear on Estate49 for everyone to see.\n\n` +
-      (data.id ? `🔗 [View your listing →](/property.html?id=${data.id})` : '') +
-      `\n\nYou can also manage all your listings from **Profile → My Listings**.`
+      `🎉 **Your property has been submitted for review!**\n\n` +
+      `Our team will approve it shortly — once approved, it goes live on Estate49 for everyone to see.\n\n` +
+      (data.id ? `🔗 [View your listing →](/property.html?id=${data.id})\n\n` : '') +
+      `You can manage all your listings from **Profile → My Listings**.`
     );
   } catch(e) {
+    console.error('Publish error:', e);
     showToast('Could not publish: ' + e.message);
     if (btn) { btn.disabled = false; btn.textContent = '✅ Confirm & Publish'; }
   }
 }
 
-// ── Typing indicator ────────────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────
 function showTyping() {
   removeTyping();
   document.getElementById('chat-body').insertAdjacentHTML('beforeend', `
     <div class="msg-row" id="typing-ind">
       <div class="msg-av bot">🤖</div>
-      <div class="msg-col"><div class="bubble bot"><div class="typing-dot">
-        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-      </div></div></div>
+      <div class="msg-col"><div class="bubble bot">
+        <div class="typing-dot"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div></div>
     </div>`);
   document.getElementById('chat-body').scrollTop = 99999;
 }
-function removeTyping() { document.getElementById('typing-ind')?.remove(); }
-function setSendBtn(d) { const b = document.getElementById('send-btn'); b.disabled = d; b.style.opacity = d ? '.5':'1'; }
-function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; }
-function esc(t) { return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function showToast(m) {
+function removeTyping()  { document.getElementById('typing-ind')?.remove(); }
+function setSendBtn(d)   { const b = document.getElementById('send-btn'); b.disabled = d; b.style.opacity = d ? '.5' : '1'; }
+function autoResize(el)  { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; }
+function esc(t)          { return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showToast(m)    {
   const el = document.getElementById('toast-el');
   if (!el) return;
   el.textContent = m; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
+  setTimeout(() => el.classList.remove('show'), 3500);
 }
 </script>
 </body>
