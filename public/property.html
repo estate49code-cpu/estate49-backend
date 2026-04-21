@@ -41,6 +41,12 @@
     .contact-name{font-size:var(--text-sm);font-weight:700;}
     .contact-role{font-size:var(--text-xs);color:var(--muted);}
     .ccard-btns{display:flex;flex-direction:column;gap:10px;margin-top:20px;}
+    /* WhatsApp button */
+    .btn-whatsapp{display:flex;align-items:center;justify-content:center;gap:9px;padding:11px 20px;background:#25d366;color:#fff;border:none;border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:700;cursor:pointer;text-decoration:none;transition:background .18s;width:100%;}
+    .btn-whatsapp:hover{background:#1ebe5d;}
+    /* Google Maps button */
+    .btn-maps{display:flex;align-items:center;justify-content:center;gap:9px;padding:11px 20px;background:#4285f4;color:#fff;border:none;border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:700;cursor:pointer;text-decoration:none;transition:background .18s;width:100%;}
+    .btn-maps:hover{background:#3367d6;}
     .fav-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;background:var(--surface);transition:all var(--transition);cursor:pointer;width:100%;}
     .fav-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-xlight);}
     .fav-btn.saved{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
@@ -117,7 +123,6 @@ const pid=new URLSearchParams(window.location.search).get('id');
 
 window.addEventListener('DOMContentLoaded', async () => {
   if(!pid){window.location.href='/browse.html';return;}
-  // ✅ Allow guests to view — no forced login
   const s=await getSession();
   if(s){ cu=s.user; tok=s.access_token; }
   document.getElementById('al').style.display='none';
@@ -139,7 +144,7 @@ async function loadProp(){
 }
 
 async function checkFav(){
-  if(!tok) return; // guests skip
+  if(!tok) return;
   try{
     const r=await fetch('/api/favorites',{headers:{Authorization:`Bearer ${tok}`}});
     if(r.ok){const d=await r.json(); isFav=(d||[]).some(f=>String(f.property_id)===String(pid));}
@@ -173,11 +178,33 @@ function render(){
 
   const ownerIni=(p.contact_name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
 
-  // ✅ Phone — show only if logged in
+  // Phone — show only if logged in
   const phoneHtml=p.contact_phone
     ? cu
       ? `<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><a href="tel:${x(p.contact_phone)}" style="color:inherit">${x(p.contact_phone)}</a></span></div>`
       : `<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><span class="phone-gate" onclick="showLoginPrompt('Sign in to view contact number')">🔐 Sign in to view</span></span></div>`
+    : '';
+
+  // WhatsApp button
+  const waMsg=encodeURIComponent(`Hi, I saw your property listing on Estate49 — "${p.title}" in ${p.locality||''}, ${p.city||''}. Is it still available?`);
+  const waBtnHtml=p.whatsapp
+    ? `<a class="btn-whatsapp" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/>
+        </svg>
+        Chat on WhatsApp
+      </a>`
+    : '';
+
+  // Google Maps button
+  const mapBtnHtml=p.map_link
+    ? `<a class="btn-maps" href="${x(p.map_link)}" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+        </svg>
+        View on Google Maps
+      </a>`
     : '';
 
   const sidebarHtml=`
@@ -193,6 +220,8 @@ function render(){
       </div>
       <div class="ccard-btns">
         ${!isOwn?`<button class="btn btn-primary btn-full btn-lg" onclick="msgOwner()">💬 Send Message</button>`:''}
+        ${waBtnHtml}
+        ${mapBtnHtml}
         <button class="fav-btn ${isFav?'saved':''}" id="fav-btn" onclick="toggleFav()">
           ${isFav?'❤️ Saved':'🤍 Save Property'}
         </button>
@@ -202,6 +231,7 @@ function render(){
         ${phoneHtml}
         ${p.contact_email?`<div class="info-row"><span class="info-key">Email</span><span class="info-val">${x(p.contact_email)}</span></div>`:''}
         ${p.contact_time?`<div class="info-row"><span class="info-key">Best time</span><span class="info-val">${x(p.contact_time)}</span></div>`:''}
+        ${p.whatsapp?`<div class="info-row"><span class="info-key">WhatsApp</span><span class="info-val">+91 ${x(p.whatsapp)}</span></div>`:''}
         ${p.property_type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${x(cp(p.property_type))}</span></div>`:''}
         ${p.carpet_area?`<div class="info-row"><span class="info-key">Carpet area</span><span class="info-val">${p.carpet_area} ft²</span></div>`:''}
         ${p.vastu?`<div class="info-row"><span class="info-key">Vastu</span><span class="info-val">✅ Compliant</span></div>`:''}
@@ -255,6 +285,7 @@ function render(){
 
 function renderMobileCTA(pr, rent, isOwn, p){
   const cta=document.getElementById('mobile-cta');
+  const waMsg=encodeURIComponent(`Hi, I saw your property listing on Estate49 — "${p.title}" in ${p.locality||''}, ${p.city||''}. Is it still available?`);
   cta.innerHTML=`
     <div style="flex:1;min-width:0">
       <div class="mobile-cta-price">${pr}</div>
@@ -263,9 +294,16 @@ function renderMobileCTA(pr, rent, isOwn, p){
     <button class="fav-btn ${isFav?'saved':''}" id="fav-btn-mob" style="width:auto;padding:9px 12px;font-size:18px;border-radius:var(--radius-md)" onclick="toggleFav()">
       ${isFav?'❤️':'🤍'}
     </button>
+    ${p.whatsapp
+      ? `<a href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener"
+           style="display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 13px;background:#25d366;color:#fff;border-radius:var(--radius-md);font-weight:700;font-size:13px;text-decoration:none;flex-shrink:0;">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+           WhatsApp
+         </a>`
+      : ''}
     ${!isOwn
-      ?`<button class="btn btn-primary" style="flex-shrink:0" onclick="msgOwner()">💬 Message</button>`
-      :`<a href="/list-property.html?edit=${p.id}" class="btn btn-secondary" style="flex-shrink:0">✏️ Edit</a>`}
+      ? `<button class="btn btn-primary" style="flex-shrink:0" onclick="msgOwner()">💬 Message</button>`
+      : `<a href="/list-property.html?edit=${p.id}" class="btn btn-secondary" style="flex-shrink:0">✏️ Edit</a>`}
     ${p.contact_phone
       ? cu
         ? `<a href="tel:${x(p.contact_phone)}" class="btn btn-primary" style="flex-shrink:0">📞 Call</a>`
@@ -280,14 +318,12 @@ function swImg(el,src){
   el.classList.add('active');
 }
 
-// ✅ Gate: sign in to message owner
 function msgOwner(){
   if(!cu){ showLoginPrompt('Sign in to contact the owner'); return; }
   if(!prop?.listed_by){toast('Owner info unavailable');return;}
   window.location.href=`/messages.html?to=${prop.listed_by}&listing=${pid}`;
 }
 
-// ✅ Gate: sign in to save
 async function toggleFav(){
   if(!cu){ showLoginPrompt('Sign in to save this property'); return; }
   try{
@@ -307,7 +343,6 @@ async function toggleFav(){
   }catch(e){toast('Failed');}
 }
 
-// ✅ Login prompt modal
 function showLoginPrompt(msg){
   document.getElementById('login-prompt')?.remove();
   document.body.insertAdjacentHTML('beforeend',`

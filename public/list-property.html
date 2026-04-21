@@ -24,6 +24,9 @@
     .type-btn.sel{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
     .form-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
     .form-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .form-hint{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5;}
+    .wa-hint{font-size:11px;color:#25d366;font-weight:600;margin-top:4px;}
+    .map-hint{font-size:11px;color:#4285f4;font-weight:600;margin-top:4px;}
     .save-bar{
       position:sticky;bottom:0;
       background:rgba(255,255,255,0.96);
@@ -34,7 +37,6 @@
       z-index:100;
     }
     .prog{font-size:var(--text-xs);color:var(--muted);flex:1;}
-    /* ✅ Phone field highlight */
     #contact_phone.required-highlight{border-color:var(--primary);box-shadow:0 0 0 3px rgba(192,57,43,0.15);}
     @media(max-width:768px){
       .lw{padding:14px 14px 0;}
@@ -43,10 +45,7 @@
       .step{padding:18px 14px;}
       .form-3,.form-2{grid-template-columns:1fr;}
       .photos-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;}
-      .save-bar{
-        padding:12px 14px;
-        bottom:calc(62px + env(safe-area-inset-bottom,0px));
-      }
+      .save-bar{padding:12px 14px;bottom:calc(62px + env(safe-area-inset-bottom,0px));}
       .save-bar .btn{font-size:var(--text-xs);padding:9px 14px;}
       .type-btn{padding:9px 18px;font-size:var(--text-xs);}
     }
@@ -69,7 +68,7 @@
         <label class="form-label">Listing For *</label>
         <div class="type-btns">
           <button type="button" class="type-btn sel" data-t="rent" onclick="setType('rent')">🔑 Rent</button>
-          <button type="button" class="type-btn" data-t="buy" onclick="setType('buy')">🏡 Sale</button>
+          <button type="button" class="type-btn" data-t="buy" onclick="setType('buy')">🏠 Sale</button>
         </div>
       </div>
       <div class="form-3">
@@ -121,6 +120,13 @@
       <div class="form-group" style="margin-bottom:16px">
         <label class="form-label">Full Address</label>
         <input type="text" class="form-input" id="address" placeholder="Flat no, Street, Landmark…"/>
+      </div>
+      <!-- Google Maps Link -->
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Google Maps Link <span style="font-size:11px;color:var(--muted);font-weight:400">(optional)</span></label>
+        <input type="url" class="form-input" id="map_link" placeholder="https://maps.google.com/?q=..."/>
+        <div class="map-hint">📍 Paste your Google Maps link — helps seekers find the exact location</div>
+        <div class="form-hint">Go to Google Maps → find your property → click Share → Copy Link</div>
       </div>
       <div class="form-group">
         <label class="form-label">Description</label>
@@ -187,19 +193,19 @@
         <label class="check-item" id="ci-lift"><input type="checkbox" id="lift" onchange="tgl('lift')"/> 🛗 Lift</label>
         <label class="check-item" id="ci-security"><input type="checkbox" id="security" onchange="tgl('security')"/> 💂 Security</label>
         <label class="check-item" id="ci-cctv"><input type="checkbox" id="cctv" onchange="tgl('cctv')"/> 📹 CCTV</label>
-        <label class="check-item" id="ci-clubhouse"><input type="checkbox" id="clubhouse" onchange="tgl('clubhouse')"/> 🏢 Clubhouse</label>
+        <label class="check-item" id="ci-clubhouse"><input type="checkbox" id="clubhouse" onchange="tgl('clubhouse')"/> 🏛️ Clubhouse</label>
         <label class="check-item" id="ci-garden"><input type="checkbox" id="garden" onchange="tgl('garden')"/> 🌳 Garden</label>
         <label class="check-item" id="ci-powerbackup"><input type="checkbox" id="powerbackup" onchange="tgl('powerbackup')"/> ⚡ Power Backup</label>
         <label class="check-item" id="ci-ac"><input type="checkbox" id="ac" onchange="tgl('ac')"/> ❄️ AC</label>
-        <label class="check-item" id="ci-balcony"><input type="checkbox" id="balcony" onchange="tgl('balcony')"/> 🌅 Balcony</label>
-        <label class="check-item" id="ci-modular_kitchen"><input type="checkbox" id="modular_kitchen" onchange="tgl('modular_kitchen')"/> 👨‍🍳 Mod Kitchen</label>
+        <label class="check-item" id="ci-balcony"><input type="checkbox" id="balcony" onchange="tgl('balcony')"/> 🏗️ Balcony</label>
+        <label class="check-item" id="ci-modular_kitchen"><input type="checkbox" id="modular_kitchen" onchange="tgl('modular_kitchen')"/> 🍳 Mod Kitchen</label>
         <label class="check-item" id="ci-washing_machine"><input type="checkbox" id="washing_machine" onchange="tgl('washing_machine')"/> 🫧 Washing M/C</label>
         <label class="check-item" id="ci-fridge"><input type="checkbox" id="fridge" onchange="tgl('fridge')"/> 🧊 Fridge</label>
         <label class="check-item" id="ci-wifi"><input type="checkbox" id="wifi" onchange="tgl('wifi')"/> 📶 WiFi</label>
         <label class="check-item" id="ci-pet_friendly"><input type="checkbox" id="pet_friendly" onchange="tgl('pet_friendly')"/> 🐾 Pet Friendly</label>
         <label class="check-item" id="ci-gated"><input type="checkbox" id="gated" onchange="tgl('gated')"/> 🔐 Gated</label>
-        <label class="check-item" id="ci-vastu"><input type="checkbox" id="vastu" onchange="tgl('vastu')"/> 🕉 Vastu</label>
-        <label class="check-item" id="ci-water_24"><input type="checkbox" id="water_24" onchange="tgl('water_24')"/> 💧 24/7 Water</label>
+        <label class="check-item" id="ci-vastu"><input type="checkbox" id="vastu" onchange="tgl('vastu')"/> 🔮 Vastu</label>
+        <label class="check-item" id="ci-water_24"><input type="checkbox" id="water_24" onchange="tgl('water_24')"/> 🚿 24/7 Water</label>
         <label class="check-item" id="ci-no_brokerage"><input type="checkbox" id="no_brokerage" onchange="tgl('no_brokerage')"/> ✅ Zero Brokerage</label>
       </div>
     </div>
@@ -213,8 +219,7 @@
           <input type="text" class="form-input" id="contact_name" placeholder="Your name"/>
         </div>
         <div class="form-group">
-          <!-- ✅ Mobile number — required, highlighted -->
-          <label class="form-label">Mobile Number * <span style="font-size:11px;color:var(--primary);font-weight:600">(required to list)</span></label>
+          <label class="form-label">Mobile Number * <span style="font-size:11px;color:var(--primary);font-weight:600">(required)</span></label>
           <input type="tel" class="form-input" id="contact_phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric"/>
         </div>
       </div>
@@ -232,18 +237,26 @@
           </select>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Best time to contact</label>
-        <input type="text" class="form-input" id="contact_time" placeholder="e.g. Weekdays 10am–7pm"/>
+      <!-- WhatsApp Number -->
+      <div class="form-2" style="margin-bottom:16px">
+        <div class="form-group">
+          <label class="form-label">WhatsApp Number <span style="font-size:11px;color:var(--muted);font-weight:400">(optional)</span></label>
+          <input type="tel" class="form-input" id="whatsapp" placeholder="10-digit WhatsApp number" maxlength="10" inputmode="numeric"/>
+          <div class="wa-hint">💬 Seekers can contact you directly on WhatsApp</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Best time to contact</label>
+          <input type="text" class="form-input" id="contact_time" placeholder="e.g. Weekdays 10am–7pm"/>
+        </div>
       </div>
     </div>
 
     <!-- STEP 6 -->
     <div class="step">
       <div class="step-title"><div class="step-num">6</div>Photos</div>
-      <p class="form-hint" style="margin-bottom:12px">Add up to 10 photos. First photo will be the cover. JPG/PNG/WEBP, max 10MB each.</p>
+      <p class="form-hint" style="margin-bottom:12px">Add up to 10 photos. First photo will be the cover. JPG/PNG/WEBP, max 15MB each.</p>
       <div class="photos-grid" id="photos-grid">
-        <div class="photo-slot" onclick="pickPhoto()" title="Add photo">➕</div>
+        <div class="photo-slot" onclick="pickPhoto()" title="Add photo">📷</div>
       </div>
       <input type="file" id="file-inp" accept="image/*" multiple style="display:none" onchange="handleFiles(event)"/>
       <div id="upload-status" style="margin-top:8px;font-size:var(--text-xs);color:var(--muted)"></div>
@@ -264,7 +277,6 @@
 let tok=null, cu=null, ltype='rent', photos=[], editId=null;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  // ✅ Must be signed in to list property
   const s=await getSession(); if(!s){window.location.href='/login.html';return;}
   cu=s.user; tok=s.access_token;
   document.getElementById('al').style.display='none';
@@ -277,6 +289,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       const p=await r.json();
       if(p.fullname) document.getElementById('contact_name').value=p.fullname;
       if(p.phone)    document.getElementById('contact_phone').value=p.phone;
+      if(p.phone)    document.getElementById('whatsapp').value=p.phone;
     }
   }catch(e){}
 
@@ -291,7 +304,8 @@ window.addEventListener('DOMContentLoaded', async () => {
       setType(p.type||'rent');
       ['title','city','locality','address','description','price','deposit','maintenance',
        'area','carpet_area','floor','furnished','available_from','contact_name',
-       'contact_phone','contact_email','contact_role','contact_time','prop_type','bhk','bathrooms'
+       'contact_phone','contact_email','contact_role','contact_time','prop_type',
+       'bhk','bathrooms','whatsapp','map_link'
       ].forEach(k=>{const el=document.getElementById(k);if(el&&p[k]!=null)el.value=p[k];});
       ['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
        'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
@@ -328,7 +342,10 @@ async function handleFiles(e){
       const fd=new FormData(); fd.append('file',f);
       const r=await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${tok}`},body:fd});
       if(!r.ok) throw new Error(await r.text());
-      const {url}=await r.json(); photos.push(url); renderPhotos();
+      const result=await r.json();
+      const url=typeof result==='string'?result:(result.url||result.publicUrl);
+      if(!url) throw new Error('No URL returned');
+      photos.push(url); renderPhotos();
     }catch(ex){toast('Upload failed: '+f.name);}
   }
   document.getElementById('upload-status').textContent=photos.length?`${photos.length} photo(s) ready`:'';
@@ -342,34 +359,31 @@ function renderPhotos(){
       ${i===0?`<div style="position:absolute;bottom:4px;left:4px;background:var(--primary);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700">COVER</div>`:''}
       <div class="photo-rm" onclick="rmPhoto(${i})">✕</div>
     </div>`).join('');
-  if(photos.length<10) g.insertAdjacentHTML('beforeend','<div class="photo-slot" onclick="pickPhoto()">➕</div>');
+  if(photos.length<10) g.insertAdjacentHTML('beforeend','<div class="photo-slot" onclick="pickPhoto()">📷</div>');
 }
 function rmPhoto(i){photos.splice(i,1);renderPhotos();}
 
 async function submit(){
   const V=id=>document.getElementById(id)?.value?.trim()||'';
 
-  // ✅ Validate required fields
   if(!V('title')||!V('price')||!V('city')||!V('locality')||!V('contact_name')){
     toast('Fill in all required (*) fields'); return;
   }
-
-  // ✅ Mobile number mandatory validation
   if(!V('contact_phone')){
     const ph=document.getElementById('contact_phone');
-    ph.classList.add('required-highlight');
-    ph.focus();
+    ph.classList.add('required-highlight'); ph.focus();
     toast('📱 Mobile number is required to publish your listing');
-    setTimeout(()=>ph.classList.remove('required-highlight'),3000);
-    return;
+    setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
   }
   if(!/^[6-9]\d{9}$/.test(V('contact_phone'))){
     const ph=document.getElementById('contact_phone');
-    ph.classList.add('required-highlight');
-    ph.focus();
+    ph.classList.add('required-highlight'); ph.focus();
     toast('Enter a valid 10-digit Indian mobile number (starts with 6-9)');
-    setTimeout(()=>ph.classList.remove('required-highlight'),3000);
-    return;
+    setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
+  }
+  // Validate WhatsApp if provided
+  if(V('whatsapp') && !/^[6-9]\d{9}$/.test(V('whatsapp'))){
+    toast('Enter a valid 10-digit WhatsApp number (starts with 6-9)'); return;
   }
 
   const btn=document.getElementById('sub-btn'); btn.disabled=true; btn.textContent='Publishing…';
@@ -391,7 +405,10 @@ async function submit(){
     floor:V('floor'), furnished:V('furnished'), available_from:V('available_from'),
     contact_name:V('contact_name'), contact_phone:V('contact_phone'),
     contact_email:V('contact_email'), contact_role:V('contact_role'),
-    contact_time:V('contact_time'), photos,
+    contact_time:V('contact_time'),
+    whatsapp: V('whatsapp')||null,
+    map_link:  V('map_link')||null,
+    photos,
   };
   bools.forEach(k=>payload[k]=!!document.getElementById(k)?.checked);
 
