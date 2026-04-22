@@ -11,7 +11,7 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, { cors: { origin: '*', methods: ['GET','POST'] } });
 
-app.use(cors());
+app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '25mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -39,6 +39,11 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// ─── API 404 guard — must be BEFORE page routes ──
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API route not found', path: req.path });
+});
+
 // ─── Page routes ─────────────────────────────
 const pages = ['login','browse','property','list-property','messages',
                'profile','favorites','notifications','chat','admin',
@@ -51,7 +56,7 @@ pages.forEach(p => {
 app.get('/auth/callback', (req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'auth', 'callback.html')));
 
-// ─── Wildcard — serve .html files or fallback to index ───
+// ─── Wildcard ───
 app.get('*', (req, res) => {
   if (req.path.endsWith('.html')) {
     const file = path.join(__dirname, 'public', path.basename(req.path));
@@ -82,12 +87,9 @@ io.on('connection', socket => {
 
       const sess = sessions.get(socket.id) || { mode: null, history: [] };
 
-      // Detect mode from first message
       if (!sess.mode) {
         sess.mode = LISTER_KW.some(k => text.toLowerCase().includes(k)) ? 'lister' : 'client';
       }
-
-      // Allow mid-conversation mode switch
       if (text.toLowerCase().includes('i want to list') || text.toLowerCase().includes('list my property')) {
         sess.mode = 'lister';
       }
@@ -105,7 +107,7 @@ io.on('connection', socket => {
       socket.emit('typing', false);
       socket.emit('botReply', {
         message:     result.reply,
-        listingData: result.listingData || null,   // ← passes listing JSON to frontend
+        listingData: result.listingData || null,
         timestamp:   new Date()
       });
 
