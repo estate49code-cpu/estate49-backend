@@ -45,7 +45,7 @@ async function signInWithGoogle() {
   const { error } = await _sb.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo:'https://estate49-backend-production.up.railway.app/login.html'
+      redirectTo:'https://estate49.com/login.html'
     }
   });
   if (error) throw error;
