@@ -12,10 +12,12 @@
     .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:10px;}
     .sh-title{font-size:var(--text-2xl);font-weight:800;}
     .sh-sub{font-size:var(--text-sm);color:var(--muted);margin-bottom:28px;}
-    /* New ticket form */
     .nticket{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;margin-bottom:28px;}
     .nt-title{font-size:var(--text-lg);font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
     .form-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    /* ✅ Ad ID hint box */
+    .ad-id-hint{background:#e3f2fd;border:1px solid #90caf9;border-radius:8px;padding:10px 14px;font-size:12px;color:#1565c0;margin-top:6px;display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
+    .ad-id-hint b{display:block;margin-bottom:2px;}
     /* Ticket list */
     .tlist{display:flex;flex-direction:column;gap:12px;}
     .tcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:all var(--transition);}
@@ -26,19 +28,16 @@
     .tcard-subject{font-size:var(--text-base);font-weight:700;margin-bottom:4px;}
     .tcard-meta{font-size:var(--text-xs);color:var(--muted);display:flex;flex-wrap:wrap;gap:8px;}
     .tcard-preview{font-size:var(--text-sm);color:var(--muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    /* Status badges */
     .sbadge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
     .sbadge.open{background:#fff3cd;color:#856404;}
     .sbadge.in_progress{background:#cce5ff;color:#004085;}
     .sbadge.resolved{background:#d4edda;color:#155724;}
     .sbadge.closed{background:#e2e3e5;color:#383d41;}
-    /* Priority badges */
     .pbadge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;}
     .pbadge.urgent{background:#f8d7da;color:#721c24;}
     .pbadge.high{background:#fde8d8;color:#7b3f00;}
     .pbadge.normal{background:#e2e3e5;color:#383d41;}
     .pbadge.low{background:#d1ecf1;color:#0c5460;}
-    /* Expanded ticket */
     .tcard-body{border-top:1px solid var(--divider);padding:16px 18px;display:none;}
     .tcard-body.open{display:block;}
     .msg-box{background:var(--surface-2);border-radius:var(--radius-md);padding:14px;font-size:var(--text-sm);line-height:1.7;color:var(--text);white-space:pre-wrap;margin-bottom:14px;}
@@ -49,6 +48,8 @@
     .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;}
     .tab{padding:9px 16px;font-size:var(--text-sm);font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-left:none;border-right:none;border-top:none;cursor:pointer;transition:all var(--transition);}
     .tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+    /* Ad ID in ticket card */
+    .ad-id-tag{display:inline-block;font-family:monospace;font-size:10px;font-weight:700;background:#f0f4ff;color:#1a1a2e;border:1px solid #c8d4f0;border-radius:5px;padding:2px 7px;letter-spacing:0.5px;}
     @media(max-width:600px){.sw{padding:14px 14px;}.nticket{padding:18px 14px;}.form-2{grid-template-columns:1fr;}}
   </style>
 </head>
@@ -73,7 +74,7 @@
       <div class="form-2" style="margin-bottom:14px">
         <div class="form-group">
           <label class="form-label">Category</label>
-          <select class="form-select" id="t-category">
+          <select class="form-select" id="t-category" onchange="onCategoryChange()">
             <option value="general">General Enquiry</option>
             <option value="listing">Listing Issue</option>
             <option value="payment">Payment / Billing</option>
@@ -93,9 +94,20 @@
           </select>
         </div>
       </div>
+
+      <!-- ✅ Ad ID field — shown only when category = listing -->
+      <div class="form-group" id="ad-id-group" style="display:none;margin-bottom:14px">
+        <label class="form-label">Ad ID <span style="font-size:11px;color:var(--muted);font-weight:400">(if related to a specific listing)</span></label>
+        <input type="text" class="form-input" id="t-ad-id" placeholder="e.g. E49-A1B2C3" style="font-family:monospace;letter-spacing:1px;text-transform:uppercase"/>
+        <div class="ad-id-hint">
+          <span>ℹ️</span>
+          <div><b>Where to find your Ad ID?</b>Your Ad ID is shown on your property listing page under the title (e.g. 🪪 E49-A1B2C3). Providing it helps us locate your ad instantly.</div>
+        </div>
+      </div>
+
       <div class="form-group" style="margin-bottom:18px">
         <label class="form-label">Message *</label>
-        <textarea class="form-textarea" id="t-message" rows="5" placeholder="Describe your issue in detail. Include any property IDs, listing titles, or error messages that might help us resolve it faster."></textarea>
+        <textarea class="form-textarea" id="t-message" rows="5" placeholder="Describe your issue in detail. Include any property titles or error messages that might help us resolve it faster."></textarea>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="submitTicket()">🎟️ Submit Ticket</button>
@@ -109,193 +121,147 @@
       <button class="tab" onclick="filterTickets('open',this)">🟡 Open</button>
       <button class="tab" onclick="filterTickets('in_progress',this)">🔵 In Progress</button>
       <button class="tab" onclick="filterTickets('resolved',this)">🟢 Resolved</button>
-      <button class="tab" onclick="filterTickets('closed',this)">⚫ Closed</button>
     </div>
 
-    <!-- Ticket List -->
-    <div id="tlist" class="tlist">
-      <!-- JS will inject spinner / empty state / tickets -->
+    <div class="tlist" id="tlist">
+      <div style="text-align:center;padding:40px;color:var(--muted)"><div class="al-spin" style="margin:0 auto 12px"></div>Loading tickets…</div>
     </div>
   </div>
 </div>
 <div class="toast" id="toast-el"></div>
 
 <script>
-let tok = null, allTickets = [], currentFilter = 'all', openCardId = null;
+let cu=null, tok=null, allTickets=[], curFilter='all';
 
 window.addEventListener('DOMContentLoaded', async () => {
-  const s = await getSession();
-  if (!s) { window.location.href = '/login.html'; return; }
-  tok = s.access_token;
-  document.getElementById('al').style.display = 'none';
-  document.getElementById('page').style.display = 'block';
-  await initNavbar({ active: 'support' });
+  const s=await getSession();
+  if(!s){window.location.href='/login.html';return;}
+  cu=s.user; tok=s.access_token;
+  document.getElementById('al').style.display='none';
+  document.getElementById('page').style.display='block';
+  await initNavbar({active:'support'});
   await loadTickets();
 });
 
-function toggleForm() {
-  const f = document.getElementById('new-ticket-form');
-  f.style.display = f.style.display === 'none' ? 'block' : 'none';
-  if (f.style.display === 'block') f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+// ✅ Show/hide Ad ID field based on category
+function onCategoryChange(){
+  const cat=document.getElementById('t-category').value;
+  const grp=document.getElementById('ad-id-group');
+  grp.style.display=(cat==='listing'||cat==='fraud')?'block':'none';
 }
 
-async function loadTickets() {
-  const listEl = document.getElementById('tlist');
-  // show spinner while loading
-  listEl.innerHTML = `
-    <div style="text-align:center;padding:40px;color:var(--muted)">
-      <div class="al-spin" style="margin:0 auto 12px"></div>
-      Loading…
-    </div>`;
+function toggleForm(){
+  const f=document.getElementById('new-ticket-form');
+  f.style.display=f.style.display==='none'?'block':'none';
+  if(f.style.display==='block') f.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 
-  try {
-    const r = await fetch('/api/support', { headers: { Authorization: `Bearer ${tok}` } });
-    if (!r.ok) throw new Error(String(r.status));
-    allTickets = await r.json();
+async function loadTickets(){
+  try{
+    const r=await fetch('/api/support/my',{headers:{Authorization:`Bearer ${tok}`}});
+    if(r.ok) allTickets=await r.json();
     renderTickets();
-  } catch (e) {
-    listEl.innerHTML = `
-      <div class="empty-tickets">
-        <div class="empty-tickets-icon">⚠️</div>
-        <div style="font-weight:700">Could not load tickets${e.message ? ' ('+e.message+')' : ''}</div>
-        <div style="font-size:var(--text-sm);margin-top:12px">
-          <button class="btn btn-secondary" onclick="loadTickets()">🔄 Retry</button>
-        </div>
-      </div>`;
+  }catch(e){
+    document.getElementById('tlist').innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)">Failed to load tickets</div>';
   }
 }
 
-function filterTickets(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
+function filterTickets(f, el){
+  curFilter=f;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
   renderTickets();
 }
 
-function renderTickets() {
-  const list = currentFilter === 'all'
-    ? allTickets
-    : allTickets.filter(t => t.status === currentFilter);
-  const el = document.getElementById('tlist');
-  if (!list.length) {
-    el.innerHTML = `
-      <div class="empty-tickets">
-        <div class="empty-tickets-icon">🎟️</div>
-        <div style="font-size:var(--text-lg);font-weight:700;margin-bottom:8px">
-          ${currentFilter === 'all' ? 'No tickets yet' : 'No ' + currentFilter + ' tickets'}
-        </div>
-        <div style="font-size:var(--text-sm);margin-bottom:20px">
-          ${currentFilter === 'all'
-            ? 'Click "New Ticket" above to raise your first support request.'
-            : 'Try switching to a different tab.'}
-        </div>
-        ${currentFilter === 'all'
-          ? '<button class="btn btn-primary" onclick="toggleForm()">+ New Ticket</button>'
-          : ''}
-      </div>`;
+function renderTickets(){
+  const list=document.getElementById('tlist');
+  const data=curFilter==='all'?allTickets:allTickets.filter(t=>t.status===curFilter);
+  if(!data.length){
+    list.innerHTML=`<div class="empty-tickets"><div class="empty-tickets-icon">🎟️</div><div style="font-weight:700;margin-bottom:6px">No tickets yet</div><div style="font-size:var(--text-sm)">Raise a support ticket using the button above</div></div>`;
     return;
   }
-  el.innerHTML = list.map(t => ticketCard(t)).join('');
-}
-
-function ticketCard(t) {
-  const catIcons = { general:'❓', listing:'🏠', payment:'💳', account:'👤', technical:'🔧', fraud:'🚨', other:'📋' };
-  const catIcon = catIcons[t.category] || '❓';
-  const statusLabels = { open:'Open', in_progress:'In Progress', resolved:'Resolved', closed:'Closed' };
-  const statusEmoji  = { open:'🟡', in_progress:'🔵', resolved:'🟢', closed:'⚫' };
-  const isOpen = openCardId === t.id;
-  const hasReply = !!t.admin_reply;
-
-  return `<div class="tcard" id="tc-${t.id}">
-    <div class="tcard-top" onclick="toggleCard(${t.id})">
-      <div class="tcard-icon">${catIcon}</div>
-      <div class="tcard-info">
-        <div class="tcard-subject">${x(t.subject)}</div>
-        <div class="tcard-meta">
-          <span class="sbadge ${t.status}">${statusEmoji[t.status] || ''} ${statusLabels[t.status] || t.status}</span>
-          <span class="pbadge ${t.priority}">${t.priority === 'urgent' ? '🚨' : ''} ${cap(t.priority)}</span>
-          <span>📂 ${cap(t.category)}</span>
-          <span>🕐 ${timeAgo(t.created_at)}</span>
-          ${hasReply ? '<span style="color:#155724;font-weight:600">💬 Admin replied</span>' : ''}
+  const iconMap={general:'❓',listing:'🏠',payment:'💳',account:'👤',technical:'⚙️',fraud:'🚨',other:'📋'};
+  list.innerHTML=data.map(t=>{
+    const icon=iconMap[t.category]||'🎟️';
+    const hasReply=!!t.admin_reply;
+    // ✅ Show Ad ID tag if present
+    const adIdTag=t.ad_id?`<span class="ad-id-tag">🪪 ${x(t.ad_id)}</span>`:'';
+    return`<div class="tcard">
+      <div class="tcard-top" onclick="toggleTicket(${t.id})">
+        <div class="tcard-icon">${icon}</div>
+        <div class="tcard-info">
+          <div class="tcard-subject">${x(t.subject)} ${adIdTag}</div>
+          <div class="tcard-meta">
+            <span class="sbadge ${t.status}">${cap(t.status)}</span>
+            <span class="pbadge ${t.priority}">${t.priority==='urgent'?'🚨 ':''} ${cap(t.priority)}</span>
+            <span>📂 ${cap(t.category)}</span>
+            <span>🕐 ${new Date(t.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
+            ${hasReply?'<span style="color:#155724;font-weight:600">✅ Replied</span>':''}
+          </div>
+          <div class="tcard-preview">${x(t.message)}</div>
         </div>
-        ${!isOpen ? `<div class="tcard-preview">${x(t.message)}</div>` : ''}
+        <div style="font-size:18px;color:var(--muted);flex-shrink:0">▼</div>
       </div>
-      <div style="font-size:18px;color:var(--muted);margin-left:8px;flex-shrink:0">${isOpen ? '▲' : '▼'}</div>
-    </div>
-    ${isOpen ? `
-    <div class="tcard-body open">
-      <div style="font-size:var(--text-xs);font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">Your Message</div>
-      <div class="msg-box">${x(t.message)}</div>
-      ${hasReply ? `
-      <div class="reply-box">
-        <div class="reply-head">✅ Estate49 Support Team replied · ${timeAgo(t.admin_replied_at)}</div>
-        ${x(t.admin_reply)}
-      </div>` : `
-      <div style="background:var(--surface-2);border-radius:var(--radius-md);padding:14px;font-size:var(--text-sm);color:var(--muted);text-align:center">
-        ⏳ Awaiting admin reply. We typically respond within 24 hours.
-      </div>`}
-      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-        <div style="font-size:var(--text-xs);color:var(--muted);flex:1">
-          Ticket #${t.id} · Created ${new Date(t.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
-          ${t.updated_at !== t.created_at ? ` · Updated ${timeAgo(t.updated_at)}` : ''}
-        </div>
+      <div class="tcard-body" id="tb-${t.id}">
+        <div style="font-size:var(--text-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Your Message</div>
+        <div class="msg-box">${x(t.message)}</div>
+        ${hasReply?`
+          <div class="reply-box">
+            <div class="reply-head">✅ Estate49 Team replied · ${timeAgo(t.admin_replied_at)}</div>
+            ${x(t.admin_reply)}
+          </div>`:
+          `<div style="font-size:var(--text-sm);color:var(--muted);padding:12px;background:var(--surface-2);border-radius:var(--radius-md)">⏳ Our team will respond shortly. We typically reply within 24 hours.</div>`
+        }
       </div>
-    </div>` : ''}
-  </div>`;
+    </div>`;
+  }).join('');
 }
 
-function toggleCard(id) {
-  openCardId = openCardId === id ? null : id;
-  renderTickets();
+function toggleTicket(id){
+  const body=document.getElementById('tb-'+id);
+  if(body) body.classList.toggle('open');
 }
 
-async function submitTicket() {
-  const subject  = document.getElementById('t-subject').value.trim();
-  const message  = document.getElementById('t-message').value.trim();
-  const category = document.getElementById('t-category').value;
-  const priority = document.getElementById('t-priority').value;
+async function submitTicket(){
+  const subject=document.getElementById('t-subject').value.trim();
+  const category=document.getElementById('t-category').value;
+  const priority=document.getElementById('t-priority').value;
+  const message=document.getElementById('t-message').value.trim();
+  const adId=document.getElementById('t-ad-id')?.value?.trim()?.toUpperCase()||null;
 
-  if (!subject) { toast('Please enter a subject'); document.getElementById('t-subject').focus(); return; }
-  if (!message) { toast('Please describe your issue'); document.getElementById('t-message').focus(); return; }
+  if(!subject){toast('⚠️ Please enter a subject');return;}
+  if(!message){toast('⚠️ Please describe your issue');return;}
 
-  const btn = document.querySelector('#new-ticket-form .btn-primary');
-  btn.disabled = true; btn.textContent = 'Submitting…';
-  try {
-    const r = await fetch('/api/support', {
-      method: 'POST',
-      headers: { 'Content-Type':'application/json', Authorization:`Bearer ${tok}` },
-      body: JSON.stringify({ subject, category, message, priority })
+  try{
+    const body={subject,category,priority,message};
+    if(adId) body.ad_id=adId;   // ✅ send ad_id to API
+
+    const r=await fetch('/api/support',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
+      body:JSON.stringify(body)
     });
-    if (!r.ok) throw new Error((await r.json()).error || 'Failed');
-    toast('✅ Ticket submitted! We\'ll get back to you soon.');
-    document.getElementById('t-subject').value = '';
-    document.getElementById('t-message').value = '';
-    document.getElementById('t-category').value = 'general';
-    document.getElementById('t-priority').value = 'normal';
-    document.getElementById('new-ticket-form').style.display = 'none';
+    if(!r.ok) throw new Error((await r.json()).error||'Failed');
+    toast('✅ Ticket submitted! We\'ll get back to you shortly.');
+    document.getElementById('t-subject').value='';
+    document.getElementById('t-message').value='';
+    document.getElementById('t-category').value='general';
+    document.getElementById('t-priority').value='normal';
+    if(document.getElementById('t-ad-id')) document.getElementById('t-ad-id').value='';
+    document.getElementById('ad-id-group').style.display='none';
+    document.getElementById('new-ticket-form').style.display='none';
     await loadTickets();
-  } catch (e) {
-    toast('Error: ' + e.message);
-  } finally {
-    btn.disabled = false; btn.textContent = '🎟️ Submit Ticket';
-  }
+  }catch(e){toast('❌ Error: '+e.message);}
 }
 
-function timeAgo(d) {
-  const s = Math.floor((Date.now() - new Date(d)) / 1000);
-  if (s < 60)    return 'just now';
-  if (s < 3600)  return Math.floor(s / 60)   + 'm ago';
-  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
-  return Math.floor(s / 86400) + 'd ago';
+function timeAgo(d){
+  const s=Math.floor((Date.now()-new Date(d))/1000);
+  if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';
 }
-function x(t)  { return String(t || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g,' ') : ''; }
-function toast(m){
-  const el = document.getElementById('toast-el');
-  el.textContent = m;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
+function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1).replace(/_/g,' '):''}
+function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 </script>
 </body>
 </html>

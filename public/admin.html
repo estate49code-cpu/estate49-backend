@@ -14,7 +14,7 @@
     .topbar-logo{font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px;}
     .topbar-right{display:flex;align-items:center;gap:16px;font-size:14px;}
     .admin-badge{background:#e74c3c;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-    .wrap{max-width:1200px;margin:0 auto;padding:32px 24px;}
+    .wrap{max-width:1280px;margin:0 auto;padding:32px 24px;}
     .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:32px;}
     .stat{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:20px;text-align:center;}
     .stat-num{font-size:32px;font-weight:800;margin-bottom:4px;}
@@ -34,7 +34,7 @@
     .search-bar input{width:100%;padding:10px 16px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:14px;outline:none;}
     .search-bar input:focus{border-color:#1a1a2e;}
     .table-wrap{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;overflow-x:auto;}
-    table{width:100%;border-collapse:collapse;min-width:900px;}
+    table{width:100%;border-collapse:collapse;min-width:980px;}
     th{background:#f8f8f8;padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e5e5e5;}
     td{padding:14px 16px;font-size:13px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
     tr:last-child td{border-bottom:none;}
@@ -42,6 +42,8 @@
     .prop-img{width:60px;height:45px;object-fit:cover;border-radius:6px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
     .prop-title{font-weight:600;font-size:13px;margin-bottom:2px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .prop-sub{font-size:11px;color:#888;}
+    /* ✅ Ad ID chip */
+    .ad-id-chip{display:inline-block;font-family:monospace;font-size:10px;font-weight:700;background:#f0f4ff;color:#1a1a2e;border:1px solid #c8d4f0;border-radius:5px;padding:2px 7px;margin-top:3px;letter-spacing:0.5px;}
     .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;}
     .badge.pending{background:#fff3cd;color:#856404;}
     .badge.approved{background:#d4edda;color:#155724;}
@@ -104,14 +106,14 @@
   </div>
 
   <div class="search-bar">
-    <input type="text" id="search" placeholder="Search by title, city, locality, owner…" oninput="filterTable()"/>
+    <input type="text" id="search" placeholder="Search by title, city, locality, owner, Ad ID…" oninput="filterTable()"/>
   </div>
 
   <div class="table-wrap">
     <table>
       <thead>
         <tr>
-          <th>Property</th>
+          <th>Property / Ad ID</th>
           <th>Owner</th>
           <th>Price</th>
           <th>Location</th>
@@ -132,7 +134,6 @@
   <div class="modal">
     <h3>❌ Reject Listing</h3>
     <p>Provide a reason for rejection. The owner will see this note on their listing.</p>
-    <!-- Shows existing note if re-rejecting -->
     <div class="prev-note-box" id="prev-note-box">
       <strong>📝 Previous note sent to owner:</strong>
       <span id="prev-note-text"></span>
@@ -198,7 +199,7 @@ function setTab(t) {
 function filterTable() {
   const q = document.getElementById('search').value.toLowerCase();
   const filtered = allData.filter(p =>
-    !q || [p.title, p.city, p.locality, p.contact_name, p.contact_phone].filter(Boolean).join(' ').toLowerCase().includes(q)
+    !q || [p.title, p.city, p.locality, p.contact_name, p.contact_phone, p.ad_id].filter(Boolean).join(' ').toLowerCase().includes(q)
   );
   renderTable(filtered);
 }
@@ -214,12 +215,13 @@ function renderTable(data) {
     const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '') : '—';
     const posted = p.posted_at ? new Date(p.posted_at).toLocaleDateString('en-IN') : '—';
     const statusBadge = `<span class="badge ${p.status || 'pending'}">${(p.status || 'pending').toUpperCase()}</span>`;
-    // Show admin note as clickable chip
     const noteHtml = p.admin_note
       ? `<div class="note-chip" onclick="openReject(${p.id})" title="Click to edit note">
            📝 <span>${p.admin_note}</span>
          </div>`
       : '';
+    // ✅ Ad ID chip shown under property title
+    const adIdHtml = p.ad_id ? `<div class="ad-id-chip">🪪 ${p.ad_id}</div>` : '';
     return `<tr id="row-${p.id}">
       <td>
         <div style="display:flex;align-items:center;gap:10px">
@@ -227,6 +229,7 @@ function renderTable(data) {
           <div>
             <div class="prop-title" title="${p.title || ''}">${p.title || 'Untitled'}</div>
             <div class="prop-sub">${(p.type || '').toUpperCase()} · ${p.property_type || ''} ${p.bhk ? '· ' + p.bhk + 'BHK' : ''}</div>
+            ${adIdHtml}
           </div>
         </div>
       </td>
@@ -270,7 +273,6 @@ async function updateStatus(id, status, note = null) {
     });
     const result = await r.json();
     if (!r.ok) throw new Error(result.error || 'Failed');
-    // Update local data — fix id type mismatch
     const idx = allData.findIndex(p => String(p.id) === String(id));
     if (idx !== -1) {
       allData[idx].status = status;
@@ -281,7 +283,6 @@ async function updateStatus(id, status, note = null) {
     const msg = status === 'approved' ? '✅ Approved!' : status === 'rejected' ? '❌ Rejected!' : '⏳ Set to Pending';
     toast(msg);
   } catch (e) {
-    console.error('updateStatus error:', e);
     toast('❌ Error: ' + e.message);
   }
 }
@@ -314,7 +315,6 @@ async function deleteProp(id) {
 
 function openReject(id) {
   rejectId = Number(id);
-  // Show existing note if any
   const prop = allData.find(p => String(p.id) === String(id));
   const prevBox = document.getElementById('prev-note-box');
   const prevText = document.getElementById('prev-note-text');
@@ -337,7 +337,7 @@ function closeModal() {
 function confirmReject() {
   if (!rejectId) { toast('❌ No property selected'); return; }
   const note = document.getElementById('reject-note').value.trim();
-  const idToReject = rejectId; // capture before closeModal nulls it
+  const idToReject = rejectId;
   closeModal();
   updateStatus(idToReject, 'rejected', note || null);
 }
