@@ -1,8 +1,10 @@
 // nav.js — Estate49 shared navigation: desktop topbar + mobile bottom nav
 
+
 async function initNavbar({ active = '' } = {}) {
   const root = document.getElementById('navbar-root');
   if (!root) return;
+
 
   let userName = '', userInitials = '?', userEmail = '';
   try {
@@ -15,12 +17,14 @@ async function initNavbar({ active = '' } = {}) {
     }
   } catch(e) {}
 
+
   const navLinks = [
     { key: 'browse',  href: '/browse.html',        label: 'Browse' },
     { key: 'chat',    href: '/chat.html',           label: 'AI Chat' },
     { key: 'list',    href: '/list-property.html',  label: 'List Property' },
     { key: 'support', href: '/support.html',        label: '🎧 Support' },
   ];
+
 
   root.innerHTML = `
     <nav id="main-nav">
@@ -47,6 +51,7 @@ async function initNavbar({ active = '' } = {}) {
             <div class="nav-dd-name">${userName}</div>
             <div class="nav-dd-email">${userEmail}</div>
             <a class="nav-dd-item" href="/profile.html">👤 Profile</a>
+            <a class="nav-dd-item" href="/profile.html?tab=listings">🏠 My Listings</a>
             <a class="nav-dd-item" href="/favorites.html">❤️ Saved</a>
             <a class="nav-dd-item" href="/messages.html">✉️ Messages</a>
             <a class="nav-dd-item" href="/notifications.html">🔔 Alerts</a>
@@ -57,6 +62,7 @@ async function initNavbar({ active = '' } = {}) {
       </div>
     </nav>
   `;
+
 
   if (!document.getElementById('nav-shared-style')) {
     const st = document.createElement('style');
@@ -93,6 +99,7 @@ async function initNavbar({ active = '' } = {}) {
       .nav-dd-signout { color:#c0392b; }
       .nav-dd-signout:hover { background:#fadbd8; }
 
+
       /* ===== BOTTOM NAV (mobile only) ===== */
       #bottom-nav {
         display: none;
@@ -114,6 +121,7 @@ async function initNavbar({ active = '' } = {}) {
       .bn-item.active { color:#c0392b; }
       .bn-badge { position:absolute;top:4px;right:calc(50% - 16px);background:#c0392b;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff; }
 
+
       @media(max-width:768px){
         #main-nav { padding:0 14px; height:54px; }
         .nav-links-center { display:none; }
@@ -125,14 +133,15 @@ async function initNavbar({ active = '' } = {}) {
     document.head.appendChild(st);
   }
 
+
   // Inject bottom nav
   document.getElementById('bottom-nav')?.remove();
   const bnPages = [
-    { key:'home',          href:'/index.html',         icon:'🏠', label:'Home' },
-    { key:'browse',        href:'/browse.html',        icon:'🔍', label:'Browse' },
-    { key:'chat',          href:'/chat.html',          icon:'💬', label:'AI Chat' },
-    { key:'messages',      href:'/messages.html',      icon:'✉️',  label:'Messages',  id:'bn-msg' },
-    { key:'support',       href:'/support.html',       icon:'🎧', label:'Support' },
+    { key:'home',     href:'/index.html',         icon:'🏠', label:'Home' },
+    { key:'browse',   href:'/browse.html',        icon:'🔍', label:'Browse' },
+    { key:'chat',     href:'/chat.html',          icon:'💬', label:'AI Chat' },
+    { key:'messages', href:'/messages.html',      icon:'✉️',  label:'Messages', id:'bn-msg' },
+    { key:'support',  href:'/support.html',       icon:'🎧', label:'Support' },
   ];
   const bn = document.createElement('nav');
   bn.id = 'bottom-nav';
@@ -143,11 +152,13 @@ async function initNavbar({ active = '' } = {}) {
     </a>`).join('');
   document.body.appendChild(bn);
 
+
   // Close dropdown on outside click
   document.addEventListener('click', e => {
     const wrap = document.querySelector('.nav-user-wrap');
     if (wrap && !wrap.contains(e.target)) document.getElementById('nav-dropdown')?.classList.remove('open');
   });
+
 
   // Load unread badges
   try {
@@ -165,9 +176,11 @@ async function initNavbar({ active = '' } = {}) {
   } catch(e) {}
 }
 
+
 function toggleNavDropdown() {
   document.getElementById('nav-dropdown')?.classList.toggle('open');
 }
+
 
 function setBadge(id, count, type='count') {
   const el = document.getElementById(id); if (!el) return;

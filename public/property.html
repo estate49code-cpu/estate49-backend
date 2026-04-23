@@ -11,12 +11,32 @@
     .pw{max-width:1080px;margin:0 auto;padding:32px 24px;}
     .back-btn{display:inline-flex;align-items:center;gap:8px;font-size:var(--text-sm);color:var(--muted);margin-bottom:20px;cursor:pointer;border:none;background:none;font-family:inherit;}
     .back-btn:hover{color:var(--primary);}
+
+    /* ── Photo Swipe Gallery ── */
     .pgal{border-radius:var(--radius-xl);overflow:hidden;background:var(--surface-3);margin-bottom:28px;position:relative;}
-    .pgal-main{width:100%;height:420px;object-fit:cover;display:block;}
+    .pgal-track{display:flex;transition:transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94);}
+    .pgal-slide{min-width:100%;height:420px;flex-shrink:0;position:relative;}
+    .pgal-slide img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;}
     .pgal-ph{width:100%;height:420px;display:flex;align-items:center;justify-content:center;font-size:80px;background:var(--surface-3);}
-    .pgal-thumbs{display:flex;gap:8px;padding:10px;background:rgba(0,0,0,0.04);overflow-x:auto;}
-    .pgal-thumb{width:72px;height:54px;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:border-color var(--transition);flex-shrink:0;}
-    .pgal-thumb.active,.pgal-thumb:hover{border-color:var(--primary);}
+    .pgal-prev,.pgal-next{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);border:none;font-size:22px;cursor:pointer;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,0.18);transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
+    .pgal-prev{left:12px;}
+    .pgal-next{right:12px;}
+    .pgal-prev:hover,.pgal-next:hover{background:#fff;transform:translateY(-50%) scale(1.08);}
+    .pgal-counter{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;font-size:12px;font-weight:600;padding:3px 12px;border-radius:20px;pointer-events:none;}
+    .e49-sticker{position:absolute;bottom:12px;right:12px;background:#c0392b;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px;opacity:0.88;pointer-events:none;letter-spacing:0.4px;z-index:5;}
+    .pgal-dots{display:flex;justify-content:center;gap:7px;margin-top:10px;flex-wrap:wrap;padding:0 4px;}
+    .pgal-dot{width:8px;height:8px;border-radius:50%;background:var(--border);cursor:pointer;transition:background 0.2s,transform 0.2s;border:none;}
+    .pgal-dot.active{background:var(--primary);transform:scale(1.3);}
+
+    /* ── Lightbox ── */
+    .lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:2000;align-items:center;justify-content:center;}
+    .lb.open{display:flex;}
+    .lb-img{max-width:94vw;max-height:86vh;object-fit:contain;border-radius:10px;user-select:none;}
+    .lb-close{position:absolute;top:16px;right:20px;background:rgba(255,255,255,0.14);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:22px;cursor:pointer;z-index:10;}
+    .lb-prev,.lb-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.14);border:none;color:#fff;width:48px;height:48px;border-radius:50%;font-size:24px;cursor:pointer;}
+    .lb-prev{left:16px;}
+    .lb-next{right:16px;}
+
     .layout{display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start;}
     .prop-title{font-size:var(--text-2xl);font-weight:800;margin-bottom:6px;}
     .prop-loc{font-size:var(--text-base);color:var(--muted);margin-bottom:16px;}
@@ -57,41 +77,24 @@
     .phone-gate{color:var(--primary);font-style:italic;cursor:pointer;}
     .phone-gate:hover{text-decoration:underline;}
 
-    /* ── Mobile sticky CTA — 2 row layout ── */
+    /* Mobile sticky CTA */
     .mobile-cta{
-      display:none;
-      position:fixed;
+      display:none;position:fixed;
       bottom:62px;left:0;right:0;
       background:rgba(255,255,255,0.97);
       backdrop-filter:blur(8px);
       border-top:1px solid var(--border);
       padding:8px 14px;
       padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));
-      z-index:150;
-      flex-direction:column;
-      gap:7px;
+      z-index:150;flex-direction:column;gap:7px;
     }
-    .mcta-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-    }
-    .mcta-bottom{
-      display:flex;
-      gap:8px;
-    }
+    .mcta-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+    .mcta-bottom{display:flex;gap:8px;}
     .mcta-bottom .mcta-btn{
-      flex:1;
-      display:flex;align-items:center;justify-content:center;
-      gap:6px;
-      padding:10px 8px;
-      border-radius:var(--radius-md);
-      font-size:13px;font-weight:700;
-      text-decoration:none;
-      border:none;cursor:pointer;
-      font-family:inherit;
-      white-space:nowrap;
+      flex:1;display:flex;align-items:center;justify-content:center;
+      gap:6px;padding:10px 8px;border-radius:var(--radius-md);
+      font-size:13px;font-weight:700;text-decoration:none;
+      border:none;cursor:pointer;font-family:inherit;white-space:nowrap;
     }
     .mcta-btn-msg{background:var(--primary);color:#fff;}
     .mcta-btn-wa{background:#25d366;color:#fff;}
@@ -103,8 +106,7 @@
     @media(max-width:900px){
       .layout{grid-template-columns:1fr;}
       .sidebar{display:none;}
-      .pgal-main{height:260px;}
-      .pgal-ph{height:260px;}
+      .pgal-slide,.pgal-ph{height:260px;}
     }
     @media(max-width:768px){
       .pw{padding:14px 14px 180px;}
@@ -114,12 +116,11 @@
       .pstat-icon{font-size:18px;}
       .amen-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
       .mobile-cta{display:flex;}
+      .pgal-prev,.pgal-next{width:34px;height:34px;font-size:18px;}
     }
     @media(max-width:480px){
-      .pgal-main{height:220px;}
-      .pgal-ph{height:220px;}
-      .pgal-thumbs{gap:6px;padding:8px;}
-      .pgal-thumb{width:58px;height:44px;}
+      .pgal-slide,.pgal-ph{height:220px;}
+      .pgal-dots{gap:5px;}
     }
   </style>
 </head>
@@ -130,32 +131,41 @@
   <div class="pw">
     <button class="back-btn" onclick="history.back()">← Back</button>
     <div id="content">
-      <div class="skeleton" style="height:420px;border-radius:var(--radius-xl);margin-bottom:28px;"></div>
+      <div class="skeleton" style="height:420px;border-radius:var(--radius-xl);margin-bottom:28px"></div>
       <div class="layout">
         <div>
-          <div class="skeleton skeleton-text" style="width:60%;height:2em;margin-bottom:10px;"></div>
-          <div class="skeleton skeleton-text" style="width:40%;"></div>
+          <div class="skeleton skeleton-text" style="width:60%;height:2em;margin-bottom:10px"></div>
+          <div class="skeleton skeleton-text" style="width:40%"></div>
         </div>
-        <div class="skeleton" style="height:360px;border-radius:var(--radius-xl);"></div>
+        <div class="skeleton" style="height:360px;border-radius:var(--radius-xl)"></div>
       </div>
     </div>
   </div>
   <div class="mobile-cta" id="mobile-cta" style="display:none"></div>
 </div>
-<div class="toast" id="toast-el"></div>
 
+<!-- Lightbox -->
+<div class="lb" id="lb" onclick="lbBgClick(event)">
+  <button class="lb-close" onclick="closeLb()">✕</button>
+  <button class="lb-prev" onclick="lbNav(-1);event.stopPropagation()">‹</button>
+  <img class="lb-img" id="lb-img" src="" alt=""/>
+  <button class="lb-next" onclick="lbNav(1);event.stopPropagation()">›</button>
+</div>
+
+<div class="toast" id="toast-el"></div>
 <script>
-let cu=null, tok=null, prop=null, isFav=false;
+let cu=null,tok=null,prop=null,isFav=false;
+let galPhotos=[], galIdx=0, lbIdx=0;
 const pid=new URLSearchParams(window.location.search).get('id');
 
-window.addEventListener('DOMContentLoaded', async () => {
+window.addEventListener('DOMContentLoaded', async ()=>{
   if(!pid){window.location.href='/browse.html';return;}
   const s=await getSession();
-  if(s){ cu=s.user; tok=s.access_token; }
+  if(s){cu=s.user;tok=s.access_token;}
   document.getElementById('al').style.display='none';
   document.getElementById('page').style.display='block';
-  await initNavbar({});
-  await Promise.all([loadProp(), checkFav()]);
+  await initNavbar();
+  await Promise.all([loadProp(),checkFav()]);
 });
 
 async function loadProp(){
@@ -166,15 +176,14 @@ async function loadProp(){
     document.title=`${prop.title||'Property'} — Estate49`;
     render();
   }catch(e){
-    document.getElementById('content').innerHTML='<div class="empty-state"><div class="empty-icon">🏚️</div><div class="empty-title">Property not found</div><a href="/browse.html" class="btn btn-primary">Browse Properties</a></div>';
+    document.getElementById('content').innerHTML=`<div class="empty-state"><div class="empty-icon">🏚️</div><div class="empty-title">Property not found</div><a href="/browse.html" class="btn btn-primary">Browse Properties</a></div>`;
   }
 }
-
 async function checkFav(){
   if(!tok) return;
   try{
     const r=await fetch('/api/favorites',{headers:{Authorization:`Bearer ${tok}`}});
-    if(r.ok){const d=await r.json(); isFav=(d||[]).some(f=>String(f.property_id)===String(pid));}
+    if(r.ok){const d=await r.json();isFav=d.some(f=>String(f.property_id)===String(pid));}
   }catch(e){}
 }
 
@@ -184,53 +193,54 @@ function render(){
   const pr=rent?`₹${Number(p.price).toLocaleString('en-IN')}`:`₹${fp(p.price)}`;
   const isOwn=cu&&p.listed_by===cu.id;
 
+  galPhotos=(p.photos||[]).map(u=>u.replace(/^http:/,'https:'));
+
+  // Gallery HTML
+  let galHtml='';
+  if(galPhotos.length){
+    galHtml=`
+      <div class="pgal" id="pgal-wrap">
+        <div class="pgal-track" id="pgal-track">
+          ${galPhotos.map((url,i)=>`<div class="pgal-slide"><img src="${url}" alt="Photo ${i+1}" loading="${i===0?'eager':'lazy'}" onclick="openLb(${i})"/></div>`).join('')}
+        </div>
+        ${galPhotos.length>1?`<button class="pgal-prev" onclick="galNav(-1)">‹</button><button class="pgal-next" onclick="galNav(1)">›</button><div class="pgal-counter" id="pgal-counter">1 / ${galPhotos.length}</div>`:''}
+        <div class="e49-sticker">E49</div>
+      </div>
+      <div class="pgal-dots" id="pgal-dots">${galPhotos.map((_,i)=>`<button class="pgal-dot ${i===0?'active':''}" onclick="galGo(${i})"></button>`).join('')}</div>`;
+  }else{
+    galHtml=`<div class="pgal"><div class="pgal-ph">🏠</div><div class="e49-sticker">E49</div></div>`;
+  }
+
   const amenities=[
-    p.parking&&['🚗','Parking'], p.gym&&['🏋️','Gym'], p.pool&&['🏊','Pool'],
-    p.lift&&['🛗','Lift'], p.security&&['💂','Security'], p.cctv&&['📹','CCTV'],
-    p.clubhouse&&['🏢','Clubhouse'], p.garden&&['🌳','Garden'],
-    p.powerbackup&&['⚡','Power Backup'], p.ac&&['❄️','AC'],
-    p.balcony&&['🌅','Balcony'], p.modular_kitchen&&['👨‍🍳','Mod Kitchen'],
-    p.washing_machine&&['🫧','Washing M/C'], p.fridge&&['🧊','Fridge'],
-    p.wifi&&['📶','WiFi'], p.pet_friendly&&['🐾','Pet Friendly'],
-    p.gated&&['🔐','Gated'], p.no_brokerage&&['✅','Zero Brokerage'],
-  ].filter(Boolean);
+    [p.parking,'🚗','Parking'],[p.gym,'🏋️','Gym'],[p.pool,'🏊','Pool'],[p.lift,'🛗','Lift'],
+    [p.security,'💂','Security'],[p.cctv,'📹','CCTV'],[p.clubhouse,'🏛️','Clubhouse'],
+    [p.garden,'🌳','Garden'],[p.powerbackup,'⚡','Power Backup'],[p.ac,'❄️','AC'],
+    [p.balcony,'🏗️','Balcony'],[p.modular_kitchen,'🍳','Mod Kitchen'],
+    [p.washing_machine,'🫧','Washing M/C'],[p.fridge,'🧊','Fridge'],[p.wifi,'📶','WiFi'],
+    [p.pet_friendly,'🐾','Pet Friendly'],[p.gated,'🔐','Gated'],[p.no_brokerage,'✅','Zero Brokerage'],
+  ].filter(([v])=>v);
 
-  const photos=p.photos||[];
-  const galHtml=photos.length
-    ?`<img class="pgal-main" id="main-img" src="${photos[0]}" alt="${x(p.title)}" width="1080" height="420"/>
-      ${photos.length>1
-        ?`<div class="pgal-thumbs">${photos.map((ph,i)=>`<img class="pgal-thumb ${i===0?'active':''}" src="${ph}" alt="photo ${i+1}" width="72" height="54" loading="lazy" onclick="swImg(this,'${ph}')"/>`).join('')}</div>`
-        :''}`
-    :`<div class="pgal-ph">🏠</div>`;
-
-  const ownerIni=(p.contact_name||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-
+  const ownerIni=(p.contact_name||'O').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   const phoneHtml=p.contact_phone
-    ? cu
-      ? `<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><a href="tel:${x(p.contact_phone)}" style="color:inherit">${x(p.contact_phone)}</a></span></div>`
-      : `<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><span class="phone-gate" onclick="showLoginPrompt('Sign in to view contact number')">🔐 Sign in to view</span></span></div>`
-    : '';
-
+    ? (cu
+      ?`<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><a href="tel:${x(p.contact_phone)}" style="color:inherit">${x(p.contact_phone)}</a></span></div>`
+      :`<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><span class="phone-gate" onclick="showLoginPrompt('Sign in to view contact number')">Sign in to view</span></span></div>`)
+    :'';
   const waMsg=encodeURIComponent(`Hi, I saw your property listing on Estate49 — "${p.title}" in ${p.locality||''}, ${p.city||''}. Is it still available?`);
-
   const waBtnHtml=p.whatsapp
-    ? `<a class="btn-whatsapp" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/>
-        </svg>
-        Chat on WhatsApp
-      </a>`
-    : '';
-
+    ?`<a class="btn-whatsapp" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+        Chat on WhatsApp</a>`:'';
   const mapBtnHtml=p.map_link
-    ? `<a class="btn-maps" href="${x(p.map_link)}" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-        </svg>
-        View on Google Maps
-      </a>`
-    : '';
+    ?`<a class="btn-maps" href="${x(p.map_link)}" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        View on Google Maps</a>`:'';
+
+  // Vastu & Facing for info rows
+  const facingMap={east:'East',northeast:'North-East',north:'North',west:'West',south:'South',northwest:'North-West',southeast:'South-East',southwest:'South-West'};
+  const vastuMap={yes:'✓ Vastu Compliant',partial:'Partially Compliant',no:'Not Vastu Compliant',unknown:'Not Specified'};
+  const facingHtml=p.facing?`<div class="info-row"><span class="info-key">🧭 Facing</span><span class="info-val">${facingMap[p.facing]||p.facing}</span></div>`:'';
+  const vastuHtml=(p.vastu_compliance)?`<div class="info-row"><span class="info-key">🕉️ Vastu</span><span class="info-val">${vastuMap[p.vastu_compliance]||p.vastu_compliance}</span></div>`:'';
 
   const sidebarHtml=`
     <div class="ccard">
@@ -238,18 +248,13 @@ function render(){
       <div class="price-note">${rent?'per month':'total price'}${p.maintenance?` • ₹${Number(p.maintenance).toLocaleString('en-IN')}/mo maintenance`:''}</div>
       <div class="contact-row">
         <div class="contact-avatar">${ownerIni}</div>
-        <div>
-          <div class="contact-name">${x(p.contact_name||'Owner')}</div>
-          <div class="contact-role">${x(cp(p.contact_role||'owner'))}</div>
-        </div>
+        <div><div class="contact-name">${x(p.contact_name||'Owner')}</div><div class="contact-role">${x(cp(p.contact_role||'owner'))}</div></div>
       </div>
       <div class="ccard-btns">
         ${!isOwn?`<button class="btn btn-primary btn-full btn-lg" onclick="msgOwner()">💬 Send Message</button>`:''}
         ${waBtnHtml}
         ${mapBtnHtml}
-        <button class="fav-btn ${isFav?'saved':''}" id="fav-btn" onclick="toggleFav()">
-          ${isFav?'❤️ Saved':'🤍 Save Property'}
-        </button>
+        <button class="fav-btn ${isFav?'saved':''}" id="fav-btn" onclick="toggleFav()">${isFav?'❤️ Saved':'🤍 Save Property'}</button>
         ${isOwn?`<a href="/list-property.html?edit=${p.id}" class="btn btn-secondary btn-full">✏️ Edit Listing</a>`:''}
       </div>
       <div class="info-rows">
@@ -259,20 +264,23 @@ function render(){
         ${p.whatsapp?`<div class="info-row"><span class="info-key">WhatsApp</span><span class="info-val">+91 ${x(p.whatsapp)}</span></div>`:''}
         ${p.property_type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${x(cp(p.property_type))}</span></div>`:''}
         ${p.carpet_area?`<div class="info-row"><span class="info-key">Carpet area</span><span class="info-val">${p.carpet_area} ft²</span></div>`:''}
-        ${p.vastu?`<div class="info-row"><span class="info-key">Vastu</span><span class="info-val">✅ Compliant</span></div>`:''}
+        ${facingHtml}
+        ${vastuHtml}
+        ${p.vastu?`<div class="info-row"><span class="info-key">Vastu</span><span class="info-val" style="color:#2e7d32">✓ Compliant</span></div>`:''}
         ${p.water_24?`<div class="info-row"><span class="info-key">Water</span><span class="info-val">24/7</span></div>`:''}
         ${p.available_from?`<div class="info-row"><span class="info-key">Available</span><span class="info-val">${new Date(p.available_from).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span></div>`:''}
       </div>
     </div>`;
 
   document.getElementById('content').innerHTML=`
-    <div class="pgal">${galHtml}</div>
+    ${galHtml}
     <div class="layout">
       <div>
         <div class="psec">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
             <span class="badge badge-${rent?'rent':'buy'}">${rent?'For Rent':'For Sale'}</span>
             ${p.no_brokerage?'<span class="badge" style="background:#d4edda;color:#155724">✅ Zero Brokerage</span>':''}
+            ${p.vastu||p.vastu_compliance==='yes'?'<span class="badge" style="background:#e8f5e9;color:#2e7d32">🕉️ Vastu</span>':''}
           </div>
           <h1 class="prop-title">${x(p.title||'Property')}</h1>
           <div class="prop-loc">📍 ${x([p.locality,p.city,p.address].filter(Boolean).join(', '))}</div>
@@ -287,10 +295,11 @@ function render(){
             ${p.area?`<div class="pstat"><div class="pstat-icon">📐</div><div class="pstat-val">${p.area}</div><div class="pstat-lbl">ft²</div></div>`:''}
             ${p.floor?`<div class="pstat"><div class="pstat-icon">🏢</div><div class="pstat-val">${x(p.floor)}</div><div class="pstat-lbl">Floor</div></div>`:''}
             ${p.furnished?`<div class="pstat"><div class="pstat-icon">🛋</div><div class="pstat-val">${x(cp(p.furnished))}</div><div class="pstat-lbl">Furnished</div></div>`:''}
+            ${p.facing?`<div class="pstat"><div class="pstat-icon">🧭</div><div class="pstat-val" style="font-size:var(--text-xs);text-align:center">${(facingMap[p.facing]||p.facing)}</div><div class="pstat-lbl">Facing</div></div>`:''}
           </div>
         </div>
         ${p.description?`<div class="psec"><h2 class="section-title">About this property</h2><p class="desc-text">${x(p.description)}</p></div>`:''}
-        ${amenities.length?`<div class="psec"><h2 class="section-title">Amenities</h2><div class="amen-grid">${amenities.map(([icon,name])=>`<div class="amen-item">${icon} ${name}</div>`).join('')}</div></div>`:''}
+        ${amenities.length?`<div class="psec"><h2 class="section-title">Amenities</h2><div class="amen-grid">${amenities.map(([,icon,name])=>`<div class="amen-item">${icon} ${name}</div>`).join('')}</div></div>`:''}
         <div class="psec" id="mobile-contact-card" style="display:none">
           <h2 class="section-title">Contact &amp; Details</h2>
           ${sidebarHtml}
@@ -299,53 +308,67 @@ function render(){
       <div class="sidebar">${sidebarHtml}</div>
     </div>`;
 
+  // Init gallery touch swipe
+  initGalTouch();
+
   if(window.innerWidth<=900) document.getElementById('mobile-contact-card').style.display='block';
   window.addEventListener('resize',()=>{
     const mcc=document.getElementById('mobile-contact-card');
     if(mcc) mcc.style.display=window.innerWidth<=900?'block':'none';
   });
-
-  renderMobileCTA(pr, rent, isOwn, p);
+  renderMobileCTA(pr,rent,isOwn,p);
 }
 
-function renderMobileCTA(pr, rent, isOwn, p){
+/* ── Gallery Controls ── */
+function galNav(dir){
+  galIdx=(galIdx+dir+galPhotos.length)%galPhotos.length;
+  galUpdate();
+}
+function galGo(i){ galIdx=i; galUpdate(); }
+function galUpdate(){
+  const track=document.getElementById('pgal-track');
+  if(track) track.style.transform=`translateX(-${galIdx*100}%)`;
+  const counter=document.getElementById('pgal-counter');
+  if(counter) counter.textContent=`${galIdx+1} / ${galPhotos.length}`;
+  document.querySelectorAll('.pgal-dot').forEach((d,i)=>d.classList.toggle('active',i===galIdx));
+}
+function initGalTouch(){
+  const wrap=document.getElementById('pgal-wrap'); if(!wrap) return;
+  let tx=0;
+  wrap.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+  wrap.addEventListener('touchend',e=>{
+    const dx=tx-e.changedTouches[0].clientX;
+    if(Math.abs(dx)>50) galNav(dx>0?1:-1);
+  },{passive:true});
+}
+
+/* ── Lightbox ── */
+function openLb(i){ lbIdx=i; document.getElementById('lb-img').src=galPhotos[i]; document.getElementById('lb').classList.add('open'); }
+function closeLb(){ document.getElementById('lb').classList.remove('open'); }
+function lbNav(dir){ lbIdx=(lbIdx+dir+galPhotos.length)%galPhotos.length; document.getElementById('lb-img').src=galPhotos[lbIdx]; }
+function lbBgClick(e){ if(e.target===document.getElementById('lb')) closeLb(); }
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('lb')?.classList.contains('open')) return;
+  if(e.key==='ArrowRight') lbNav(1);
+  if(e.key==='ArrowLeft') lbNav(-1);
+  if(e.key==='Escape') closeLb();
+});
+
+function renderMobileCTA(pr,rent,isOwn,p){
   const cta=document.getElementById('mobile-cta');
   const waMsg=encodeURIComponent(`Hi, I saw your property listing on Estate49 — "${p.title}" in ${p.locality||''}, ${p.city||''}. Is it still available?`);
-
-  // Build action buttons array
   const btns=[];
-  if(!isOwn)
-    btns.push(`<button class="mcta-btn mcta-btn-msg" onclick="msgOwner()">💬 Message</button>`);
-  if(p.whatsapp)
-    btns.push(`<a class="mcta-btn mcta-btn-wa" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
-      WhatsApp</a>`);
-  if(p.contact_phone)
-    btns.push(cu
-      ? `<a class="mcta-btn mcta-btn-call" href="tel:${x(p.contact_phone)}">📞 Call</a>`
-      : `<button class="mcta-btn mcta-btn-call" onclick="showLoginPrompt('Sign in to call the owner')">📞 Call</button>`);
-  if(isOwn)
-    btns.push(`<a class="mcta-btn mcta-btn-edit" href="/list-property.html?edit=${p.id}">✏️ Edit</a>`);
-
+  if(!isOwn) btns.push(`<button class="mcta-btn mcta-btn-msg" onclick="msgOwner()">💬 Message</button>`);
+  if(p.whatsapp) btns.push(`<a class="mcta-btn mcta-btn-wa" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg> WhatsApp</a>`);
+  if(p.contact_phone) btns.push(cu?`<a class="mcta-btn mcta-btn-call" href="tel:${x(p.contact_phone)}">📞 Call</a>`:`<button class="mcta-btn mcta-btn-call" onclick="showLoginPrompt('Sign in to call the owner')">📞 Call</button>`);
+  if(isOwn) btns.push(`<a class="mcta-btn mcta-btn-edit" href="/list-property.html?edit=${p.id}">✏️ Edit</a>`);
   cta.innerHTML=`
     <div class="mcta-top">
-      <div>
-        <div class="mobile-cta-price">${pr}</div>
-        <div class="mobile-cta-sub">${rent?'per month':'total price'}</div>
-      </div>
-      <button class="fav-btn ${isFav?'saved':''}" id="fav-btn-mob"
-        style="width:auto;padding:8px 14px;font-size:18px;border-radius:var(--radius-md);"
-        onclick="toggleFav()">${isFav?'❤️':'🤍'}</button>
+      <div><div class="mobile-cta-price">${pr}</div><div class="mobile-cta-sub">${rent?'per month':'total price'}</div></div>
+      <button class="fav-btn ${isFav?'saved':''}" id="fav-btn-mob" style="width:auto;padding:8px 14px;font-size:18px;" onclick="toggleFav()">${isFav?'❤️':'🤍'}</button>
     </div>
     <div class="mcta-bottom">${btns.join('')}</div>`;
-
   cta.style.display='flex';
-}
-
-function swImg(el,src){
-  document.getElementById('main-img').src=src;
-  document.querySelectorAll('.pgal-thumb').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
 }
 
 function msgOwner(){
@@ -353,7 +376,6 @@ function msgOwner(){
   if(!prop?.listed_by){toast('Owner info unavailable');return;}
   window.location.href=`/messages.html?to=${prop.listed_by}&listing=${pid}`;
 }
-
 async function toggleFav(){
   if(!cu){ showLoginPrompt('Sign in to save this property'); return; }
   try{
@@ -365,14 +387,13 @@ async function toggleFav(){
       isFav=true; toast('❤️ Saved!');
     }
     ['fav-btn','fav-btn-mob'].forEach(id=>{
-      const b=document.getElementById(id); if(!b)return;
+      const b=document.getElementById(id); if(!b) return;
       b.className=`fav-btn ${isFav?'saved':''}`;
       if(id==='fav-btn') b.innerHTML=isFav?'❤️ Saved':'🤍 Save Property';
       else b.innerHTML=isFav?'❤️':'🤍';
     });
   }catch(e){toast('Failed');}
 }
-
 function showLoginPrompt(msg){
   document.getElementById('login-prompt')?.remove();
   document.body.insertAdjacentHTML('beforeend',`
@@ -389,7 +410,6 @@ function showLoginPrompt(msg){
       </div>
     </div>`);
 }
-
 function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN');}
 function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function cp(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}

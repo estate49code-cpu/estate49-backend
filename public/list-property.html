@@ -27,6 +27,7 @@
     .form-hint{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.5;}
     .wa-hint{font-size:11px;color:#25d366;font-weight:600;margin-top:4px;}
     .map-hint{font-size:11px;color:#4285f4;font-weight:600;margin-top:4px;}
+    .vastu-hint{font-size:11px;color:#2e7d32;font-weight:600;margin-top:4px;}
     .save-bar{
       position:sticky;bottom:0;
       background:rgba(255,255,255,0.96);
@@ -121,7 +122,6 @@
         <label class="form-label">Full Address</label>
         <input type="text" class="form-input" id="address" placeholder="Flat no, Street, Landmark…"/>
       </div>
-      <!-- Google Maps Link -->
       <div class="form-group" style="margin-bottom:16px">
         <label class="form-label">Google Maps Link <span style="font-size:11px;color:var(--muted);font-weight:400">(optional)</span></label>
         <input type="url" class="form-input" id="map_link" placeholder="https://maps.google.com/?q=..."/>
@@ -151,7 +151,7 @@
           <input type="number" class="form-input" id="maintenance" placeholder="e.g. 2000"/>
         </div>
       </div>
-      <div class="form-3">
+      <div class="form-3" style="margin-bottom:16px">
         <div class="form-group">
           <label class="form-label">Total Area (ft²)</label>
           <input type="number" class="form-input" id="area" placeholder="1200"/>
@@ -163,6 +163,34 @@
         <div class="form-group">
           <label class="form-label">Floor</label>
           <input type="text" class="form-input" id="floor" placeholder="e.g. 3rd of 6"/>
+        </div>
+      </div>
+      <!-- NEW: Vastu & Facing Row -->
+      <div class="form-2">
+        <div class="form-group">
+          <label class="form-label">🧭 Main Door / Flat Facing</label>
+          <select class="form-select" id="facing">
+            <option value="">Select Facing</option>
+            <option value="east">East ⭐ (Most Preferred)</option>
+            <option value="northeast">North-East (Ishan Corner)</option>
+            <option value="north">North</option>
+            <option value="west">West</option>
+            <option value="south">South</option>
+            <option value="northwest">North-West</option>
+            <option value="southeast">South-East (Agneya)</option>
+            <option value="southwest">South-West</option>
+          </select>
+          <div class="vastu-hint">🕉️ East & North-East are most preferred per Vastu Shastra</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">🕉️ Vastu Compliance</label>
+          <select class="form-select" id="vastu_compliance">
+            <option value="">Select</option>
+            <option value="yes">Yes — Fully Vastu Compliant</option>
+            <option value="partial">Partially Compliant</option>
+            <option value="no">No</option>
+            <option value="unknown">Not Sure</option>
+          </select>
         </div>
       </div>
     </div>
@@ -237,7 +265,6 @@
           </select>
         </div>
       </div>
-      <!-- WhatsApp Number -->
       <div class="form-2" style="margin-bottom:16px">
         <div class="form-group">
           <label class="form-label">WhatsApp Number <span style="font-size:11px;color:var(--muted);font-weight:400">(optional)</span></label>
@@ -305,7 +332,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       ['title','city','locality','address','description','price','deposit','maintenance',
        'area','carpet_area','floor','furnished','available_from','contact_name',
        'contact_phone','contact_email','contact_role','contact_time','prop_type',
-       'bhk','bathrooms','whatsapp','map_link'
+       'bhk','bathrooms','whatsapp','map_link','facing','vastu_compliance'
       ].forEach(k=>{const el=document.getElementById(k);if(el&&p[k]!=null)el.value=p[k];});
       ['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
        'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
@@ -365,14 +392,13 @@ function rmPhoto(i){photos.splice(i,1);renderPhotos();}
 
 async function submit(){
   const V=id=>document.getElementById(id)?.value?.trim()||'';
-
   if(!V('title')||!V('price')||!V('city')||!V('locality')||!V('contact_name')){
-    toast('Fill in all required (*) fields'); return;
+    toast('Fill in all required fields'); return;
   }
   if(!V('contact_phone')){
     const ph=document.getElementById('contact_phone');
     ph.classList.add('required-highlight'); ph.focus();
-    toast('📱 Mobile number is required to publish your listing');
+    toast('Mobile number is required to publish your listing');
     setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
   }
   if(!/^[6-9]\d{9}$/.test(V('contact_phone'))){
@@ -381,11 +407,9 @@ async function submit(){
     toast('Enter a valid 10-digit Indian mobile number (starts with 6-9)');
     setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
   }
-  // Validate WhatsApp if provided
-  if(V('whatsapp') && !/^[6-9]\d{9}$/.test(V('whatsapp'))){
+  if(V('whatsapp')&&!/^[6-9]\d{9}$/.test(V('whatsapp'))){
     toast('Enter a valid 10-digit WhatsApp number (starts with 6-9)'); return;
   }
-
   const btn=document.getElementById('sub-btn'); btn.disabled=true; btn.textContent='Publishing…';
   const bools=['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
     'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
@@ -395,39 +419,36 @@ async function submit(){
     property_type:V('prop_type'),
     bhk:V('bhk')?parseInt(V('bhk')):null,
     bathrooms:V('bathrooms')?parseInt(V('bathrooms')):null,
-    title:V('title'), city:V('city'), locality:V('locality'), address:V('address'),
-    description:V('description'),
+    title:V('title'), city:V('city'), locality:V('locality'),
+    address:V('address'), description:V('description'),
     price:parseFloat(V('price')),
     deposit:V('deposit')?parseFloat(V('deposit')):null,
     maintenance:V('maintenance')?parseFloat(V('maintenance')):null,
     area:V('area')?parseInt(V('area')):null,
     carpet_area:V('carpet_area')?parseInt(V('carpet_area')):null,
-    floor:V('floor'), furnished:V('furnished'), available_from:V('available_from'),
+    floor:V('floor'), furnished:V('furnished'),
+    available_from:V('available_from'),
     contact_name:V('contact_name'), contact_phone:V('contact_phone'),
     contact_email:V('contact_email'), contact_role:V('contact_role'),
     contact_time:V('contact_time'),
-    whatsapp: V('whatsapp')||null,
-    map_link:  V('map_link')||null,
+    whatsapp:V('whatsapp')||null,
+    map_link:V('map_link')||null,
+    facing:V('facing')||null,
+    vastu_compliance:V('vastu_compliance')||null,
     photos,
   };
   bools.forEach(k=>payload[k]=!!document.getElementById(k)?.checked);
-
   try{
     const url=editId?`/api/properties/${editId}`:'/api/properties';
     const method=editId?'PATCH':'POST';
-    const r=await fetch(url,{
-      method,
-      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
-      body:JSON.stringify(payload)
-    });
+    const r=await fetch(url,{method,headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(payload)});
     if(!r.ok){const e=await r.json();throw new Error(e.error||'Failed');}
     const d=await r.json();
     toast(editId?'✅ Listing updated!':'✅ Listing published!');
     setTimeout(()=>window.location.href=`/property.html?id=${d.id}`,1000);
   }catch(e){
     toast('Error: '+e.message);
-    btn.disabled=false;
-    btn.textContent=editId?'💾 Save Changes':'🏠 Publish Listing';
+    btn.disabled=false; btn.textContent=editId?'💾 Save Changes':'🏠 Publish Listing';
   }
 }
 
