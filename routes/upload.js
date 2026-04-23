@@ -1,162 +1,88 @@
-const express = require('express');
-const router  = express.Router();
-const multer  = require('multer');
-const sharp   = require('sharp');
+upload.js
+
+const express  = require('express');
+const router   = express.Router();
+const multer   = require('multer');
+const sharp    = require('sharp');
 const { createClient } = require('@supabase/supabase-js');
 
-// ✅ Fix 1: inline auth check — no dependency on auth-middleware export name
-const { createClient: createSupabaseClient } = require('@supabase/supabase-js');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
-function requireAuth(req, res, next) {
-  const header = req.headers.authorization || '';
-  const token  = header.replace('Bearer ', '').trim();
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
-
-  // Lazy supabase anon client just for verifying JWT
-  const anonClient = createSupabaseClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-  );
-
-  anonClient.auth.getUser(token).then(({ data, error }) => {
-    if (error || !data?.user) return res.status(401).json({ error: 'Invalid token' });
-    req.user = data.user;
-    next();
-  });
-}
-
-// ✅ Fix 2: lazy-load service client using correct env var name SUPABASE_SERVICE_KEY
-let supabase;
-function getSupabase() {
-  if (!supabase) {
-    const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_KEY; // ✅ matches your .env exactly
-    if (!url || !key) throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY');
-    supabase = createClient(url, key);
-  }
-  return supabase;
-}
-
-// ── Multer: memory storage, 10MB limit, images only ──
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith('image/')) {
-      return cb(new Error('Only image files are allowed'));
-    }
-    cb(null, true);
-  }
+  limits: { fileSize: 15 * 1024 * 1024 }
 });
 
-// ── Build E49 SVG watermark (middle-right pill) ──
-function buildWatermarkSvg(imgWidth, imgHeight) {
-  const pillW    = Math.round(imgWidth * 0.18);
-  const pillH    = Math.round(imgHeight * 0.09);
-  const fontSize = Math.round(pillH * 0.52);
-  const x  = imgWidth - pillW - Math.round(imgWidth * 0.025);
-  const y  = Math.round((imgHeight - pillH) / 2);
-  const rx = Math.round(pillH * 0.35);
-
+function makeWatermarkSVG(width, height) {
+  const fontSize = Math.max(16, Math.round(width * 0.055));
+  const padding  = 14;
   return Buffer.from(`
-    <svg width="${imgWidth}" height="${imgHeight}" xmlns="http://www.w3.org/2000/svg">
-      <rect x="${x}" y="${y}" width="${pillW}" height="${pillH}"
-        rx="${rx}" ry="${rx}" fill="rgba(192,57,43,0.82)"/>
+    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <rect
+        x="${width - fontSize * 3 - padding * 2}"
+        y="${height - fontSize - padding * 2}"
+        width="${fontSize * 3 + padding}"
+        height="${fontSize + padding}"
+        rx="4" fill="rgba(0,0,0,0.45)"/>
       <text
-        x="${x + pillW / 2}" y="${y + pillH / 2 + fontSize * 0.36}"
-        font-family="Arial, Helvetica, sans-serif"
-        font-size="${fontSize}" font-weight="800"
-        fill="white" text-anchor="middle" letter-spacing="1.5">E49</text>
-    </svg>
-  `);
+        x="${width - fontSize * 1.5 - padding * 1.5}"
+        y="${height - padding * 0.9}"
+        font-family="Arial, sans-serif"
+        font-size="${fontSize}"
+        font-weight="bold"
+        fill="white"
+        text-anchor="middle"
+        opacity="0.92">E49</text>
+    </svg>`);
 }
 
-// ── POST /api/upload — compress + watermark + upload ──
-router.post('/', requireAuth, upload.array('photos', 15), async (req, res) => {
+router.post('/', upload.single('file'), async (req, res) => {
   try {
-    const sb = getSupabase();
-
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: 'No files uploaded' });
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const userId = req.user.id;
-    const uploadedUrls = [];
+    // Get original dimensions
+    const meta = await sharp(req.file.buffer).metadata();
+    const w = Math.min(meta.width  || 1200, 1200);
+    const h = Math.min(meta.height || 900,  900);
 
-    for (const file of req.files) {
-      const meta        = await sharp(file.buffer).metadata();
-      const origWidth   = meta.width  || 1200;
-      const origHeight  = meta.height || 900;
-      const targetWidth = Math.min(origWidth, 1400);
+    // Compress + resize + watermark → WebP
+    const processed = await sharp(req.file.buffer)
+      .rotate()
+      .resize(1200, 900, { fit: 'inside', withoutEnlargement: true })
+      .composite([{
+        input: makeWatermarkSVG(w, h),
+        blend: 'over'
+      }])
+      .webp({ quality: 78 })
+      .toBuffer();
 
-      // Resize + compress
-      const resized = await sharp(file.buffer)
-        .rotate()
-        .resize({ width: targetWidth, withoutEnlargement: true })
-        .jpeg({ quality: 82, progressive: true, mozjpeg: true })
-        .toBuffer();
+    // Upload to Supabase Storage
+    const filename = `properties/${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
+    const { error: upErr } = await supabase.storage
+      .from('property-images')
+      .upload(filename, processed, {
+        contentType: 'image/webp',
+        upsert: false
+      });
 
-      // Final dimensions after resize
-      const finalMeta = await sharp(resized).metadata();
-      const finalW    = finalMeta.width  || targetWidth;
-      const finalH    = finalMeta.height || Math.round(targetWidth * origHeight / origWidth);
+    if (upErr) throw upErr;
 
-      // Stamp E49 watermark
-      const watermarkSvg = buildWatermarkSvg(finalW, finalH);
-      const watermarked  = await sharp(resized)
-        .composite([{ input: watermarkSvg, top: 0, left: 0 }])
-        .jpeg({ quality: 82, progressive: true })
-        .toBuffer();
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('property-images')
+      .getPublicUrl(filename);
 
-      // Upload to Supabase Storage
-      const timestamp = Date.now();
-      const rand      = Math.random().toString(36).substring(2, 8);
-      const filename  = `properties/${userId}/${timestamp}-${rand}.jpg`;
+    // Always return { url: '...' } — consistent for all callers
+    res.json({ url: publicUrl });
 
-      const { error: uploadError } = await sb.storage
-        .from('property-photos')
-        .upload(filename, watermarked, {
-          contentType: 'image/jpeg',
-          upsert: false,
-          cacheControl: '31536000'
-        });
-
-      if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
-
-      const { data: urlData } = sb.storage
-        .from('property-photos')
-        .getPublicUrl(filename);
-
-      uploadedUrls.push(urlData.publicUrl);
-    }
-
-    res.json({ urls: uploadedUrls });
-
-  } catch (err) {
-    console.error('Photo upload error:', err);
-    res.status(500).json({ error: err.message || 'Upload failed' });
-  }
-});
-
-// ── DELETE /api/upload — remove photo from storage ──
-router.delete('/', requireAuth, async (req, res) => {
-  try {
-    const sb = getSupabase();
-    const { url } = req.body;
-    if (!url) return res.status(400).json({ error: 'URL required' });
-
-    const marker = '/property-photos/';
-    const idx    = url.indexOf(marker);
-    if (idx === -1) return res.status(400).json({ error: 'Invalid URL' });
-
-    const storagePath = url.substring(idx + marker.length);
-    const { error } = await sb.storage.from('property-photos').remove([storagePath]);
-    if (error) throw error;
-
-    res.json({ success: true });
-  } catch (err) {
-    console.error('Photo delete error:', err);
-    res.status(500).json({ error: err.message });
+  } catch (e) {
+    console.error('Upload error:', e);
+    res.status(500).json({ error: e.message || 'Upload failed' });
   }
 });
 
