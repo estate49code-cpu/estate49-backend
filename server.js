@@ -11,6 +11,16 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, { cors: { origin: '*', methods: ['GET','POST'] } });
 
+// ─── Force www redirect (must be FIRST, before all other middleware) ─────────
+app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  // In production, redirect bare domain → www
+  if (host === 'estate49.com') {
+    return res.redirect(301, 'https://www.estate49.com' + req.originalUrl);
+  }
+  next();
+});
+
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '25mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -44,6 +54,10 @@ app.all('/api/*', (req, res) => {
   res.status(404).json({ error: 'API route not found', path: req.path });
 });
 
+// ─── Auth callback route ─────────────────────
+app.get('/auth/callback', (req, res) =>
+  res.sendFile(path.join(__dirname, 'public', 'auth', 'callback.html')));
+
 // ─── Page routes ─────────────────────────────
 const pages = ['login','browse','property','list-property','messages',
                'profile','favorites','notifications','chat','admin',
@@ -52,9 +66,6 @@ pages.forEach(p => {
   app.get(`/${p}`,      (req, res) => res.sendFile(path.join(__dirname, 'public', `${p}.html`)));
   app.get(`/${p}.html`, (req, res) => res.sendFile(path.join(__dirname, 'public', `${p}.html`)));
 });
-
-app.get('/auth/callback', (req, res) =>
-  res.sendFile(path.join(__dirname, 'public', 'auth', 'callback.html')));
 
 // ─── Wildcard ───
 app.get('*', (req, res) => {

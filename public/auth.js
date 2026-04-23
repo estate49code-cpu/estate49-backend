@@ -1,36 +1,35 @@
 // auth.js — Estate49
 // Handles Supabase session: normal login, Google OAuth callback, email confirmation
 
-const SUPABASE_URL = 'https://qbbxdtbfxlliqxxlaoed.supabase.co';   // ← your Supabase URL
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiYnhkdGJmeGxsaXF4eGxhb2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzY0MzUsImV4cCI6MjA5MTUxMjQzNX0.g86SW28zVacKDKzb0bZcsJvGTQ1N7Ahy3Ib3_DRNL90';                  // ← your anon key
+const SUPABASE_URL = 'https://qbbxdtbfxlliqxxlaoed.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiYnhkdGJmeGxsaXF4eGxhb2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzY0MzUsImV4cCI6MjA5MTUxMjQzNX0.g86SW28zVacKDKzb0bZcsJvGTQ1N7Ahy3Ib3_DRNL90';
 
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true   // ✅ THIS is what picks up the OAuth hash/code redirect
+    detectSessionInUrl: true
   }
 });
 
+// expose as `sb` so callback.html can also use it
+const sb = _sb;
+
 // ── getSession ──────────────────────────────────────────────────────────────
-// Returns { user, access_token } or null.
-// Waits for OAuth/email redirect to be exchanged automatically.
 async function getSession() {
-  // 1. Let Supabase process any #access_token or ?code= in the URL first
   const { data: { session }, error } = await _sb.auth.getSession();
 
   if (session) {
     return { user: session.user, access_token: session.access_token };
   }
 
-  // 2. If no session yet, try exchanging code from URL (PKCE flow)
+  // PKCE flow — exchange ?code= from URL
   const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
   if (code) {
     try {
       const { data, error: exchErr } = await _sb.auth.exchangeCodeForSession(code);
       if (data?.session) {
-        // Clean URL after exchange
         window.history.replaceState({}, '', window.location.pathname);
         return { user: data.session.user, access_token: data.session.access_token };
       }
@@ -41,11 +40,12 @@ async function getSession() {
 }
 
 // ── signInWithGoogle ────────────────────────────────────────────────────────
+// Uses window.location.origin so it works on BOTH estate49.com AND www.estate49.com
 async function signInWithGoogle() {
   const { error } = await _sb.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo:'https://estate49.com/login.html'
+      redirectTo: window.location.origin + '/auth/callback'  // ✅ Dynamic — works on www and non-www
     }
   });
   if (error) throw error;
@@ -57,7 +57,7 @@ async function signUpEmail(email, password) {
     email,
     password,
     options: {
-      emailRedirectTo: window.location.origin + '/login.html'
+      emailRedirectTo: window.location.origin + '/auth/callback'
     }
   });
   if (error) throw error;

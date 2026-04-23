@@ -77,16 +77,19 @@
     .phone-gate{color:var(--primary);font-style:italic;cursor:pointer;}
     .phone-gate:hover{text-decoration:underline;}
 
-    /* Mobile sticky CTA */
+    /* ── Mobile sticky CTA — HIDDEN on desktop, shown only on mobile ── */
     .mobile-cta{
-      display:none;position:fixed;
+      display:none;                          /* hidden by default on ALL screens */
+      position:fixed;
       bottom:62px;left:0;right:0;
       background:rgba(255,255,255,0.97);
       backdrop-filter:blur(8px);
       border-top:1px solid var(--border);
       padding:8px 14px;
       padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));
-      z-index:150;flex-direction:column;gap:7px;
+      z-index:150;
+      flex-direction:column;
+      gap:7px;
     }
     .mcta-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
     .mcta-bottom{display:flex;gap:8px;}
@@ -99,9 +102,14 @@
     .mcta-btn-msg{background:var(--primary);color:#fff;}
     .mcta-btn-wa{background:#25d366;color:#fff;}
     .mcta-btn-call{background:var(--primary);color:#fff;}
-    .mcta-btn-edit{background:var(--surface-2);color:var(--text);border:1.5px solid var(--border) !important;}
+    .mcta-btn-edit{background:var(--surface-2);color:var(--text);border:1.5px solid var(--border)!important;}
     .mobile-cta-price{font-size:var(--text-lg);font-weight:900;color:var(--primary);}
     .mobile-cta-sub{font-size:10px;color:var(--muted);}
+
+    /* ── Desktop: sidebar layout, no mobile CTA ever ── */
+    @media(min-width:769px){
+      .mobile-cta{display:none!important;}   /* ✅ Force-hide on desktop no matter what JS does */
+    }
 
     @media(max-width:900px){
       .layout{grid-template-columns:1fr;}
@@ -115,7 +123,7 @@
       .pstat{min-width:68px;padding:8px 10px;}
       .pstat-icon{font-size:18px;}
       .amen-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
-      .mobile-cta{display:flex;}
+      .mobile-cta{display:flex;}             /* ✅ Only shown on mobile */
       .pgal-prev,.pgal-next{width:34px;height:34px;font-size:18px;}
     }
     @media(max-width:480px){
@@ -141,7 +149,8 @@
       </div>
     </div>
   </div>
-  <div class="mobile-cta" id="mobile-cta" style="display:none"></div>
+  <!-- Mobile CTA: rendered by JS, CSS controls visibility -->
+  <div class="mobile-cta" id="mobile-cta"></div>
 </div>
 
 <!-- Lightbox -->
@@ -155,10 +164,10 @@
 <div class="toast" id="toast-el"></div>
 <script>
 let cu=null,tok=null,prop=null,isFav=false;
-let galPhotos=[], galIdx=0, lbIdx=0;
+let galPhotos=[],galIdx=0,lbIdx=0;
 const pid=new URLSearchParams(window.location.search).get('id');
 
-window.addEventListener('DOMContentLoaded', async ()=>{
+window.addEventListener('DOMContentLoaded',async()=>{
   if(!pid){window.location.href='/browse.html';return;}
   const s=await getSession();
   if(s){cu=s.user;tok=s.access_token;}
@@ -179,6 +188,7 @@ async function loadProp(){
     document.getElementById('content').innerHTML=`<div class="empty-state"><div class="empty-icon">🏚️</div><div class="empty-title">Property not found</div><a href="/browse.html" class="btn btn-primary">Browse Properties</a></div>`;
   }
 }
+
 async function checkFav(){
   if(!tok) return;
   try{
@@ -222,7 +232,7 @@ function render(){
 
   const ownerIni=(p.contact_name||'O').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   const phoneHtml=p.contact_phone
-    ? (cu
+    ?(cu
       ?`<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><a href="tel:${x(p.contact_phone)}" style="color:inherit">${x(p.contact_phone)}</a></span></div>`
       :`<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><span class="phone-gate" onclick="showLoginPrompt('Sign in to view contact number')">Sign in to view</span></span></div>`)
     :'';
@@ -236,11 +246,10 @@ function render(){
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
         View on Google Maps</a>`:'';
 
-  // Vastu & Facing for info rows
   const facingMap={east:'East',northeast:'North-East',north:'North',west:'West',south:'South',northwest:'North-West',southeast:'South-East',southwest:'South-West'};
   const vastuMap={yes:'✓ Vastu Compliant',partial:'Partially Compliant',no:'Not Vastu Compliant',unknown:'Not Specified'};
   const facingHtml=p.facing?`<div class="info-row"><span class="info-key">🧭 Facing</span><span class="info-val">${facingMap[p.facing]||p.facing}</span></div>`:'';
-  const vastuHtml=(p.vastu_compliance)?`<div class="info-row"><span class="info-key">🕉️ Vastu</span><span class="info-val">${vastuMap[p.vastu_compliance]||p.vastu_compliance}</span></div>`:'';
+  const vastuHtml=p.vastu_compliance?`<div class="info-row"><span class="info-key">🕉️ Vastu</span><span class="info-val">${vastuMap[p.vastu_compliance]||p.vastu_compliance}</span></div>`:'';
 
   const sidebarHtml=`
     <div class="ccard">
@@ -295,7 +304,7 @@ function render(){
             ${p.area?`<div class="pstat"><div class="pstat-icon">📐</div><div class="pstat-val">${p.area}</div><div class="pstat-lbl">ft²</div></div>`:''}
             ${p.floor?`<div class="pstat"><div class="pstat-icon">🏢</div><div class="pstat-val">${x(p.floor)}</div><div class="pstat-lbl">Floor</div></div>`:''}
             ${p.furnished?`<div class="pstat"><div class="pstat-icon">🛋</div><div class="pstat-val">${x(cp(p.furnished))}</div><div class="pstat-lbl">Furnished</div></div>`:''}
-            ${p.facing?`<div class="pstat"><div class="pstat-icon">🧭</div><div class="pstat-val" style="font-size:var(--text-xs);text-align:center">${(facingMap[p.facing]||p.facing)}</div><div class="pstat-lbl">Facing</div></div>`:''}
+            ${p.facing?`<div class="pstat"><div class="pstat-icon">🧭</div><div class="pstat-val" style="font-size:var(--text-xs);text-align:center">${facingMap[p.facing]||p.facing}</div><div class="pstat-lbl">Facing</div></div>`:''}
           </div>
         </div>
         ${p.description?`<div class="psec"><h2 class="section-title">About this property</h2><p class="desc-text">${x(p.description)}</p></div>`:''}
@@ -308,23 +317,23 @@ function render(){
       <div class="sidebar">${sidebarHtml}</div>
     </div>`;
 
-  // Init gallery touch swipe
   initGalTouch();
 
-  if(window.innerWidth<=900) document.getElementById('mobile-contact-card').style.display='block';
+  // Show contact card inline on tablet/mobile (no sidebar)
+  const mcc=document.getElementById('mobile-contact-card');
+  if(mcc) mcc.style.display=window.innerWidth<=900?'block':'none';
   window.addEventListener('resize',()=>{
-    const mcc=document.getElementById('mobile-contact-card');
-    if(mcc) mcc.style.display=window.innerWidth<=900?'block':'none';
+    const mc=document.getElementById('mobile-contact-card');
+    if(mc) mc.style.display=window.innerWidth<=900?'block':'none';
   });
+
+  // Render mobile CTA — CSS controls whether it actually shows
   renderMobileCTA(pr,rent,isOwn,p);
 }
 
 /* ── Gallery Controls ── */
-function galNav(dir){
-  galIdx=(galIdx+dir+galPhotos.length)%galPhotos.length;
-  galUpdate();
-}
-function galGo(i){ galIdx=i; galUpdate(); }
+function galNav(dir){galIdx=(galIdx+dir+galPhotos.length)%galPhotos.length;galUpdate();}
+function galGo(i){galIdx=i;galUpdate();}
 function galUpdate(){
   const track=document.getElementById('pgal-track');
   if(track) track.style.transform=`translateX(-${galIdx*100}%)`;
@@ -343,10 +352,10 @@ function initGalTouch(){
 }
 
 /* ── Lightbox ── */
-function openLb(i){ lbIdx=i; document.getElementById('lb-img').src=galPhotos[i]; document.getElementById('lb').classList.add('open'); }
-function closeLb(){ document.getElementById('lb').classList.remove('open'); }
-function lbNav(dir){ lbIdx=(lbIdx+dir+galPhotos.length)%galPhotos.length; document.getElementById('lb-img').src=galPhotos[lbIdx]; }
-function lbBgClick(e){ if(e.target===document.getElementById('lb')) closeLb(); }
+function openLb(i){lbIdx=i;document.getElementById('lb-img').src=galPhotos[i];document.getElementById('lb').classList.add('open');}
+function closeLb(){document.getElementById('lb').classList.remove('open');}
+function lbNav(dir){lbIdx=(lbIdx+dir+galPhotos.length)%galPhotos.length;document.getElementById('lb-img').src=galPhotos[lbIdx];}
+function lbBgClick(e){if(e.target===document.getElementById('lb')) closeLb();}
 document.addEventListener('keydown',e=>{
   if(!document.getElementById('lb')?.classList.contains('open')) return;
   if(e.key==='ArrowRight') lbNav(1);
@@ -356,11 +365,15 @@ document.addEventListener('keydown',e=>{
 
 function renderMobileCTA(pr,rent,isOwn,p){
   const cta=document.getElementById('mobile-cta');
+  if(!cta) return;
   const waMsg=encodeURIComponent(`Hi, I saw your property listing on Estate49 — "${p.title}" in ${p.locality||''}, ${p.city||''}. Is it still available?`);
   const btns=[];
   if(!isOwn) btns.push(`<button class="mcta-btn mcta-btn-msg" onclick="msgOwner()">💬 Message</button>`);
-  if(p.whatsapp) btns.push(`<a class="mcta-btn mcta-btn-wa" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg> WhatsApp</a>`);
-  if(p.contact_phone) btns.push(cu?`<a class="mcta-btn mcta-btn-call" href="tel:${x(p.contact_phone)}">📞 Call</a>`:`<button class="mcta-btn mcta-btn-call" onclick="showLoginPrompt('Sign in to call the owner')">📞 Call</button>`);
+  if(p.whatsapp) btns.push(`<a class="mcta-btn mcta-btn-wa" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg> WhatsApp</a>`);
+  if(p.contact_phone) btns.push(cu
+    ?`<a class="mcta-btn mcta-btn-call" href="tel:${x(p.contact_phone)}">📞 Call</a>`
+    :`<button class="mcta-btn mcta-btn-call" onclick="showLoginPrompt('Sign in to call the owner')">📞 Call</button>`);
   if(isOwn) btns.push(`<a class="mcta-btn mcta-btn-edit" href="/list-property.html?edit=${p.id}">✏️ Edit</a>`);
   cta.innerHTML=`
     <div class="mcta-top">
@@ -368,32 +381,34 @@ function renderMobileCTA(pr,rent,isOwn,p){
       <button class="fav-btn ${isFav?'saved':''}" id="fav-btn-mob" style="width:auto;padding:8px 14px;font-size:18px;" onclick="toggleFav()">${isFav?'❤️':'🤍'}</button>
     </div>
     <div class="mcta-bottom">${btns.join('')}</div>`;
-  cta.style.display='flex';
+  // ✅ No JS display override — CSS media query handles show/hide
 }
 
 function msgOwner(){
-  if(!cu){ showLoginPrompt('Sign in to contact the owner'); return; }
+  if(!cu){showLoginPrompt('Sign in to contact the owner');return;}
   if(!prop?.listed_by){toast('Owner info unavailable');return;}
   window.location.href=`/messages.html?to=${prop.listed_by}&listing=${pid}`;
 }
+
 async function toggleFav(){
-  if(!cu){ showLoginPrompt('Sign in to save this property'); return; }
+  if(!cu){showLoginPrompt('Sign in to save this property');return;}
   try{
     if(isFav){
       await fetch(`/api/favorites/${pid}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});
-      isFav=false; toast('Removed from saved');
+      isFav=false;toast('Removed from saved');
     }else{
       await fetch('/api/favorites',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify({property_id:Number(pid)})});
-      isFav=true; toast('❤️ Saved!');
+      isFav=true;toast('❤️ Saved!');
     }
     ['fav-btn','fav-btn-mob'].forEach(id=>{
-      const b=document.getElementById(id); if(!b) return;
+      const b=document.getElementById(id);if(!b)return;
       b.className=`fav-btn ${isFav?'saved':''}`;
       if(id==='fav-btn') b.innerHTML=isFav?'❤️ Saved':'🤍 Save Property';
       else b.innerHTML=isFav?'❤️':'🤍';
     });
   }catch(e){toast('Failed');}
 }
+
 function showLoginPrompt(msg){
   document.getElementById('login-prompt')?.remove();
   document.body.insertAdjacentHTML('beforeend',`
@@ -410,6 +425,7 @@ function showLoginPrompt(msg){
       </div>
     </div>`);
 }
+
 function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN');}
 function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function cp(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
