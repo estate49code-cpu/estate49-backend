@@ -3,18 +3,35 @@ const router  = express.Router();
 const multer  = require('multer');
 const sharp   = require('sharp');
 const { createClient } = require('@supabase/supabase-js');
-const { requireAuth } = require('./auth-middleware');
 
-// ✅ Fix: lazy-load Supabase client — only created when first request arrives,
-//         not at module load time. Prevents crash on startup if env vars missing.
+// ✅ Fix 1: inline auth check — no dependency on auth-middleware export name
+const { createClient: createSupabaseClient } = require('@supabase/supabase-js');
+
+function requireAuth(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token  = header.replace('Bearer ', '').trim();
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+  // Lazy supabase anon client just for verifying JWT
+  const anonClient = createSupabaseClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY
+  );
+
+  anonClient.auth.getUser(token).then(({ data, error }) => {
+    if (error || !data?.user) return res.status(401).json({ error: 'Invalid token' });
+    req.user = data.user;
+    next();
+  });
+}
+
+// ✅ Fix 2: lazy-load service client using correct env var name SUPABASE_SERVICE_KEY
 let supabase;
 function getSupabase() {
   if (!supabase) {
     const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_KEY;
-    if (!url || !key) {
-      throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY env vars');
-    }
+    const key = process.env.SUPABASE_SERVICE_KEY; // ✅ matches your .env exactly
+    if (!url || !key) throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY');
     supabase = createClient(url, key);
   }
   return supabase;
@@ -32,13 +49,13 @@ const upload = multer({
   }
 });
 
-// ── Build E49 SVG watermark overlay ──
+// ── Build E49 SVG watermark (middle-right pill) ──
 function buildWatermarkSvg(imgWidth, imgHeight) {
-  const pillW   = Math.round(imgWidth * 0.18);
-  const pillH   = Math.round(imgHeight * 0.09);
+  const pillW    = Math.round(imgWidth * 0.18);
+  const pillH    = Math.round(imgHeight * 0.09);
   const fontSize = Math.round(pillH * 0.52);
-  const x = imgWidth - pillW - Math.round(imgWidth * 0.025);
-  const y = Math.round((imgHeight - pillH) / 2);
+  const x  = imgWidth - pillW - Math.round(imgWidth * 0.025);
+  const y  = Math.round((imgHeight - pillH) / 2);
   const rx = Math.round(pillH * 0.35);
 
   return Buffer.from(`
@@ -54,10 +71,10 @@ function buildWatermarkSvg(imgWidth, imgHeight) {
   `);
 }
 
-// ── Main upload handler ──
+// ── POST /api/upload — compress + watermark + upload ──
 router.post('/', requireAuth, upload.array('photos', 15), async (req, res) => {
   try {
-    const sb = getSupabase(); // ✅ only called here, not at startup
+    const sb = getSupabase();
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: 'No files uploaded' });
@@ -72,23 +89,26 @@ router.post('/', requireAuth, upload.array('photos', 15), async (req, res) => {
       const origHeight  = meta.height || 900;
       const targetWidth = Math.min(origWidth, 1400);
 
+      // Resize + compress
       const resized = await sharp(file.buffer)
         .rotate()
         .resize({ width: targetWidth, withoutEnlargement: true })
         .jpeg({ quality: 82, progressive: true, mozjpeg: true })
         .toBuffer();
 
+      // Final dimensions after resize
       const finalMeta = await sharp(resized).metadata();
       const finalW    = finalMeta.width  || targetWidth;
       const finalH    = finalMeta.height || Math.round(targetWidth * origHeight / origWidth);
 
+      // Stamp E49 watermark
       const watermarkSvg = buildWatermarkSvg(finalW, finalH);
-
-      const watermarked = await sharp(resized)
+      const watermarked  = await sharp(resized)
         .composite([{ input: watermarkSvg, top: 0, left: 0 }])
         .jpeg({ quality: 82, progressive: true })
         .toBuffer();
 
+      // Upload to Supabase Storage
       const timestamp = Date.now();
       const rand      = Math.random().toString(36).substring(2, 8);
       const filename  = `properties/${userId}/${timestamp}-${rand}.jpg`;
@@ -118,7 +138,7 @@ router.post('/', requireAuth, upload.array('photos', 15), async (req, res) => {
   }
 });
 
-// ── Delete a photo ──
+// ── DELETE /api/upload — remove photo from storage ──
 router.delete('/', requireAuth, async (req, res) => {
   try {
     const sb = getSupabase();
