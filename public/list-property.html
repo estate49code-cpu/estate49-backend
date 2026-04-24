@@ -313,11 +313,8 @@
 <script>
 let tok=null, cu=null, ltype='rent', photos=[], editId=null;
 
-// ─── E49 Round Watermark Stamp ─────────────────────────────────────────────
-// Fixed approach: use ctx.save/rotate to place each character individually
-// on ONE top arc only. Bottom half uses a separate canvas.drawImage trick
-// with rotate(Math.PI) so text reads correctly going around the bottom.
-// Both arcs together form one clean circle of text.
+// ─── E49 Watermark — simple round stamp, top-left corner ──────────────────
+// Two concentric rings + bold "E49" in centre. No curved text. Clean & works.
 function stampE49(file) {
   return new Promise((resolve) => {
     const img    = new Image();
@@ -329,15 +326,14 @@ function stampE49(file) {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0);
 
-      // ── Stamp size: 10% of shorter side ──
-      const r      = Math.round(Math.min(W, H) * 0.10);
-      const margin = Math.round(r * 0.6);
+      // Stamp radius = 9% of shorter side
+      const r      = Math.round(Math.min(W, H) * 0.09);
+      const margin = Math.round(r * 0.55);
       const cx     = margin + r;
       const cy     = margin + r;
 
-      // ── Watermark colour: Estate49 red, low opacity ──
-      const col  = 'rgba(192,57,43,0.28)';
-      const colT = 'rgba(192,57,43,0.32)';
+      // Watermark colour — semi-transparent Estate49 red
+      const col = 'rgba(192,57,43,0.28)';
 
       ctx.save();
 
@@ -345,72 +341,20 @@ function stampE49(file) {
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
       ctx.strokeStyle = col;
-      ctx.lineWidth   = Math.round(r * 0.06);
+      ctx.lineWidth   = Math.round(r * 0.07);
       ctx.stroke();
 
       // 2. Inner ring
       ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.80, 0, Math.PI * 2);
+      ctx.arc(cx, cy, r * 0.72, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(192,57,43,0.18)';
-      ctx.lineWidth   = Math.round(r * 0.025);
+      ctx.lineWidth   = Math.round(r * 0.03);
       ctx.stroke();
 
-      // ── Helper: draw text curved along an arc ──
-      // text     : string to draw
-      // arcR     : radius of the text path
-      // startAng : angle (radians) where first char centre goes
-      // endAng   : angle where last char centre goes
-      // flipped  : if true, rotate chars 180° (for bottom arc reading outward)
-      function drawArcText(text, arcR, startAng, endAng, flipped) {
-        const fontSize = Math.round(r * 0.185);
-        ctx.font         = `700 ${fontSize}px Arial, Helvetica, sans-serif`;
-        ctx.fillStyle    = colT;
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-
-        const n    = text.length;
-        const span = endAng - startAng;
-
-        for (let i = 0; i < n; i++) {
-          // Distribute characters evenly: 0 → first, 1 → last
-          const t     = n === 1 ? 0.5 : i / (n - 1);
-          const angle = startAng + span * t;
-          ctx.save();
-          ctx.translate(cx + arcR * Math.cos(angle), cy + arcR * Math.sin(angle));
-          ctx.rotate(angle + Math.PI / 2 + (flipped ? Math.PI : 0));
-          ctx.fillText(text[i], 0, 0);
-          ctx.restore();
-        }
-      }
-
-      const textR = r * 0.875;
-
-      // ── TOP arc: "ESTATE49" from ~200° to ~340° (-160° to -20°) ──
-      // Runs left-to-right across the top, reading normally from outside
-      drawArcText('ESTATE49', textR,
-        -Math.PI * (160/180),   // -160°
-        -Math.PI * (20/180),    //  -20°
-        false
-      );
-
-      // ── BOTTOM arc: "ESTATE49" from ~200° to ~340° ──
-      // Flipped so chars read outward from the bottom
-      drawArcText('ESTATE49', textR,
-        Math.PI * (200/180),    // 200°
-        Math.PI * (340/180),    // 340°
-        true
-      );
-
-      // 3. Two separator dots at top and bottom where arcs meet
-      const dotR = Math.round(r * 0.045);
-      ctx.fillStyle = col;
-      ctx.beginPath(); ctx.arc(cx, cy - r * 0.875, dotR, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(cx, cy + r * 0.875, dotR, 0, Math.PI*2); ctx.fill();
-
-      // 4. "E49" bold in centre
-      const midFS = Math.round(r * 0.38);
-      ctx.font         = `900 ${midFS}px Arial, Helvetica, sans-serif`;
-      ctx.fillStyle    = 'rgba(192,57,43,0.34)';
+      // 3. "E49" bold in centre
+      const fs = Math.round(r * 0.50);
+      ctx.font         = `900 ${fs}px Arial, Helvetica, sans-serif`;
+      ctx.fillStyle    = 'rgba(192,57,43,0.32)';
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('E49', cx, cy);
@@ -479,7 +423,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 function onRoleChange() {
   const role = document.getElementById('contact_role').value;
   const sec  = document.getElementById('rera-brokerage-section');
-  if (role === 'agent' || role === 'builder') { sec.classList.remove('hidden'); }
+  if (role==='agent'||role==='builder') { sec.classList.remove('hidden'); }
   else {
     sec.classList.add('hidden');
     document.getElementById('rera_number').value          = '';
@@ -489,7 +433,7 @@ function onRoleChange() {
 
 function setType(t) {
   ltype = t;
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('sel', b.dataset.t === t));
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('sel', b.dataset.t===t));
 }
 function tgl(k) {
   document.getElementById('ci-'+k)?.classList.toggle('checked', !!document.getElementById(k)?.checked);
@@ -507,7 +451,7 @@ async function handleFiles(e) {
 
   for (const f of toUp) {
     try {
-      statusEl.textContent = `Stamping & uploading ${uploaded + 1} of ${toUp.length}…`;
+      statusEl.textContent = `Stamping & uploading ${uploaded+1} of ${toUp.length}…`;
       const stamped = await stampE49(f);
       const fd = new FormData();
       fd.append('file', stamped);
@@ -563,21 +507,21 @@ async function submit() {
   if (!V('contact_phone')) {
     const ph = document.getElementById('contact_phone');
     ph.classList.add('required-highlight'); ph.focus();
-    toast('Mobile number is required');
+    toast('Mobile number is required to publish your listing');
     setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
   }
   if (!/^[6-9]\d{9}$/.test(V('contact_phone'))) {
     const ph = document.getElementById('contact_phone');
     ph.classList.add('required-highlight'); ph.focus();
-    toast('Enter a valid 10-digit Indian mobile number');
+    toast('Enter a valid 10-digit Indian mobile number (starts with 6-9)');
     setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
   }
   if (V('whatsapp')&&!/^[6-9]\d{9}$/.test(V('whatsapp'))) {
-    toast('Enter a valid 10-digit WhatsApp number'); return;
+    toast('Enter a valid 10-digit WhatsApp number (starts with 6-9)'); return;
   }
 
   const btn = document.getElementById('sub-btn');
-  btn.disabled = true; btn.textContent = 'Submitting…';
+  btn.disabled=true; btn.textContent='Submitting…';
 
   const role = V('contact_role');
   const isAB = role==='agent'||role==='builder';
@@ -613,7 +557,11 @@ async function submit() {
   try {
     const url    = editId?`/api/properties/${editId}`:'/api/properties';
     const method = editId?'PATCH':'POST';
-    const r = await fetch(url,{method,headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(payload)});
+    const r = await fetch(url,{
+      method,
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
+      body:JSON.stringify(payload)
+    });
     if (!r.ok){const e=await r.json();throw new Error(e.error||'Failed');}
     const d = await r.json();
     if (editId) {
@@ -624,7 +572,8 @@ async function submit() {
     }
   } catch(e) {
     toast('Error: '+e.message);
-    btn.disabled=false; btn.textContent=editId?'💾 Save Changes':'🏠 Submit Listing';
+    btn.disabled=false;
+    btn.textContent=editId?'💾 Save Changes':'🏠 Submit Listing';
   }
 }
 
