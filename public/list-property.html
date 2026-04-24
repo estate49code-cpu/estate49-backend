@@ -264,7 +264,7 @@
           <div class="form-group">
             <label class="form-label">RERA Number <span style="font-size:11px;color:var(--muted);font-weight:400">(optional)</span></label>
             <input type="text" class="form-input" id="rera_number" placeholder="e.g. PRM/KA/RERA/12345"/>
-            <div class="rera-hint">🏛️ <strong>Why add RERA?</strong> Listings with a verified RERA number build instant trust with buyers and tenants. It shows your project is government-registered, legally compliant, and reduces disputes. Seekers actively filter for RERA-registered properties.</div>
+            <div class="rera-hint">🏛️ <strong>Why add RERA?</strong> Listings with a verified RERA number build instant trust with buyers and tenants.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Brokerage Applicable?</label>
@@ -272,7 +272,7 @@
               <option value="no">No — Zero Brokerage</option>
               <option value="yes">Yes — Brokerage Applicable</option>
             </select>
-            <div class="form-hint">If brokerage is applicable, it will be clearly shown on your listing so seekers know upfront.</div>
+            <div class="form-hint">If brokerage is applicable, it will be clearly shown on your listing.</div>
           </div>
         </div>
       </div>
@@ -315,9 +315,10 @@
 <script>
 let tok=null, cu=null, ltype='rent', photos=[], editId=null;
 
-// ─── E49 Round Stamp Watermark — top-left corner ────────────────────────────
-// Looks like an official ink seal: outer ring, dashed inner ring,
-// "ESTATE49" curved around top, "E49" bold in the center.
+// ─── E49 Watermark Stamp — small, ghost/water-ink style, top-left ──────────
+// Circle ring: "ESTATE49" runs full 360° around the ring (top half forward,
+// bottom half mirrored so both ends meet). E49 bold in centre. All very
+// transparent — looks like a water-ink stamp, not an opaque badge.
 function stampE49(file) {
   return new Promise((resolve) => {
     const img    = new Image();
@@ -327,88 +328,96 @@ function stampE49(file) {
       canvas.width  = img.width;
       canvas.height = img.height;
       const ctx     = canvas.getContext('2d');
-
-      // Draw original image
       ctx.drawImage(img, 0, 0);
 
-      // ── Stamp dimensions: 14% of the shorter side, top-left ──
-      const size   = Math.round(Math.min(img.width, img.height) * 0.14);
-      const margin = Math.round(size * 0.30);
-      const cx     = margin + size;   // circle centre X
-      const cy     = margin + size;   // circle centre Y
-      const r      = size;            // outer radius
+      // ── Size: 9% of shorter side — compact, not intrusive ──
+      const size   = Math.round(Math.min(img.width, img.height) * 0.09);
+      const margin = Math.round(size * 0.55);
+      const cx     = margin + size;
+      const cy     = margin + size;
+      const r      = size;
+
+      // ── Watermark colour: semi-transparent red ──
+      // All elements use low alpha so the image shows through
+      const alpha  = 0.22;   // base transparency — ghostly water-ink feel
+      const color  = `rgba(192,57,43,${alpha})`;
+      const colorM = `rgba(192,57,43,${alpha + 0.05})`; // slightly more for text
 
       ctx.save();
 
-      // 1. Drop shadow behind the stamp
-      ctx.shadowColor   = 'rgba(0,0,0,0.35)';
-      ctx.shadowBlur    = Math.round(r * 0.18);
-      ctx.shadowOffsetX = Math.round(r * 0.04);
-      ctx.shadowOffsetY = Math.round(r * 0.04);
-
-      // 2. Solid filled circle — deep red, full opacity
+      // 1. Outer ring stroke only — no fill (transparent centre)
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(180,28,18,1.0)';
-      ctx.fill();
-
-      ctx.shadowColor = 'transparent'; // reset shadow for inner elements
-
-      // 3. Outer white ring border
-      ctx.beginPath();
-      ctx.arc(cx, cy, r - Math.round(r * 0.06), 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255,255,255,0.95)';
-      ctx.lineWidth   = Math.round(r * 0.045);
+      ctx.strokeStyle = color;
+      ctx.lineWidth   = Math.round(r * 0.07);
       ctx.stroke();
 
-      // 4. Inner dashed ring — seal texture
+      // 2. Inner thin ring
       ctx.beginPath();
-      ctx.arc(cx, cy, r - Math.round(r * 0.20), 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255,255,255,0.70)';
-      ctx.lineWidth   = Math.round(r * 0.028);
-      ctx.setLineDash([Math.round(r * 0.12), Math.round(r * 0.07)]);
+      ctx.arc(cx, cy, r * 0.82, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(192,57,43,${alpha - 0.05})`;
+      ctx.lineWidth   = Math.round(r * 0.03);
       ctx.stroke();
-      ctx.setLineDash([]); // reset dash
 
-      // 5. "ESTATE49" curved along the top arc
-      const textR    = r - Math.round(r * 0.30);  // radius for text path
+      // 3. "ESTATE49" curved full circle — top half normal, bottom half flipped
+      // This makes text run all the way around so both ends meet at the bottom
       const label    = 'ESTATE49';
-      const arcFontS = Math.round(r * 0.22);
-      ctx.font      = `800 ${arcFontS}px Arial, Helvetica, sans-serif`;
-      ctx.fillStyle = '#ffffff';
+      const arcR     = r * 0.91;
+      const arcFontS = Math.round(r * 0.21);
+      ctx.font         = `800 ${arcFontS}px Arial, Helvetica, sans-serif`;
+      ctx.fillStyle    = colorM;
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
 
-      // Measure total angle needed
-      const totalAngle = Math.PI * 0.78;            // arc span (top half)
-      const startAngle = -Math.PI / 2 - totalAngle / 2; // start left of top
       const charCount  = label.length;
+      // Top half: spread chars from -160° to -20° (left to right across top)
+      const topStart   = (-Math.PI * 0.89);
+      const topEnd     = (-Math.PI * 0.11);
+      const topSpan    = topEnd - topStart;
 
       for (let i = 0; i < charCount; i++) {
-        const angle = startAngle + (totalAngle / (charCount - 1)) * i;
+        const t     = i / (charCount - 1);
+        const angle = topStart + topSpan * t;
         ctx.save();
-        ctx.translate(cx + textR * Math.cos(angle), cy + textR * Math.sin(angle));
+        ctx.translate(cx + arcR * Math.cos(angle), cy + arcR * Math.sin(angle));
         ctx.rotate(angle + Math.PI / 2);
         ctx.fillText(label[i], 0, 0);
         ctx.restore();
       }
 
-      // 6. "E49" bold in the centre
-      const midFontS = Math.round(r * 0.42);
+      // Bottom half: same "ESTATE49" mirrored — chars run from 200° to 340°
+      // rotated so they read correctly from outside the circle
+      const botStart = (Math.PI * 1.11);
+      const botEnd   = (Math.PI * 1.89);
+      const botSpan  = botEnd - botStart;
+
+      for (let i = 0; i < charCount; i++) {
+        const t     = i / (charCount - 1);
+        const angle = botStart + botSpan * t;
+        ctx.save();
+        ctx.translate(cx + arcR * Math.cos(angle), cy + arcR * Math.sin(angle));
+        ctx.rotate(angle - Math.PI / 2); // flip so text reads outward
+        ctx.fillText(label[charCount - 1 - i], 0, 0); // reversed order bottom
+        ctx.restore();
+      }
+
+      // 4. "E49" bold in centre
+      const midFontS   = Math.round(r * 0.40);
       ctx.font         = `900 ${midFontS}px Arial, Helvetica, sans-serif`;
-      ctx.fillStyle    = '#ffffff';
+      ctx.fillStyle    = `rgba(192,57,43,${alpha + 0.08})`;
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('E49', cx, cy + Math.round(r * 0.08));
+      ctx.fillText('E49', cx, cy);
 
-      // 7. Small horizontal line above E49 (separator)
-      const lineW = Math.round(r * 0.55);
+      // 5. Two tiny dots at left & right where text ends meet — classic seal detail
+      const dotR = Math.round(r * 0.05);
       ctx.beginPath();
-      ctx.moveTo(cx - lineW / 2, cy - Math.round(r * 0.14));
-      ctx.lineTo(cx + lineW / 2, cy - Math.round(r * 0.14));
-      ctx.strokeStyle = 'rgba(255,255,255,0.75)';
-      ctx.lineWidth   = Math.round(r * 0.03);
-      ctx.stroke();
+      ctx.arc(cx, cy - arcR, dotR, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, cy + arcR, dotR, 0, Math.PI * 2);
+      ctx.fill();
 
       ctx.restore();
 
@@ -421,7 +430,7 @@ function stampE49(file) {
     img.src = objUrl;
   });
 }
-// ───────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────
 
 window.addEventListener('DOMContentLoaded', async () => {
   const s = await getSession();
@@ -496,9 +505,9 @@ function tgl(k) {
 function pickPhoto() { document.getElementById('file-inp').click(); }
 
 async function handleFiles(e) {
-  const files = Array.from(e.target.files || []);
+  const files    = Array.from(e.target.files || []);
   e.target.value = '';
-  const avail = 10 - photos.length;
+  const avail    = 10 - photos.length;
   if (avail <= 0) { toast('Max 10 photos'); return; }
   const toUp     = files.slice(0, avail);
   const statusEl = document.getElementById('upload-status');
@@ -597,27 +606,22 @@ async function submit() {
     property_type:    V('prop_type'),
     bhk:              V('bhk')        ? parseInt(V('bhk'))        : null,
     bathrooms:        V('bathrooms')  ? parseInt(V('bathrooms'))  : null,
-    title:            V('title'),
-    city:             V('city'),
-    locality:         V('locality'),
-    address:          V('address'),
+    title:            V('title'),     city:          V('city'),
+    locality:         V('locality'),  address:       V('address'),
     description:      V('description'),
     price:            parseFloat(V('price')),
     deposit:          V('deposit')     ? parseFloat(V('deposit'))     : null,
     maintenance:      V('maintenance') ? parseFloat(V('maintenance')) : null,
     area:             V('area')        ? parseInt(V('area'))          : null,
     carpet_area:      V('carpet_area') ? parseInt(V('carpet_area'))   : null,
-    floor:            V('floor'),
-    furnished:        V('furnished'),
+    floor:            V('floor'),      furnished:     V('furnished'),
     available_from:   V('available_from'),
-    contact_name:     V('contact_name'),
-    contact_phone:    V('contact_phone'),
-    contact_email:    V('contact_email'),
-    contact_role:     role,
+    contact_name:     V('contact_name'),  contact_phone: V('contact_phone'),
+    contact_email:    V('contact_email'), contact_role:  role,
     contact_time:     V('contact_time'),
-    whatsapp:         V('whatsapp')  || null,
-    map_link:         V('map_link')  || null,
-    facing:           V('facing')    || null,
+    whatsapp:         V('whatsapp')         || null,
+    map_link:         V('map_link')         || null,
+    facing:           V('facing')           || null,
     vastu_compliance: V('vastu_compliance') || null,
     rera_number:          isAgentOrBuilder ? (V('rera_number') || null) : null,
     brokerage_applicable: isAgentOrBuilder ? (V('brokerage_applicable') === 'yes') : false,
