@@ -19,8 +19,6 @@
     .photo-slot:hover{border-color:var(--primary);background:var(--primary-xlight);}
     .photo-slot img{width:100%;height:100%;object-fit:cover;}
     .photo-rm{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
-    .upload-prog{position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--primary);transform-origin:left;transform:scaleX(0);transition:transform 0.3s ease;}
-    .photo-slot.uploading{opacity:0.7;}
     .type-btns{display:flex;gap:10px;flex-wrap:wrap;}
     .type-btn{padding:10px 24px;border:2px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;transition:all var(--transition);background:var(--surface);cursor:pointer;}
     .type-btn.sel{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
@@ -320,15 +318,13 @@
 <script>
 let tok=null, cu=null, ltype='rent', photos=[], editId=null;
 
-// ─── E49 Canvas Watermark ───────────────────────────────────────────────────
-// Stamps a red E49 pill on the right-center of the image before upload.
-// Done client-side so the server needs zero image processing libraries.
+// ─── E49 Canvas Watermark — small, neat, bottom-right corner ───────────────
 function stampE49(file) {
   return new Promise((resolve) => {
-    const img = new Image();
+    const img    = new Image();
     const objUrl = URL.createObjectURL(file);
     img.onload = () => {
-      const canvas = document.createElement('canvas');
+      const canvas  = document.createElement('canvas');
       canvas.width  = img.width;
       canvas.height = img.height;
       const ctx = canvas.getContext('2d');
@@ -336,15 +332,25 @@ function stampE49(file) {
       // Draw original image
       ctx.drawImage(img, 0, 0);
 
-      // Pill dimensions — 18% wide, 9% tall, vertically centered, right edge
-      const pillW  = Math.round(img.width  * 0.18);
-      const pillH  = Math.round(img.height * 0.09);
-      const px     = img.width  - pillW - Math.round(img.width * 0.025);
-      const py     = Math.round((img.height - pillH) / 2);
-      const radius = Math.round(pillH * 0.35);
-      const fSize  = Math.round(pillH * 0.52);
+      // ── Pill dimensions: small & neat ──
+      // 8% wide, 5.5% tall — roughly 2.5× smaller than before
+      // Positioned bottom-right with a small margin
+      const pillW  = Math.round(img.width  * 0.08);
+      const pillH  = Math.round(img.height * 0.055);
+      const margin = Math.round(img.width  * 0.02);   // 2% margin from edges
+      const px     = img.width  - pillW - margin;      // right-aligned
+      const py     = img.height - pillH - margin;      // bottom-aligned
+      const radius = Math.round(pillH * 0.38);
+      const fSize  = Math.round(pillH * 0.50);
 
-      // Draw rounded pill background
+      // Semi-transparent dark backdrop for readability on any image
+      ctx.save();
+      ctx.shadowColor   = 'rgba(0,0,0,0.25)';
+      ctx.shadowBlur    = 4;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 2;
+
+      // Draw rounded pill
       ctx.beginPath();
       ctx.moveTo(px + radius, py);
       ctx.lineTo(px + pillW - radius, py);
@@ -356,28 +362,27 @@ function stampE49(file) {
       ctx.lineTo(px, py + radius);
       ctx.quadraticCurveTo(px,         py,            px + radius, py);
       ctx.closePath();
-      ctx.fillStyle = 'rgba(192,57,43,0.85)';
+      ctx.fillStyle = 'rgba(192,57,43,0.88)';
       ctx.fill();
+      ctx.restore();
 
-      // Draw E49 text
+      // Draw E49 text — tight, bold, white
       ctx.fillStyle    = '#ffffff';
       ctx.font         = `800 ${fSize}px Arial, Helvetica, sans-serif`;
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
-      ctx.letterSpacing = '1.5px';
       ctx.fillText('E49', px + pillW / 2, py + pillH / 2);
 
       canvas.toBlob((blob) => {
         URL.revokeObjectURL(objUrl);
-        // Return as a File so FormData sends correct filename
         resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
       }, 'image/jpeg', 0.85);
     };
-    img.onerror = () => { URL.revokeObjectURL(objUrl); resolve(file); }; // fallback: upload raw
+    img.onerror = () => { URL.revokeObjectURL(objUrl); resolve(file); };
     img.src = objUrl;
   });
 }
-// ───────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────
 
 window.addEventListener('DOMContentLoaded', async () => {
   const s = await getSession();
@@ -434,7 +439,7 @@ function onRoleChange() {
     sec.classList.remove('hidden');
   } else {
     sec.classList.add('hidden');
-    document.getElementById('rera_number').value         = '';
+    document.getElementById('rera_number').value          = '';
     document.getElementById('brokerage_applicable').value = 'no';
   }
 }
@@ -451,26 +456,23 @@ function tgl(k) {
 
 function pickPhoto() { document.getElementById('file-inp').click(); }
 
-// ── Upload handler: stamps E49 via canvas, then sends one file at a time ──
 async function handleFiles(e) {
   const files = Array.from(e.target.files || []);
   e.target.value = '';
   const avail = 10 - photos.length;
   if (avail <= 0) { toast('Max 10 photos'); return; }
-  const toUp = files.slice(0, avail);
+  const toUp    = files.slice(0, avail);
   const statusEl = document.getElementById('upload-status');
   statusEl.textContent = `Uploading ${toUp.length} photo(s)…`;
 
   let uploaded = 0;
   for (const f of toUp) {
     try {
-      // 1. Stamp E49 watermark via canvas (client-side, no server lib needed)
-      statusEl.textContent = `Stamping & uploading photo ${uploaded + 1} of ${toUp.length}…`;
+      statusEl.textContent = `Stamping & uploading ${uploaded + 1} of ${toUp.length}…`;
       const stamped = await stampE49(f);
 
-      // 2. Upload the watermarked file
       const fd = new FormData();
-      fd.append('file', stamped);   // ← key must match upload.single('file') on server
+      fd.append('file', stamped);
 
       const r = await fetch('/api/upload', {
         method:  'POST',
@@ -478,13 +480,9 @@ async function handleFiles(e) {
         body:    fd
       });
 
-      if (!r.ok) {
-        const errText = await r.text();
-        throw new Error(errText);
-      }
+      if (!r.ok) throw new Error(await r.text());
 
       const result = await r.json();
-      // Support both response shapes: {url} / {publicUrl} / {urls:[...]}
       const url = typeof result === 'string'
         ? result
         : (result.url || result.publicUrl || (Array.isArray(result.urls) ? result.urls[0] : null));
@@ -497,7 +495,7 @@ async function handleFiles(e) {
       statusEl.textContent = `${uploaded} of ${toUp.length} uploaded…`;
     } catch(ex) {
       console.error('Upload error:', ex);
-      toast('Upload failed: ' + f.name + (ex.message ? ' — ' + ex.message : ''));
+      toast('Upload failed: ' + f.name);
     }
   }
   statusEl.textContent = photos.length ? `✅ ${photos.length} photo(s) ready` : '';
@@ -582,7 +580,7 @@ async function submit() {
     map_link:         V('map_link')  || null,
     facing:           V('facing')    || null,
     vastu_compliance: V('vastu_compliance') || null,
-    rera_number:       isAgentOrBuilder ? (V('rera_number') || null) : null,
+    rera_number:          isAgentOrBuilder ? (V('rera_number') || null) : null,
     brokerage_applicable: isAgentOrBuilder ? (V('brokerage_applicable') === 'yes') : false,
     photos,
   };
