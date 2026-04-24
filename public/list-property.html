@@ -19,6 +19,8 @@
     .photo-slot:hover{border-color:var(--primary);background:var(--primary-xlight);}
     .photo-slot img{width:100%;height:100%;object-fit:cover;}
     .photo-rm{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+    .upload-prog{position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--primary);transform-origin:left;transform:scaleX(0);transition:transform 0.3s ease;}
+    .photo-slot.uploading{opacity:0.7;}
     .type-btns{display:flex;gap:10px;flex-wrap:wrap;}
     .type-btn{padding:10px 24px;border:2px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:600;transition:all var(--transition);background:var(--surface);cursor:pointer;}
     .type-btn.sel{border-color:var(--primary);background:var(--primary-light);color:var(--primary);}
@@ -259,7 +261,7 @@
         </div>
       </div>
 
-      <!-- ✅ RERA + Brokerage — shown only for agent/builder -->
+      <!-- RERA + Brokerage — shown only for agent/builder -->
       <div id="rera-brokerage-section" class="hidden">
         <div class="form-2" style="margin-bottom:16px">
           <div class="form-group">
@@ -318,195 +320,301 @@
 <script>
 let tok=null, cu=null, ltype='rent', photos=[], editId=null;
 
+// ─── E49 Canvas Watermark ───────────────────────────────────────────────────
+// Stamps a red E49 pill on the right-center of the image before upload.
+// Done client-side so the server needs zero image processing libraries.
+function stampE49(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const objUrl = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width  = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+
+      // Draw original image
+      ctx.drawImage(img, 0, 0);
+
+      // Pill dimensions — 18% wide, 9% tall, vertically centered, right edge
+      const pillW  = Math.round(img.width  * 0.18);
+      const pillH  = Math.round(img.height * 0.09);
+      const px     = img.width  - pillW - Math.round(img.width * 0.025);
+      const py     = Math.round((img.height - pillH) / 2);
+      const radius = Math.round(pillH * 0.35);
+      const fSize  = Math.round(pillH * 0.52);
+
+      // Draw rounded pill background
+      ctx.beginPath();
+      ctx.moveTo(px + radius, py);
+      ctx.lineTo(px + pillW - radius, py);
+      ctx.quadraticCurveTo(px + pillW, py,           px + pillW, py + radius);
+      ctx.lineTo(px + pillW, py + pillH - radius);
+      ctx.quadraticCurveTo(px + pillW, py + pillH,   px + pillW - radius, py + pillH);
+      ctx.lineTo(px + radius, py + pillH);
+      ctx.quadraticCurveTo(px,         py + pillH,   px, py + pillH - radius);
+      ctx.lineTo(px, py + radius);
+      ctx.quadraticCurveTo(px,         py,            px + radius, py);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(192,57,43,0.85)';
+      ctx.fill();
+
+      // Draw E49 text
+      ctx.fillStyle    = '#ffffff';
+      ctx.font         = `800 ${fSize}px Arial, Helvetica, sans-serif`;
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.letterSpacing = '1.5px';
+      ctx.fillText('E49', px + pillW / 2, py + pillH / 2);
+
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(objUrl);
+        // Return as a File so FormData sends correct filename
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+      }, 'image/jpeg', 0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(objUrl); resolve(file); }; // fallback: upload raw
+    img.src = objUrl;
+  });
+}
+// ───────────────────────────────────────────────────────────────────────────
+
 window.addEventListener('DOMContentLoaded', async () => {
-  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
-  cu=s.user; tok=s.access_token;
-  document.getElementById('al').style.display='none';
-  document.getElementById('page').style.display='block';
-  await initNavbar({active:'list'});
+  const s = await getSession();
+  if (!s) { window.location.href = '/login.html'; return; }
+  cu = s.user; tok = s.access_token;
+  document.getElementById('al').style.display   = 'none';
+  document.getElementById('page').style.display = 'block';
+  await initNavbar({ active: 'list' });
 
-  try{
-    const r=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${tok}`}});
-    if(r.ok){
-      const p=await r.json();
-      if(p.fullname) document.getElementById('contact_name').value=p.fullname;
-      if(p.phone)    document.getElementById('contact_phone').value=p.phone;
-      if(p.phone)    document.getElementById('whatsapp').value=p.phone;
+  try {
+    const r = await fetch('/api/profiles/me', { headers: { Authorization: `Bearer ${tok}` } });
+    if (r.ok) {
+      const p = await r.json();
+      if (p.fullname) document.getElementById('contact_name').value  = p.fullname;
+      if (p.phone)    document.getElementById('contact_phone').value = p.phone;
+      if (p.phone)    document.getElementById('whatsapp').value      = p.phone;
     }
-  }catch(e){}
+  } catch(e) {}
 
-  editId=new URLSearchParams(window.location.search).get('edit');
-  if(editId){
-    document.getElementById('page-title').textContent='Edit Listing';
-    document.getElementById('sub-btn').textContent='💾 Save Changes';
-    try{
-      const r=await fetch(`/api/properties/${editId}`);
-      const p=await r.json();
-      if(p.listed_by!==cu.id){toast('Not your listing');return;}
-      setType(p.type||'rent');
+  editId = new URLSearchParams(window.location.search).get('edit');
+  if (editId) {
+    document.getElementById('page-title').textContent = 'Edit Listing';
+    document.getElementById('sub-btn').textContent    = '💾 Save Changes';
+    try {
+      const r = await fetch(`/api/properties/${editId}`);
+      const p = await r.json();
+      if (p.listed_by !== cu.id) { toast('Not your listing'); return; }
+      setType(p.type || 'rent');
       ['title','city','locality','address','description','price','deposit','maintenance',
        'area','carpet_area','floor','furnished','available_from','contact_name',
        'contact_phone','contact_email','contact_role','contact_time','prop_type',
        'bhk','bathrooms','whatsapp','map_link','facing','vastu_compliance',
        'rera_number','brokerage_applicable'
-      ].forEach(k=>{const el=document.getElementById(k);if(el&&p[k]!=null)el.value=p[k];});
+      ].forEach(k => { const el = document.getElementById(k); if (el && p[k] != null) el.value = p[k]; });
       ['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
        'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
        'gated','vastu','water_24','no_brokerage'
-      ].forEach(k=>{
-        if(p[k]){
-          const el=document.getElementById(k);
-          if(el){el.checked=true;document.getElementById('ci-'+k)?.classList.add('checked');}
+      ].forEach(k => {
+        if (p[k]) {
+          const el = document.getElementById(k);
+          if (el) { el.checked = true; document.getElementById('ci-' + k)?.classList.add('checked'); }
         }
       });
-      photos=[...(p.photos||[])]; renderPhotos();
-      onRoleChange(); // show/hide RERA section based on loaded role
-    }catch(e){toast('Failed to load listing');}
+      photos = [...(p.photos || [])]; renderPhotos();
+      onRoleChange();
+    } catch(e) { toast('Failed to load listing'); }
   }
 });
 
-function onRoleChange(){
-  const role=document.getElementById('contact_role').value;
-  const sec=document.getElementById('rera-brokerage-section');
-  if(role==='agent'||role==='builder'){
+function onRoleChange() {
+  const role = document.getElementById('contact_role').value;
+  const sec  = document.getElementById('rera-brokerage-section');
+  if (role === 'agent' || role === 'builder') {
     sec.classList.remove('hidden');
   } else {
     sec.classList.add('hidden');
-    document.getElementById('rera_number').value='';
-    document.getElementById('brokerage_applicable').value='no';
+    document.getElementById('rera_number').value         = '';
+    document.getElementById('brokerage_applicable').value = 'no';
   }
 }
 
-function setType(t){
-  ltype=t;
-  document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('sel',b.dataset.t===t));
+function setType(t) {
+  ltype = t;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('sel', b.dataset.t === t));
 }
-function tgl(k){
-  const c=document.getElementById(k)?.checked;
-  document.getElementById('ci-'+k)?.classList.toggle('checked',!!c);
-}
-function pickPhoto(){document.getElementById('file-inp').click();}
 
-async function handleFiles(e){
-  const files=Array.from(e.target.files||[]); e.target.value='';
-  const avail=10-photos.length;
-  if(avail<=0){toast('Max 10 photos');return;}
-  const toUp=files.slice(0,avail);
-  document.getElementById('upload-status').textContent=`Uploading ${toUp.length} photo(s)…`;
-  for(const f of toUp){
-    try{
-      const fd=new FormData(); fd.append('file',f);
-      const r=await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${tok}`},body:fd});
-      if(!r.ok) throw new Error(await r.text());
-      const result=await r.json();
-      const url=typeof result==='string'?result:(result.url||result.publicUrl);
-      if(!url) throw new Error('No URL returned');
-      photos.push(url); renderPhotos();
-    }catch(ex){toast('Upload failed: '+f.name);}
+function tgl(k) {
+  const c = document.getElementById(k)?.checked;
+  document.getElementById('ci-' + k)?.classList.toggle('checked', !!c);
+}
+
+function pickPhoto() { document.getElementById('file-inp').click(); }
+
+// ── Upload handler: stamps E49 via canvas, then sends one file at a time ──
+async function handleFiles(e) {
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  const avail = 10 - photos.length;
+  if (avail <= 0) { toast('Max 10 photos'); return; }
+  const toUp = files.slice(0, avail);
+  const statusEl = document.getElementById('upload-status');
+  statusEl.textContent = `Uploading ${toUp.length} photo(s)…`;
+
+  let uploaded = 0;
+  for (const f of toUp) {
+    try {
+      // 1. Stamp E49 watermark via canvas (client-side, no server lib needed)
+      statusEl.textContent = `Stamping & uploading photo ${uploaded + 1} of ${toUp.length}…`;
+      const stamped = await stampE49(f);
+
+      // 2. Upload the watermarked file
+      const fd = new FormData();
+      fd.append('file', stamped);   // ← key must match upload.single('file') on server
+
+      const r = await fetch('/api/upload', {
+        method:  'POST',
+        headers: { Authorization: `Bearer ${tok}` },
+        body:    fd
+      });
+
+      if (!r.ok) {
+        const errText = await r.text();
+        throw new Error(errText);
+      }
+
+      const result = await r.json();
+      // Support both response shapes: {url} / {publicUrl} / {urls:[...]}
+      const url = typeof result === 'string'
+        ? result
+        : (result.url || result.publicUrl || (Array.isArray(result.urls) ? result.urls[0] : null));
+
+      if (!url) throw new Error('No URL returned from server');
+
+      photos.push(url);
+      uploaded++;
+      renderPhotos();
+      statusEl.textContent = `${uploaded} of ${toUp.length} uploaded…`;
+    } catch(ex) {
+      console.error('Upload error:', ex);
+      toast('Upload failed: ' + f.name + (ex.message ? ' — ' + ex.message : ''));
+    }
   }
-  document.getElementById('upload-status').textContent=photos.length?`${photos.length} photo(s) ready`:'';
+  statusEl.textContent = photos.length ? `✅ ${photos.length} photo(s) ready` : '';
 }
 
-function renderPhotos(){
-  const g=document.getElementById('photos-grid');
-  g.innerHTML=photos.map((url,i)=>`
+function renderPhotos() {
+  const g = document.getElementById('photos-grid');
+  g.innerHTML = photos.map((url, i) => `
     <div class="photo-slot">
-      <img src="${url}" alt="photo ${i+1}" loading="lazy"/>
-      ${i===0?`<div style="position:absolute;bottom:4px;left:4px;background:var(--primary);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700">COVER</div>`:''}
+      <img src="${url}" alt="photo ${i + 1}" loading="lazy"/>
+      ${i === 0 ? `<div style="position:absolute;bottom:4px;left:4px;background:var(--primary);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700">COVER</div>` : ''}
       <div class="photo-rm" onclick="rmPhoto(${i})">✕</div>
     </div>`).join('');
-  if(photos.length<10) g.insertAdjacentHTML('beforeend','<div class="photo-slot" onclick="pickPhoto()">📷</div>');
+  if (photos.length < 10) g.insertAdjacentHTML('beforeend', '<div class="photo-slot" onclick="pickPhoto()">📷</div>');
 }
-function rmPhoto(i){photos.splice(i,1);renderPhotos();}
 
-// ✅ Generate Ad ID: E49-XXXXXX (6 alphanumeric chars)
-function generateAdId(){
-  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let id='E49-';
-  for(let i=0;i<6;i++) id+=chars[Math.floor(Math.random()*chars.length)];
+function rmPhoto(i) { photos.splice(i, 1); renderPhotos(); }
+
+function generateAdId() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let id = 'E49-';
+  for (let i = 0; i < 6; i++) id += chars[Math.floor(Math.random() * chars.length)];
   return id;
 }
 
-async function submit(){
-  const V=id=>document.getElementById(id)?.value?.trim()||'';
-  if(!V('title')||!V('price')||!V('city')||!V('locality')||!V('contact_name')){
+async function submit() {
+  const V = id => document.getElementById(id)?.value?.trim() || '';
+  if (!V('title') || !V('price') || !V('city') || !V('locality') || !V('contact_name')) {
     toast('Fill in all required fields'); return;
   }
-  if(!V('contact_phone')){
-    const ph=document.getElementById('contact_phone');
+  if (!V('contact_phone')) {
+    const ph = document.getElementById('contact_phone');
     ph.classList.add('required-highlight'); ph.focus();
     toast('Mobile number is required to publish your listing');
-    setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
+    setTimeout(() => ph.classList.remove('required-highlight'), 3000); return;
   }
-  if(!/^[6-9]\d{9}$/.test(V('contact_phone'))){
-    const ph=document.getElementById('contact_phone');
+  if (!/^[6-9]\d{9}$/.test(V('contact_phone'))) {
+    const ph = document.getElementById('contact_phone');
     ph.classList.add('required-highlight'); ph.focus();
     toast('Enter a valid 10-digit Indian mobile number (starts with 6-9)');
-    setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
+    setTimeout(() => ph.classList.remove('required-highlight'), 3000); return;
   }
-  if(V('whatsapp')&&!/^[6-9]\d{9}$/.test(V('whatsapp'))){
+  if (V('whatsapp') && !/^[6-9]\d{9}$/.test(V('whatsapp'))) {
     toast('Enter a valid 10-digit WhatsApp number (starts with 6-9)'); return;
   }
-  const btn=document.getElementById('sub-btn'); btn.disabled=true; btn.textContent='Submitting…';
 
-  const role=V('contact_role');
-  const isAgentOrBuilder=role==='agent'||role==='builder';
+  const btn = document.getElementById('sub-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Submitting…';
 
-  const bools=['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
+  const role             = V('contact_role');
+  const isAgentOrBuilder = role === 'agent' || role === 'builder';
+
+  const bools = ['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
     'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
     'gated','vastu','water_24','no_brokerage'];
-  const payload={
-    type:ltype,
-    property_type:V('prop_type'),
-    bhk:V('bhk')?parseInt(V('bhk')):null,
-    bathrooms:V('bathrooms')?parseInt(V('bathrooms')):null,
-    title:V('title'), city:V('city'), locality:V('locality'),
-    address:V('address'), description:V('description'),
-    price:parseFloat(V('price')),
-    deposit:V('deposit')?parseFloat(V('deposit')):null,
-    maintenance:V('maintenance')?parseFloat(V('maintenance')):null,
-    area:V('area')?parseInt(V('area')):null,
-    carpet_area:V('carpet_area')?parseInt(V('carpet_area')):null,
-    floor:V('floor'), furnished:V('furnished'),
-    available_from:V('available_from'),
-    contact_name:V('contact_name'), contact_phone:V('contact_phone'),
-    contact_email:V('contact_email'), contact_role:role,
-    contact_time:V('contact_time'),
-    whatsapp:V('whatsapp')||null,
-    map_link:V('map_link')||null,
-    facing:V('facing')||null,
-    vastu_compliance:V('vastu_compliance')||null,
-    // ✅ RERA + Brokerage
-    rera_number: isAgentOrBuilder ? (V('rera_number')||null) : null,
-    brokerage_applicable: isAgentOrBuilder ? (V('brokerage_applicable')==='yes') : false,
+
+  const payload = {
+    type:             ltype,
+    property_type:    V('prop_type'),
+    bhk:              V('bhk')        ? parseInt(V('bhk'))        : null,
+    bathrooms:        V('bathrooms')  ? parseInt(V('bathrooms'))  : null,
+    title:            V('title'),
+    city:             V('city'),
+    locality:         V('locality'),
+    address:          V('address'),
+    description:      V('description'),
+    price:            parseFloat(V('price')),
+    deposit:          V('deposit')     ? parseFloat(V('deposit'))     : null,
+    maintenance:      V('maintenance') ? parseFloat(V('maintenance')) : null,
+    area:             V('area')        ? parseInt(V('area'))          : null,
+    carpet_area:      V('carpet_area') ? parseInt(V('carpet_area'))   : null,
+    floor:            V('floor'),
+    furnished:        V('furnished'),
+    available_from:   V('available_from'),
+    contact_name:     V('contact_name'),
+    contact_phone:    V('contact_phone'),
+    contact_email:    V('contact_email'),
+    contact_role:     role,
+    contact_time:     V('contact_time'),
+    whatsapp:         V('whatsapp')  || null,
+    map_link:         V('map_link')  || null,
+    facing:           V('facing')    || null,
+    vastu_compliance: V('vastu_compliance') || null,
+    rera_number:       isAgentOrBuilder ? (V('rera_number') || null) : null,
+    brokerage_applicable: isAgentOrBuilder ? (V('brokerage_applicable') === 'yes') : false,
     photos,
   };
 
-  // ✅ Generate Ad ID only for new listings
-  if(!editId) payload.ad_id = generateAdId();
+  if (!editId) payload.ad_id = generateAdId();
+  bools.forEach(k => payload[k] = !!document.getElementById(k)?.checked);
 
-  bools.forEach(k=>payload[k]=!!document.getElementById(k)?.checked);
-  try{
-    const url=editId?`/api/properties/${editId}`:'/api/properties';
-    const method=editId?'PATCH':'POST';
-    const r=await fetch(url,{method,headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(payload)});
-    if(!r.ok){const e=await r.json();throw new Error(e.error||'Failed');}
-    const d=await r.json();
-    if(editId){
+  try {
+    const url    = editId ? `/api/properties/${editId}` : '/api/properties';
+    const method = editId ? 'PATCH' : 'POST';
+    const r = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error || 'Failed'); }
+    const d = await r.json();
+    if (editId) {
       toast('✅ Listing updated successfully!');
-      setTimeout(()=>window.location.href=`/property.html?id=${d.id}`,1200);
+      setTimeout(() => window.location.href = `/property.html?id=${d.id}`, 1200);
     } else {
-      // ✅ New: show verification message instead of "published"
-      showSubmitSuccess(d.ad_id||payload.ad_id, d.id);
+      showSubmitSuccess(d.ad_id || payload.ad_id, d.id);
     }
-  }catch(e){
-    toast('Error: '+e.message);
-    btn.disabled=false; btn.textContent=editId?'💾 Save Changes':'🏠 Submit Listing';
+  } catch(e) {
+    toast('Error: ' + e.message);
+    btn.disabled    = false;
+    btn.textContent = editId ? '💾 Save Changes' : '🏠 Submit Listing';
   }
 }
 
-function showSubmitSuccess(adId, propId){
-  document.querySelector('.lw').innerHTML=`
+function showSubmitSuccess(adId, propId) {
+  document.querySelector('.lw').innerHTML = `
     <div style="text-align:center;padding:60px 20px;">
       <div style="font-size:64px;margin-bottom:16px">🎉</div>
       <h2 style="font-size:var(--text-2xl);font-weight:800;margin-bottom:10px;color:var(--text)">Ad Submitted Successfully!</h2>
@@ -522,13 +630,14 @@ function showSubmitSuccess(adId, propId){
         <a href="/browse.html" class="btn btn-primary">Browse Properties</a>
       </div>
     </div>`;
-  document.querySelector('.save-bar').style.display='none';
+  document.querySelector('.save-bar').style.display = 'none';
 }
 
-function toast(m){
-  const el=document.getElementById('toast-el');
-  el.textContent=m; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),3000);
+function toast(m) {
+  const el = document.getElementById('toast-el');
+  el.textContent = m;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
 }
 </script>
 </body>
