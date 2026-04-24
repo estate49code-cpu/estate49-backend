@@ -259,15 +259,12 @@
         </div>
       </div>
 
-      <!-- RERA + Brokerage — shown only for agent/builder -->
       <div id="rera-brokerage-section" class="hidden">
         <div class="form-2" style="margin-bottom:16px">
           <div class="form-group">
             <label class="form-label">RERA Number <span style="font-size:11px;color:var(--muted);font-weight:400">(optional)</span></label>
             <input type="text" class="form-input" id="rera_number" placeholder="e.g. PRM/KA/RERA/12345"/>
-            <div class="rera-hint">
-              🏛️ <strong>Why add RERA?</strong> Listings with a verified RERA number build instant trust with buyers and tenants. It shows your project is government-registered, legally compliant, and reduces disputes. Seekers actively filter for RERA-registered properties.
-            </div>
+            <div class="rera-hint">🏛️ <strong>Why add RERA?</strong> Listings with a verified RERA number build instant trust with buyers and tenants. It shows your project is government-registered, legally compliant, and reduces disputes. Seekers actively filter for RERA-registered properties.</div>
           </div>
           <div class="form-group">
             <label class="form-label">Brokerage Applicable?</label>
@@ -318,7 +315,9 @@
 <script>
 let tok=null, cu=null, ltype='rent', photos=[], editId=null;
 
-// ─── E49 Canvas Watermark — small, neat, bottom-right corner ───────────────
+// ─── E49 Round Stamp Watermark — top-left corner ────────────────────────────
+// Looks like an official ink seal: outer ring, dashed inner ring,
+// "ESTATE49" curved around top, "E49" bold in the center.
 function stampE49(file) {
   return new Promise((resolve) => {
     const img    = new Image();
@@ -327,62 +326,102 @@ function stampE49(file) {
       const canvas  = document.createElement('canvas');
       canvas.width  = img.width;
       canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
+      const ctx     = canvas.getContext('2d');
 
       // Draw original image
       ctx.drawImage(img, 0, 0);
 
-      // ── Pill dimensions: small & neat ──
-      // 8% wide, 5.5% tall — roughly 2.5× smaller than before
-      // Positioned bottom-right with a small margin
-      const pillW  = Math.round(img.width  * 0.08);
-      const pillH  = Math.round(img.height * 0.055);
-      const margin = Math.round(img.width  * 0.02);   // 2% margin from edges
-      const px     = img.width  - pillW - margin;      // right-aligned
-      const py     = img.height - pillH - margin;      // bottom-aligned
-      const radius = Math.round(pillH * 0.38);
-      const fSize  = Math.round(pillH * 0.50);
+      // ── Stamp dimensions: 14% of the shorter side, top-left ──
+      const size   = Math.round(Math.min(img.width, img.height) * 0.14);
+      const margin = Math.round(size * 0.30);
+      const cx     = margin + size;   // circle centre X
+      const cy     = margin + size;   // circle centre Y
+      const r      = size;            // outer radius
 
-      // Semi-transparent dark backdrop for readability on any image
       ctx.save();
-      ctx.shadowColor   = 'rgba(0,0,0,0.25)';
-      ctx.shadowBlur    = 4;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 2;
 
-      // Draw rounded pill
+      // 1. Drop shadow behind the stamp
+      ctx.shadowColor   = 'rgba(0,0,0,0.35)';
+      ctx.shadowBlur    = Math.round(r * 0.18);
+      ctx.shadowOffsetX = Math.round(r * 0.04);
+      ctx.shadowOffsetY = Math.round(r * 0.04);
+
+      // 2. Solid filled circle — deep red, full opacity
       ctx.beginPath();
-      ctx.moveTo(px + radius, py);
-      ctx.lineTo(px + pillW - radius, py);
-      ctx.quadraticCurveTo(px + pillW, py,           px + pillW, py + radius);
-      ctx.lineTo(px + pillW, py + pillH - radius);
-      ctx.quadraticCurveTo(px + pillW, py + pillH,   px + pillW - radius, py + pillH);
-      ctx.lineTo(px + radius, py + pillH);
-      ctx.quadraticCurveTo(px,         py + pillH,   px, py + pillH - radius);
-      ctx.lineTo(px, py + radius);
-      ctx.quadraticCurveTo(px,         py,            px + radius, py);
-      ctx.closePath();
-      ctx.fillStyle = 'rgba(192,57,43,0.88)';
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(180,28,18,1.0)';
       ctx.fill();
-      ctx.restore();
 
-      // Draw E49 text — tight, bold, white
-      ctx.fillStyle    = '#ffffff';
-      ctx.font         = `800 ${fSize}px Arial, Helvetica, sans-serif`;
+      ctx.shadowColor = 'transparent'; // reset shadow for inner elements
+
+      // 3. Outer white ring border
+      ctx.beginPath();
+      ctx.arc(cx, cy, r - Math.round(r * 0.06), 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+      ctx.lineWidth   = Math.round(r * 0.045);
+      ctx.stroke();
+
+      // 4. Inner dashed ring — seal texture
+      ctx.beginPath();
+      ctx.arc(cx, cy, r - Math.round(r * 0.20), 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.70)';
+      ctx.lineWidth   = Math.round(r * 0.028);
+      ctx.setLineDash([Math.round(r * 0.12), Math.round(r * 0.07)]);
+      ctx.stroke();
+      ctx.setLineDash([]); // reset dash
+
+      // 5. "ESTATE49" curved along the top arc
+      const textR    = r - Math.round(r * 0.30);  // radius for text path
+      const label    = 'ESTATE49';
+      const arcFontS = Math.round(r * 0.22);
+      ctx.font      = `800 ${arcFontS}px Arial, Helvetica, sans-serif`;
+      ctx.fillStyle = '#ffffff';
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('E49', px + pillW / 2, py + pillH / 2);
+
+      // Measure total angle needed
+      const totalAngle = Math.PI * 0.78;            // arc span (top half)
+      const startAngle = -Math.PI / 2 - totalAngle / 2; // start left of top
+      const charCount  = label.length;
+
+      for (let i = 0; i < charCount; i++) {
+        const angle = startAngle + (totalAngle / (charCount - 1)) * i;
+        ctx.save();
+        ctx.translate(cx + textR * Math.cos(angle), cy + textR * Math.sin(angle));
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.fillText(label[i], 0, 0);
+        ctx.restore();
+      }
+
+      // 6. "E49" bold in the centre
+      const midFontS = Math.round(r * 0.42);
+      ctx.font         = `900 ${midFontS}px Arial, Helvetica, sans-serif`;
+      ctx.fillStyle    = '#ffffff';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('E49', cx, cy + Math.round(r * 0.08));
+
+      // 7. Small horizontal line above E49 (separator)
+      const lineW = Math.round(r * 0.55);
+      ctx.beginPath();
+      ctx.moveTo(cx - lineW / 2, cy - Math.round(r * 0.14));
+      ctx.lineTo(cx + lineW / 2, cy - Math.round(r * 0.14));
+      ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+      ctx.lineWidth   = Math.round(r * 0.03);
+      ctx.stroke();
+
+      ctx.restore();
 
       canvas.toBlob((blob) => {
         URL.revokeObjectURL(objUrl);
         resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
-      }, 'image/jpeg', 0.85);
+      }, 'image/jpeg', 0.88);
     };
     img.onerror = () => { URL.revokeObjectURL(objUrl); resolve(file); };
     img.src = objUrl;
   });
 }
-// ──────────────────────────────────────────────────────────────────────────
+// ───────────────────────────────────────────────────────────────────────────
 
 window.addEventListener('DOMContentLoaded', async () => {
   const s = await getSession();
@@ -461,7 +500,7 @@ async function handleFiles(e) {
   e.target.value = '';
   const avail = 10 - photos.length;
   if (avail <= 0) { toast('Max 10 photos'); return; }
-  const toUp    = files.slice(0, avail);
+  const toUp     = files.slice(0, avail);
   const statusEl = document.getElementById('upload-status');
   statusEl.textContent = `Uploading ${toUp.length} photo(s)…`;
 
