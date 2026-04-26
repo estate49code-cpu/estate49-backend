@@ -6,6 +6,7 @@ const cors       = require('cors');
 const path       = require('path');
 const db         = require('./db');
 const { chat }   = require('./services/ai');
+const uploadRouter = require('./routes/upload');
 
 const app    = express();
 const server = http.createServer(app);
@@ -33,6 +34,7 @@ app.use('/api/profiles',      require('./routes/profiles'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/upload',        require('./routes/upload'));
 app.use('/api/support',       require('./routes/support'));
+app.use('/api/upload', uploadRouter);
 
 // ─── AI REST endpoint ────────────────────────
 app.post('/api/chat', async (req, res) => {
