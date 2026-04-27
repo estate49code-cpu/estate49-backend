@@ -158,7 +158,7 @@ function toggleForm(){
 
 async function loadTickets(){
   try{
-    const r=await fetch('/api/support/my',{headers:{Authorization:`Bearer ${tok}`}});
+    const r=await fetch('/api/support',{headers:{Authorization:`Bearer ${tok}`}});
     if(r.ok) allTickets=await r.json();
     renderTickets();
   }catch(e){
