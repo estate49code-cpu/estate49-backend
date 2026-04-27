@@ -1,50 +1,30 @@
-const express        = require('express');
-const router         = express.Router();
-const db             = require('../db');
-const authMiddleware = require('./auth-middleware');
+const express = require('express');
+const router  = express.Router();
+const db      = require('../db');
+const { authMiddleware } = require('./auth-middleware');
 
-// ── Admin helper ──────────────────────────────────────────────────────────────
+// Admin check helper
 async function isAdmin(userId) {
-  const { data } = await db.from('adminusers').select('id').eq('id', userId).single();
+  const { data } = await db.from('admin_users').select('id').eq('id', userId).single();
   return !!data;
 }
 
-// ── Field whitelist — prevents unknown column errors (e.g. agencyname) ────────
-// Only these fields are passed to Supabase on POST / PATCH
-const ALLOWED_FIELDS = [
-  'type', 'propertytype', 'bhk', 'bathrooms', 'title', 'city', 'locality',
-  'address', 'maplink', 'description', 'price', 'deposit', 'maintenance',
-  'area', 'carpetarea', 'floor', 'facing', 'vastucompliance', 'furnished',
-  'availablefrom', 'contactname', 'contactphone', 'contactemail', 'contactrole',
-  'contacttime', 'whatsapp', 'reranumber', 'brokerageapplicable', 'photos', 'adid',
-  // amenity booleans
-  'parking', 'gym', 'pool', 'lift', 'security', 'cctv', 'clubhouse', 'garden',
-  'powerbackup', 'ac', 'balcony', 'modularkitchen', 'washingmachine', 'fridge',
-  'wifi', 'petfriendly', 'gated', 'vastu', 'water24', 'nobrokerage',
-];
+// ─── ADMIN ROUTES (must be before /:id) ──────────────────────────────────────
 
-function pickFields(body) {
-  return Object.fromEntries(
-    Object.entries(body).filter(([k]) => ALLOWED_FIELDS.includes(k))
-  );
-}
-
-// ── ADMIN: GET all properties ─────────────────────────────────────────────────
+// GET all properties — admin only
 router.get('/admin/all', authMiddleware, async (req, res) => {
   try {
     if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
-    const { status } = req.query;
-    let q = db.from('properties').select('*').order('postedat', { ascending: false });
+    const status = req.query.status;
+    let q = db.from('properties').select('*').order('posted_at', { ascending: false });
     if (status) q = q.eq('status', status);
     const { data, error } = await q;
     if (error) throw error;
-    res.json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+    res.json(data || []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── ADMIN: GET stats ──────────────────────────────────────────────────────────
+// GET admin stats
 router.get('/admin/stats', authMiddleware, async (req, res) => {
   try {
     if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
@@ -53,7 +33,7 @@ router.get('/admin/stats', authMiddleware, async (req, res) => {
       db.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       db.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
       db.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
-      db.from('profiles').select('id',   { count: 'exact', head: true }),
+      db.from('profiles').select('id', { count: 'exact', head: true }),
     ]);
     res.json({
       total:    all.count      || 0,
@@ -62,132 +42,115 @@ router.get('/admin/stats', authMiddleware, async (req, res) => {
       rejected: rejected.count || 0,
       users:    usersRes.count || 0,
     });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── ADMIN: PATCH approve / reject ─────────────────────────────────────────────
+// PATCH admin approve/reject
 router.patch('/admin/:id', authMiddleware, async (req, res) => {
   try {
     if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
-    const { status, adminnote } = req.body;
+    const { status, admin_note } = req.body;
     if (!['approved', 'rejected', 'pending'].includes(status))
       return res.status(400).json({ error: 'Invalid status' });
     const { data, error } = await db.from('properties')
-      .update({ status, adminnote: adminnote || null, updatedat: new Date().toISOString() })
+      .update({ status, admin_note: admin_note || null, updated_at: new Date().toISOString() })
       .eq('id', req.params.id).select().single();
     if (error) throw error;
     res.json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── ADMIN: DELETE any property ────────────────────────────────────────────────
+// DELETE admin — delete any property
 router.delete('/admin/:id', authMiddleware, async (req, res) => {
   try {
     if (!await isAdmin(req.user.id)) return res.status(403).json({ error: 'Forbidden' });
     const { error } = await db.from('properties').delete().eq('id', req.params.id);
     if (error) throw error;
     res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── PUBLIC: GET all approved listings ────────────────────────────────────────
+// ─── PUBLIC & USER ROUTES ─────────────────────────────────────────────────────
+
+// GET all — public (only approved)
 router.get('/', async (req, res) => {
   try {
-    let q = db.from('properties').select('*').eq('status', 'approved').order('postedat', { ascending: false });
+    let q = db.from('properties').select('*').eq('status', 'approved').order('posted_at', { ascending: false });
     if (req.query.type)   q = q.eq('type', req.query.type);
     if (req.query.city)   q = q.ilike('city', `%${req.query.city}%`);
     if (req.query.bhk)    q = q.eq('bhk', parseInt(req.query.bhk));
-    if (req.query.adid)   q = q.eq('adid', req.query.adid);
-    if (req.query.search) q = q.or(`title.ilike.%${req.query.search}%,locality.ilike.%${req.query.search}%,city.ilike.%${req.query.search}%`);
+    if (req.query.search) q = q.or(
+      `title.ilike.%${req.query.search}%,locality.ilike.%${req.query.search}%,city.ilike.%${req.query.search}%`
+    );
     const { data, error } = await q;
     if (error) throw error;
-    res.json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+    res.json(data || []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── AUTH: GET my listings (all statuses) ─────────────────────────────────────
+// GET my listings — auth (all statuses)
 router.get('/mine', authMiddleware, async (req, res) => {
   try {
     const { data, error } = await db.from('properties')
-      .select('*').eq('listedby', req.user.id).order('postedat', { ascending: false });
+      .select('*')
+      .eq('listed_by', req.user.id)
+      .order('posted_at', { ascending: false });
     if (error) throw error;
-    res.json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+    res.json(data || []);
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── PUBLIC: GET single property ───────────────────────────────────────────────
+// GET single — public
 router.get('/:id', async (req, res) => {
   try {
-    const { data, error } = await db.from('properties').select('*').eq('id', req.params.id).single();
+    const { data, error } = await db.from('properties')
+      .select('*').eq('id', req.params.id).single();
     if (error || !data) return res.status(404).json({ error: 'Property not found' });
     res.json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── AUTH: POST create listing ─────────────────────────────────────────────────
+// POST create — auth (starts as pending)
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const payload = {
-      ...pickFields(req.body),          // strips unknown fields like agencyname
-      listedby: req.user.id,
-      status:   'pending',
-      postedat: new Date().toISOString(),
+      ...req.body,
+      listed_by: req.user.id,
+      status:    'pending',
+      posted_at: new Date().toISOString(),
     };
     const { data, error } = await db.from('properties').insert(payload).select().single();
     if (error) throw error;
     res.status(201).json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── AUTH: PATCH update listing (owner only, resets to pending) ────────────────
+// PATCH update — owner only (resets to pending for re-review)
 router.patch('/:id', authMiddleware, async (req, res) => {
   try {
     const { data: ex } = await db.from('properties')
-      .select('listedby').eq('id', req.params.id).single();
-    if (!ex)                          return res.status(404).json({ error: 'Not found' });
-    if (ex.listedby !== req.user.id)  return res.status(403).json({ error: 'Forbidden' });
-
+      .select('listed_by').eq('id', req.params.id).single();
+    if (!ex) return res.status(404).json({ error: 'Not found' });
+    if (ex.listed_by !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
     const { data, error } = await db.from('properties')
-      .update({
-        ...pickFields(req.body),        // strips unknown fields like agencyname
-        status:    'pending',
-        updatedat: new Date().toISOString(),
-      })
+      .update({ ...req.body, status: 'pending', updated_at: new Date().toISOString() })
       .eq('id', req.params.id).select().single();
     if (error) throw error;
     res.json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── AUTH: DELETE listing (owner only) ────────────────────────────────────────
+// DELETE — owner only
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const { data: ex } = await db.from('properties')
-      .select('listedby').eq('id', req.params.id).single();
-    if (!ex)                          return res.status(404).json({ error: 'Not found' });
-    if (ex.listedby !== req.user.id)  return res.status(403).json({ error: 'Forbidden' });
+      .select('listed_by').eq('id', req.params.id).single();
+    if (!ex) return res.status(404).json({ error: 'Not found' });
+    if (ex.listed_by !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
     const { error } = await db.from('properties').delete().eq('id', req.params.id);
     if (error) throw error;
     res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;
