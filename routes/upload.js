@@ -39,7 +39,10 @@ const upload = multer({
 
 // ── E49 Round Stamp (only applied to app uploads) ────────────────────────────
 // Web already stamps client-side via Canvas — no double-stamp needed.
-// App sends X-Upload-Source: app header → server stamps here.
+// App sends x-upload-source: app header → server stamps here.
+//
+// ✅ FIX: sharp uses librsvg which does NOT support dominant-baseline="central"
+// Text y is set to cy + (fs * 0.35) to manually center the baseline inside ring.
 async function stampE49(buffer) {
   const meta = await sharp(buffer).metadata();
   const W   = meta.width  || 1280;
@@ -52,6 +55,7 @@ async function stampE49(buffer) {
   const fs  = Math.round(r * 0.50);
   const lw1 = Math.max(1, Math.round(r * 0.07));
   const lw2 = Math.max(1, Math.round(r * 0.03));
+  const ty  = cy + Math.round(fs * 0.35);   // ✅ manual vertical centre
 
   const svg = Buffer.from(`
     <svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
@@ -62,9 +66,8 @@ async function stampE49(buffer) {
         fill="none" stroke="#c0392b"
         stroke-width="${lw2}" stroke-opacity="0.18"/>
       <text
-        x="${cx}" y="${cy}"
+        x="${cx}" y="${ty}"
         text-anchor="middle"
-        dominant-baseline="central"
         font-family="Arial,Helvetica,sans-serif"
         font-size="${fs}"
         font-weight="900"
@@ -84,8 +87,8 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-    // App sends X-Upload-Source: app → stamp watermark server-side
-    // Web uploads are already stamped client-side via Canvas → pass through as-is
+    // App sends x-upload-source: app → stamp watermark server-side
+    // Web uploads already stamped client-side via Canvas → pass through as-is
     const isApp      = req.headers['x-upload-source'] === 'app';
     const fileBuffer = isApp ? await stampE49(req.file.buffer) : req.file.buffer;
     const mimeType   = isApp ? 'image/jpeg' : req.file.mimetype;
