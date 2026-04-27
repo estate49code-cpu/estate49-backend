@@ -38,75 +38,71 @@ const upload = multer({
 
 
 // ── E49 Round Stamp ───────────────────────────────────────────────────────────
-// ✅ FONT-FREE: E49 is drawn as pure SVG <rect> elements (7-segment style).
-//    This works on every server — no Arial/Helvetica/DejaVu needed.
-//    Previous approach used SVG <text> which showed □□□ because server fonts
-//    (Arial, Helvetica) are not installed in librsvg on Linux.
+// Font-free: E49 drawn as pure SVG <rect> elements — no server fonts needed.
+// Watermark style: light, absorbed look — visible only on close inspection.
 async function stampE49(buffer) {
   const meta = await sharp(buffer).metadata();
   const W  = meta.width  || 1280;
   const H  = meta.height || 960;
 
-  // Stamp size: 11% of shorter dimension
   const r   = Math.round(Math.min(W, H) * 0.11);
-  const mg  = Math.round(r * 0.50);       // margin from edge
-  const cx  = mg + r;                     // stamp centre x
-  const cy  = mg + r;                     // stamp centre y
-  const r2  = Math.round(r * 0.70);       // inner ring radius
-  const lw1 = Math.max(2, Math.round(r * 0.08));
-  const lw2 = Math.max(1, Math.round(r * 0.035));
+  const mg  = Math.round(r * 0.50);
+  const cx  = mg + r;
+  const cy  = mg + r;
+  const r2  = Math.round(r * 0.70);
+  const lw1 = Math.max(1, Math.round(r * 0.05));   // ✅ thinner outer ring
+  const lw2 = Math.max(1, Math.round(r * 0.02));   // ✅ thinner inner ring
   const col = '#c0392b';
 
-  // ── E49 as pure rectangles ────────────────────────────────────────────────
-  // Unit grid per character: 36w × 56h, bar thickness t=7
-  // Three chars side by side with gap=10 → total: 128w × 56h
-  // Char offsets: E=0, 4=46, 9=92
-  const UW = 128, UH = 56;
-  const sc = (r2 * 1.45) / UW;            // scale to fill ~72% of inner ring diameter
-  const ox = cx - (UW * sc) / 2;          // text block left edge (horizontally centred)
-  const oy = cy - (UH * sc) / 2;          // text block top edge  (vertically centred)
-  const t  = 7;                           // bar thickness in unit coords
-  const op = 0.80;                        // opacity — clearly visible on any background
+  // ── Watermark opacities — light absorbed watercolor look ─────────────────
+  const ringOp1 = 0.18;   // outer ring  — very faint
+  const ringOp2 = 0.12;   // inner ring  — even fainter
+  const textOp  = 0.22;   // E49 bars    — subtle, absorbed into photo
 
-  // Helper: unit-coord rect → absolute SVG rect string
+  const UW = 128, UH = 56;
+  const sc = (r2 * 1.45) / UW;
+  const ox = cx - (UW * sc) / 2;
+  const oy = cy - (UH * sc) / 2;
+  const t  = 7;
+
   function R(ux, uy, uw, uh) {
     const x = (ox + ux * sc).toFixed(1);
     const y = (oy + uy * sc).toFixed(1);
     const w = (uw * sc).toFixed(1);
     const h = (uh * sc).toFixed(1);
-    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${col}" fill-opacity="${op}" rx="1.5"/>`;
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${col}" fill-opacity="${textOp}" rx="1.5"/>`;
   }
 
-  // ── Letter E (offset x=0) ─────────────────────────────────────────────────
+  // Letter E
   const E = [
-    R( 0,  0,  t, 56),   // left vertical (full height)
-    R( 0,  0, 36,  t),   // top bar
-    R( 0, 24, 30,  t),   // middle bar (slightly shorter for classic E look)
-    R( 0, 49, 36,  t),   // bottom bar
+    R( 0,  0,  t, 56),
+    R( 0,  0, 36,  t),
+    R( 0, 24, 30,  t),
+    R( 0, 49, 36,  t),
   ].join('');
 
-  // ── Number 4 (offset x=46) ───────────────────────────────────────────────
+  // Number 4
   const o4 = 46;
   const N4 = [
-    R(o4,      0,  t, 32),   // left arm (top half only)
-    R(o4,     24, 36,  t),   // crossbar
-    R(o4 + 29, 0,  t, 56),  // right vertical (full height)
+    R(o4,       0,  t, 32),
+    R(o4,      24, 36,  t),
+    R(o4 + 29,  0,  t, 56),
   ].join('');
 
-  // ── Number 9 (offset x=92) ───────────────────────────────────────────────
+  // Number 9
   const o9 = 92;
   const N9 = [
-    R(o9,       0, 36,  t),   // top bar
-    R(o9,       0,  t, 32),   // left arm (top half only — makes the closed top loop)
-    R(o9,      24, 36,  t),   // middle bar
-    R(o9 + 29,  0,  t, 56),  // right vertical (full height — the tail of 9)
+    R(o9,       0, 36,  t),
+    R(o9,       0,  t, 32),
+    R(o9,      24, 36,  t),
+    R(o9 + 29,  0,  t, 56),
   ].join('');
 
   const svg = Buffer.from(`<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
     <circle cx="${cx}" cy="${cy}" r="${r}"
-      fill="none" stroke="${col}" stroke-width="${lw1}" stroke-opacity="0.55"/>
+      fill="none" stroke="${col}" stroke-width="${lw1}" stroke-opacity="${ringOp1}"/>
     <circle cx="${cx}" cy="${cy}" r="${r2}"
-      fill="none" stroke="${col}" stroke-width="${lw2}" stroke-opacity="0.40"/>
+      fill="none" stroke="${col}" stroke-width="${lw2}" stroke-opacity="${ringOp2}"/>
     ${E}${N4}${N9}
   </svg>`);
 
@@ -122,8 +118,6 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-    // App sends x-upload-source: app → stamp watermark server-side
-    // Web uploads already stamped client-side via Canvas → pass through as-is
     const isApp      = req.headers['x-upload-source'] === 'app';
     const fileBuffer = isApp ? await stampE49(req.file.buffer) : req.file.buffer;
     const mimeType   = isApp ? 'image/jpeg' : req.file.mimetype;
