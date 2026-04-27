@@ -190,7 +190,7 @@ function renderTable(){
   el.innerHTML=filtered.map(t=>{
     const hasReply=!!t.admin_reply;
     const isNew=!hasReply&&t.status==='open';
-    const userName=t.profiles?.fullname||'—';
+    const userName=t.user_name||t.user_email||'—';
     const isExp=expandedId===t.id;
     // ✅ Ad ID chip in row
     const adIdChip=t.ad_id?`<span class="ad-id-chip">🪪 ${x(t.ad_id)}</span>`:'';

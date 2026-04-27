@@ -1,6 +1,5 @@
-// routes/support.js
-const express = require('express');
-const router = express.Router();
+const express       = require('express');
+const router        = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
@@ -8,74 +7,85 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-// ── Admin emails — hardcoded + env var fallback ────────────
+// Admin emails — hardcoded + env var
 const ADMIN_EMAILS = [
   'estate49code@gmail.com',
-  ...(process.env.ADMIN_EMAILS || '').split(',').map(e => e.toLowerCase().trim()).filter(Boolean)
+  ...(process.env.ADMIN_EMAILS || '').split(',').map(e => e.toLowerCase().trim()).filter(Boolean),
 ];
 
-// ── MIDDLEWARE: get user from JWT ──────────────────────────
+// ── Get user from JWT ─────────────────────────────────────────────────────────
 async function getUser(req) {
-  const auth = req.headers.authorization || '';
-  const token = auth.replace('Bearer ', '').trim();
+  const auth  = req.headers.authorization;
+  const token = auth?.replace('Bearer ', '').trim();
   if (!token) return null;
   const { data: { user }, error } = await supabase.auth.getUser(token);
   return error ? null : user;
 }
 
 function isAdmin(user) {
-  if (!user || !user.email) return false;
+  if (!user?.email) return false;
   return ADMIN_EMAILS.includes(user.email.toLowerCase().trim());
 }
 
-// ── CLIENT: GET /api/support — my tickets ─────────────────
+
+// ── CLIENT: GET /api/support — my tickets ────────────────────────────────────
 router.get('/', async (req, res) => {
   const user = await getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
   const { data, error } = await supabase
     .from('support_tickets')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
-// ── CLIENT: POST /api/support — raise ticket ──────────────
+
+// ── CLIENT: POST /api/support — raise ticket ──────────────────────────────────
 router.post('/', async (req, res) => {
   const user = await getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
-  const { subject, category, message, priority } = req.body;
+
+  const { subject, category, message, priority, ad_id } = req.body;
   if (!subject || !message) return res.status(400).json({ error: 'Subject and message required' });
+
   const { data, error } = await supabase
     .from('support_tickets')
-    .insert([{
-      user_id: user.id,
-      subject: subject.trim(),
-      category: category || 'general',
-      message: message.trim(),
-      priority: priority || 'normal',
-      status: 'open'
-    }])
+    .insert({
+      user_id:    user.id,
+      user_email: user.email,                                          // ✅ store email
+      user_name:  user.user_metadata?.fullname || user.email,          // ✅ store name
+      subject:    subject.trim(),
+      category:   category   || 'general',
+      message:    message.trim(),
+      priority:   priority   || 'normal',
+      status:     'open',
+      ad_id:      ad_id ? ad_id.trim().toUpperCase() : null,           // ✅ store ad_id
+    })
     .select()
     .single();
+
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
 });
 
-// ── ADMIN: GET /api/support/admin/all — all tickets ───────
+
+// ── ADMIN: GET /api/support/admin/all — all tickets ───────────────────────────
+// ✅ MUST be before /:id route or Express swallows it as id="admin"
 router.get('/admin/all', async (req, res) => {
   const user = await getUser(req);
   if (!isAdmin(user)) return res.status(403).json({ error: 'Forbidden' });
 
   const { status, priority, category } = req.query;
-
   let q = supabase
     .from('support_tickets')
-    .select('*')                      // ← no profiles join
+    .select('*')                       // user_name + user_email already in the row
     .order('created_at', { ascending: false });
 
-  if (status)   q = q.eq('status', status);
+  if (status)   q = q.eq('status',   status);
   if (priority) q = q.eq('priority', priority);
   if (category) q = q.eq('category', category);
 
@@ -84,41 +94,50 @@ router.get('/admin/all', async (req, res) => {
   res.json(data);
 });
 
-// ── ADMIN: PATCH /api/support/admin/:id — reply + status ──
+
+// ── ADMIN: PATCH /api/support/admin/:id — reply + status + priority ───────────
 router.patch('/admin/:id', async (req, res) => {
   const user = await getUser(req);
   if (!isAdmin(user)) return res.status(403).json({ error: 'Forbidden' });
+
   const { admin_reply, status, priority } = req.body;
   const updates = { updated_at: new Date().toISOString() };
+
   if (admin_reply !== undefined) {
-    updates.admin_reply = admin_reply;
+    updates.admin_reply      = admin_reply;
     updates.admin_replied_at = new Date().toISOString();
   }
-  if (status)   updates.status = status;
+  if (status)   updates.status   = status;
   if (priority) updates.priority = priority;
+
   const { data, error } = await supabase
     .from('support_tickets')
     .update(updates)
     .eq('id', req.params.id)
     .select()
     .single();
+
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
-// ── CLIENT: GET /api/support/:id — ticket detail ──────────
-// ⚠️ This MUST come AFTER /admin/all to avoid swallowing it
+
+// ── CLIENT: GET /api/support/:id — single ticket ──────────────────────────────
+// ✅ MUST be AFTER /admin/all to avoid swallowing it
 router.get('/:id', async (req, res) => {
   const user = await getUser(req);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
+
   const { data, error } = await supabase
     .from('support_tickets')
     .select('*')
-    .eq('id', req.params.id)
+    .eq('id',      req.params.id)
     .eq('user_id', user.id)
     .single();
+
   if (error || !data) return res.status(404).json({ error: 'Not found' });
   res.json(data);
 });
+
 
 module.exports = router;
