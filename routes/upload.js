@@ -4,6 +4,7 @@ const multer   = require('multer');
 const sharp    = require('sharp');
 const { createClient } = require('@supabase/supabase-js');
 
+
 // ── Auth middleware ───────────────────────────────────────────────────────────
 function requireAuth(req, res, next) {
   const token = req.headers.authorization?.replace('Bearer ', '').trim();
@@ -16,12 +17,14 @@ function requireAuth(req, res, next) {
   });
 }
 
+
 // ── Supabase service-role client (lazy) ──────────────────────────────────────
 let sb;
 function getSB() {
   if (!sb) sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
   return sb;
 }
+
 
 // ── Multer: memory storage ────────────────────────────────────────────────────
 const upload = multer({
@@ -32,6 +35,7 @@ const upload = multer({
     cb(null, true);
   },
 });
+
 
 // ── E49 Round Stamp (only applied to app uploads) ────────────────────────────
 // Web already stamps client-side via Canvas — no double-stamp needed.
@@ -74,6 +78,7 @@ async function stampE49(buffer) {
     .toBuffer();
 }
 
+
 // ── POST /api/upload ──────────────────────────────────────────────────────────
 router.post('/', requireAuth, upload.single('file'), async (req, res) => {
   try {
@@ -81,7 +86,7 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
 
     // App sends X-Upload-Source: app → stamp watermark server-side
     // Web uploads are already stamped client-side via Canvas → pass through as-is
-    const isApp     = req.headers['x-upload-source'] === 'app';
+    const isApp      = req.headers['x-upload-source'] === 'app';
     const fileBuffer = isApp ? await stampE49(req.file.buffer) : req.file.buffer;
     const mimeType   = isApp ? 'image/jpeg' : req.file.mimetype;
     const ext        = isApp ? 'jpg' : (req.file.mimetype === 'image/png' ? 'png' : 'jpg');
@@ -107,6 +112,7 @@ router.post('/', requireAuth, upload.single('file'), async (req, res) => {
   }
 });
 
+
 // ── DELETE /api/upload ────────────────────────────────────────────────────────
 router.delete('/', requireAuth, async (req, res) => {
   try {
@@ -127,5 +133,6 @@ router.delete('/', requireAuth, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 module.exports = router;
