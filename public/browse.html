@@ -37,29 +37,25 @@
     body{min-height:100vh}
     .page{display:none}
 
-    .browse-shell{
-      min-height:100vh;
-      background:
-        radial-gradient(circle at top left, rgba(192,57,43,.05), transparent 22%),
-        linear-gradient(180deg, #fbfbfa 0%, #f7f6f2 100%);
-    }
-
+    /* ── Header ─────────────────────────────────────────────── */
     .browse-header{
       position:sticky;
       top:var(--nav-h, 70px);
       z-index:30;
-      background:rgba(255,255,255,.92);
-      backdrop-filter:blur(14px);
-      border-bottom:1px solid rgba(229,231,235,.85);
-      box-shadow:0 10px 28px rgba(15,23,42,.04);
+      background:rgba(255,255,255,.96);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(229,231,235,.9);
+      box-shadow:0 10px 28px rgba(15,23,42,.05);
     }
 
     .browse-header-inner{
-      max-width:1320px;
+      max-width:1360px;
       margin:0 auto;
-      padding:14px 20px 12px;
+      padding:14px 20px 14px;
     }
 
+    /* ── Search row ─────────────────────────────────────────── */
     .top-row{
       display:flex;
       align-items:center;
@@ -71,26 +67,22 @@
       flex:1;
       display:flex;
       align-items:center;
-      gap:10px;
+      gap:9px;
       min-height:48px;
       padding:0 12px 0 14px;
       border:1.5px solid var(--line);
       border-radius:16px;
       background:#f8fafc;
-      box-shadow:inset 0 1px 0 rgba(255,255,255,.9);
+      transition:border-color .2s, box-shadow .2s;
     }
 
     .search-box:focus-within{
-      border-color:rgba(192,57,43,.55);
+      border-color:rgba(192,57,43,.5);
       background:#fff;
-      box-shadow:0 0 0 4px rgba(192,57,43,.08);
+      box-shadow:0 0 0 4px rgba(192,57,43,.07);
     }
 
-    .search-icon{
-      font-size:16px;
-      color:#94a3b8;
-      flex-shrink:0;
-    }
+    .search-icon{font-size:16px;color:#94a3b8;flex-shrink:0}
 
     .search-input{
       flex:1;
@@ -100,43 +92,53 @@
       font-size:14px;
       font-weight:600;
       color:var(--text-strong);
+      font-family:inherit;
       min-width:0;
     }
-
     .search-input::placeholder{color:#9ca3af;font-weight:500}
 
-    .clear-btn{
+    .clear-filters-btn{
+      display:none;
+      align-items:center;
+      gap:6px;
       border:none;
       background:#fee2e2;
       color:var(--brand);
-      height:30px;
-      padding:0 10px;
+      height:32px;
+      padding:0 11px;
       border-radius:10px;
       font-size:11px;
       font-weight:800;
       cursor:pointer;
       white-space:nowrap;
+      flex-shrink:0;
     }
+    .clear-filters-btn.show{display:inline-flex}
 
-    .list-free-top{
+    .list-free-btn{
       display:inline-flex;
       align-items:center;
       justify-content:center;
       gap:7px;
       min-height:48px;
-      padding:0 14px;
+      padding:0 18px;
       border:none;
       border-radius:14px;
-      background:linear-gradient(180deg, #cf4a3b 0%, #c0392b 100%);
+      background:linear-gradient(180deg,#cf4a3b 0%,#c0392b 100%);
       color:#fff;
       font-size:13px;
       font-weight:800;
+      font-family:inherit;
       text-decoration:none;
-      box-shadow:0 10px 24px rgba(192,57,43,.24);
-      flex-shrink:0;
       white-space:nowrap;
+      flex-shrink:0;
+      box-shadow:0 10px 24px rgba(192,57,43,.22);
+      cursor:pointer;
+      transition:background .2s, transform .15s;
     }
+    .list-free-btn:hover{background:#a93226;transform:translateY(-1px)}
 
+    /* ── Type tabs ──────────────────────────────────────────── */
     .type-tabs{
       display:flex;
       gap:4px;
@@ -146,22 +148,20 @@
       border-radius:14px;
       margin-bottom:12px;
       width:max-content;
-      min-width:320px;
-      max-width:100%;
     }
 
     .type-tab{
-      flex:1;
-      min-width:92px;
       border:none;
       background:transparent;
       color:#64748b;
       border-radius:11px;
-      padding:10px 14px;
+      padding:10px 22px;
       font-size:13px;
       font-weight:700;
       cursor:pointer;
+      font-family:inherit;
       transition:.2s ease;
+      white-space:nowrap;
     }
 
     .type-tab.active{
@@ -170,91 +170,106 @@
       box-shadow:0 4px 14px rgba(15,23,42,.08);
     }
 
-    .filter-rail{
+    /* ── Dropdown filter bar ────────────────────────────────── */
+    .filter-bar{
       display:flex;
-      align-items:flex-start;
-      gap:16px;
-      overflow-x:auto;
-      padding:2px 2px 6px;
-      scrollbar-width:none;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
     }
-    .filter-rail::-webkit-scrollbar{display:none}
 
-    .filter-group{
+    .fgroup{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+      flex:1 1 auto;
+      min-width:118px;
+    }
+
+    .flabel{
+      font-size:10px;
+      font-weight:800;
+      color:#94a3b8;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      padding-left:2px;
+      white-space:nowrap;
+    }
+
+    .fsel{
+      appearance:none;
+      -webkit-appearance:none;
+      width:100%;
+      min-height:40px;
+      padding:0 30px 0 11px;
+      border:1.5px solid var(--line);
+      border-radius:12px;
+      background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+      background-size:14px;
+      font-size:13px;
+      font-weight:600;
+      color:var(--text-strong);
+      font-family:inherit;
+      cursor:pointer;
+      transition:border-color .18s, box-shadow .18s;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .fsel:focus{
+      outline:none;
+      border-color:rgba(192,57,43,.5);
+      box-shadow:0 0 0 4px rgba(192,57,43,.07);
+    }
+
+    .fsel.active{
+      border-color:var(--brand);
+      color:var(--brand);
+      background-color:#fff5f5;
+      font-weight:800;
+    }
+
+    .fsel-sort{
+      flex:0 0 auto;
+      min-width:132px;
+    }
+
+    /* ── Results bar ────────────────────────────────────────── */
+    .results-bar{
+      max-width:1360px;
+      margin:0 auto;
+      padding:11px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid rgba(229,231,235,.7);
+      background:rgba(255,255,255,.7);
+    }
+
+    .results-count{
+      font-size:13px;
+      font-weight:600;
+      color:var(--text-soft);
+      white-space:nowrap;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .results-right{
       display:flex;
       align-items:center;
       gap:8px;
       flex-shrink:0;
     }
 
-    .filter-label{
-      font-size:11px;
-      font-weight:800;
-      color:#94a3b8;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      flex-shrink:0;
-    }
-
-    .chip-row{
-      display:flex;
-      align-items:center;
-      gap:7px;
-      flex-shrink:0;
-    }
-
-    .chip{
-      border:1.5px solid var(--line);
-      background:#fff;
-      color:#475569;
-      border-radius:999px;
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:700;
-      cursor:pointer;
-      white-space:nowrap;
-      transition:.2s ease;
-      box-shadow:0 2px 7px rgba(15,23,42,.03);
-    }
-
-    .chip:hover{transform:translateY(-1px); border-color:#d1d5db}
-    .chip.active{
-      background:var(--brand);
-      color:#fff;
-      border-color:var(--brand);
-      box-shadow:0 10px 20px rgba(192,57,43,.18);
-    }
-
-    .divider{
-      width:1px;
-      height:22px;
-      background:#e2e8f0;
-      border-radius:999px;
-      flex-shrink:0;
-      align-self:center;
-    }
-
-    .results-bar{
-      max-width:1320px;
-      margin:0 auto;
-      padding:12px 20px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      color:var(--text-soft);
-      font-size:13px;
-      font-weight:600;
-    }
-
-    .results-left{min-width:0}
-    .results-count{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-
-    .results-cta{
+    .results-list-btn{
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      gap:7px;
+      gap:6px;
       background:var(--brand);
       color:#fff;
       text-decoration:none;
@@ -262,14 +277,16 @@
       padding:8px 12px;
       font-size:12px;
       font-weight:800;
-      box-shadow:0 8px 18px rgba(192,57,43,.18);
-      flex-shrink:0;
+      box-shadow:0 6px 16px rgba(192,57,43,.18);
+      transition:background .18s;
     }
+    .results-list-btn:hover{background:var(--brand-dark)}
 
+    /* ── Grid ───────────────────────────────────────────────── */
     .grid-wrap{
-      max-width:1320px;
+      max-width:1360px;
       margin:0 auto;
-      padding:0 20px 28px;
+      padding:20px 20px 32px;
     }
 
     .property-grid{
@@ -278,338 +295,144 @@
       gap:18px;
     }
 
+    /* ── Card ───────────────────────────────────────────────── */
     .card{
       background:var(--card-bg);
       border:1px solid rgba(229,231,235,.95);
       border-radius:22px;
       overflow:hidden;
       box-shadow:var(--shadow-card);
-      transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+      transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
       cursor:pointer;
       display:flex;
       flex-direction:column;
-      min-width:0;
     }
+    .card:hover{transform:translateY(-3px);border-color:rgba(192,57,43,.2);box-shadow:0 16px 38px rgba(15,23,42,.11)}
 
-    .card:hover{
-      transform:translateY(-3px);
-      border-color:rgba(192,57,43,.18);
-      box-shadow:0 16px 34px rgba(15,23,42,.11);
-    }
-
-    .img-wrap{
-      position:relative;
-      height:196px;
-      background:#eef2f7;
-      overflow:hidden;
-    }
-
-    .card-img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      transition:transform .35s ease;
-    }
-
+    .img-wrap{position:relative;height:194px;background:#eef2f7;overflow:hidden}
+    .card-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .38s ease}
     .card:hover .card-img{transform:scale(1.04)}
-
-    .img-ph{
-      width:100%;
-      height:100%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(180deg, #f3f4f6 0%, #e5e7eb 100%);
-      font-size:44px;
-    }
+    .img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px;background:linear-gradient(180deg,#f3f4f6,#e5e7eb)}
 
     .type-badge{
-      position:absolute;
-      top:10px;
-      left:10px;
-      padding:5px 10px;
-      border-radius:8px;
-      color:#fff;
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:.05em;
-      z-index:2;
+      position:absolute;top:10px;left:10px;z-index:2;
+      padding:5px 10px;border-radius:8px;color:#fff;
+      font-size:11px;font-weight:800;letter-spacing:.05em;
     }
-
     .type-badge.rent{background:var(--blue)}
     .type-badge.buy{background:var(--green)}
 
     .heart-btn{
-      position:absolute;
-      top:8px;
-      right:8px;
-      width:38px;
-      height:38px;
-      border:none;
-      border-radius:50%;
-      background:rgba(255,255,255,.92);
-      backdrop-filter:blur(8px);
-      box-shadow:0 8px 18px rgba(15,23,42,.14);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:16px;
-      cursor:pointer;
-      z-index:2;
+      position:absolute;top:8px;right:8px;z-index:2;
+      width:38px;height:38px;border:none;border-radius:50%;
+      background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+      display:flex;align-items:center;justify-content:center;
+      font-size:16px;cursor:pointer;box-shadow:0 8px 18px rgba(15,23,42,.14);
     }
-
     .heart-btn.saved{background:#fff5f5}
 
     .e49{
-      position:absolute;
-      bottom:8px;
-      right:8px;
-      background:var(--brand);
-      color:#fff;
-      padding:4px 8px;
-      border-radius:7px;
-      font-size:10px;
-      font-weight:900;
-      letter-spacing:.08em;
-      z-index:2;
-      opacity:.96;
+      position:absolute;bottom:8px;right:8px;z-index:2;
+      background:var(--brand);color:#fff;
+      padding:4px 8px;border-radius:7px;
+      font-size:10px;font-weight:900;letter-spacing:.08em;opacity:.96;
     }
 
-    .card-body{
-      padding:14px 14px 12px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-width:0;
-      flex:1;
-    }
+    .card-body{padding:14px;display:flex;flex-direction:column;gap:7px;flex:1;min-width:0}
 
-    .price-row{
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      gap:10px;
-      min-width:0;
-    }
+    .price-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;min-width:0}
+    .price{font-size:21px;line-height:1.1;font-weight:900;color:var(--brand);min-width:0}
+    .price-sub{font-size:13px;font-weight:500;color:#9ca3af}
+    .price-na{font-size:14px;color:#9ca3af;font-style:italic;font-weight:600}
+    .deposit{flex-shrink:0;font-size:11px;color:#7c4a03;background:#fff3e0;padding:4px 8px;border-radius:8px;font-weight:700}
 
-    .price{
-      font-size:21px;
-      line-height:1.1;
-      font-weight:900;
-      color:var(--brand);
-      min-width:0;
-    }
+    .ctitle{font-size:15px;font-weight:800;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cloc{font-size:12px;color:var(--text-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    .price-sub{
-      font-size:13px;
-      font-weight:500;
-      color:#9ca3af;
-    }
+    .stats-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+    .stat{font-size:11px;font-weight:700;color:#4b5563;background:#f5f5f5;padding:4px 8px;border-radius:8px}
+    .stat-type{font-size:11px;font-weight:800;color:var(--blue);background:var(--blue-soft);padding:4px 8px;border-radius:8px}
 
-    .price-na{
-      font-size:14px;
-      color:#9ca3af;
-      font-style:italic;
-      font-weight:600;
-    }
-
-    .deposit{
-      flex-shrink:0;
-      font-size:11px;
-      color:#7c4a03;
-      background:#fff3e0;
-      padding:4px 8px;
-      border-radius:8px;
-      font-weight:700;
-    }
-
-    .title{
-      font-size:15px;
-      font-weight:800;
-      color:var(--text-strong);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .loc{
-      font-size:12px;
-      color:var(--text-soft);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .stats-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      margin-top:2px;
-    }
-
-    .stat{
-      font-size:11px;
-      font-weight:700;
-      color:#4b5563;
-      background:#f5f5f5;
-      padding:4px 8px;
-      border-radius:8px;
-    }
-
-    .stat-type{
-      font-size:11px;
-      font-weight:800;
-      color:var(--blue);
-      background:var(--blue-soft);
-      padding:4px 8px;
-      border-radius:8px;
-    }
-
-    .badge-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      margin-top:2px;
-    }
-
+    .badge-row{display:flex;flex-wrap:wrap;gap:6px}
     .mini-badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:4px 8px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      border:1px solid transparent;
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:4px 8px;border-radius:999px;
+      font-size:11px;font-weight:800;border:1px solid transparent;
     }
+    .mini-badge.vastu{background:var(--green-soft);color:var(--green);border-color:#a5d6a7}
+    .mini-badge.zero{background:var(--amber-soft);color:var(--amber);border-color:#ffe082}
+    .mini-badge.face{background:var(--purple-soft);color:var(--purple);border-color:#ce93d8}
 
-    .mini-badge.vastu{background:var(--green-soft); color:var(--green); border-color:#a5d6a7}
-    .mini-badge.zero{background:var(--amber-soft); color:var(--amber); border-color:#ffe082}
-    .mini-badge.face{background:var(--purple-soft); color:var(--purple); border-color:#ce93d8}
-
-    .card-actions{
-      display:flex;
-      gap:8px;
-      padding:10px 12px 12px;
-      border-top:1px solid var(--line-soft);
-    }
-
+    .card-actions{display:flex;gap:8px;padding:10px 12px 12px;border-top:1px solid var(--line-soft)}
     .btn{
-      border:none;
-      border-radius:11px;
-      min-height:42px;
-      padding:0 14px;
-      font-size:13px;
-      font-weight:800;
-      cursor:pointer;
-      transition:.2s ease;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
+      border:none;border-radius:11px;min-height:42px;padding:0 14px;
+      font-size:13px;font-weight:800;cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;
+      text-decoration:none;font-family:inherit;transition:.18s ease;
     }
-
-    .btn-primary{
-      flex:1;
-      background:var(--brand);
-      color:#fff;
-      box-shadow:0 8px 18px rgba(192,57,43,.18);
-    }
-
+    .btn-primary{flex:1;background:var(--brand);color:#fff;box-shadow:0 8px 18px rgba(192,57,43,.18)}
     .btn-primary:hover{background:var(--brand-dark)}
-
-    .btn-secondary{
-      flex:1;
-      background:#fff;
-      color:#1f2937;
-      border:1.5px solid var(--line);
-    }
-
-    .btn-secondary:hover{
-      border-color:#d1d5db;
-      background:#fafafa;
-    }
-
+    .btn-secondary{flex:1;background:#fff;color:#1f2937;border:1.5px solid var(--line)}
+    .btn-secondary:hover{border-color:#d1d5db;background:#fafafa}
     .own-pill{
-      flex:1;
-      min-height:42px;
-      border-radius:11px;
-      background:#effaf1;
-      color:var(--green);
-      border:1px solid #b7dfbb;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:12px;
-      font-weight:800;
-      padding:0 12px;
-      text-align:center;
+      flex:1;min-height:42px;border-radius:11px;
+      background:#effaf1;color:var(--green);border:1px solid #b7dfbb;
+      display:flex;align-items:center;justify-content:center;
+      font-size:12px;font-weight:800;padding:0 12px;text-align:center;
     }
 
+    /* ── Empty & Load more ──────────────────────────────────── */
     .empty-state{
-      grid-column:1/-1;
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:22px;
-      padding:46px 20px;
-      text-align:center;
-      box-shadow:var(--shadow-soft);
+      grid-column:1/-1;background:#fff;border:1px solid var(--line);
+      border-radius:22px;padding:48px 20px;text-align:center;box-shadow:var(--shadow-soft);
     }
-
     .empty-icon{font-size:54px;margin-bottom:10px}
     .empty-title{font-size:20px;font-weight:800;margin-bottom:6px}
     .empty-sub{font-size:14px;color:var(--text-soft);margin-bottom:18px}
 
-    .load-more-wrap{
-      display:flex;
-      justify-content:center;
-      padding:28px 0 6px;
+    .load-more-wrap{display:flex;justify-content:center;padding:24px 0 4px}
+    .load-more-btn{
+      min-height:46px;padding:0 24px;border-radius:14px;
+      border:1.5px solid var(--line);background:#fff;
+      color:#111827;font-size:13px;font-weight:800;
+      cursor:pointer;font-family:inherit;box-shadow:var(--shadow-soft);
     }
 
-    .load-more{
-      min-height:46px;
-      padding:0 18px;
-      border-radius:14px;
-      border:1.5px solid var(--line);
-      background:#fff;
-      color:#111827;
-      font-size:13px;
-      font-weight:800;
-      cursor:pointer;
-      box-shadow:var(--shadow-soft);
-    }
-
-    @media (max-width: 980px){
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media(max-width:1024px){
       .property-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
 
-    @media (max-width: 768px){
-      .browse-header{top:var(--nav-h, 64px)}
-      .browse-header-inner{padding:12px 12px 10px}
-      .top-row{gap:8px}
-      .search-box{min-height:46px;border-radius:14px}
-      .list-free-top{padding:0 12px;border-radius:12px;font-size:12px}
-      .type-tabs{width:100%;min-width:0}
-      .type-tab{min-width:0;padding:10px 10px}
-      .results-bar{padding:10px 12px}
-      .grid-wrap{padding:0 12px 22px}
-      .property-grid{grid-template-columns:1fr;gap:14px}
+    @media(max-width:768px){
+      .browse-header{top:var(--nav-h,64px)}
+      .browse-header-inner{padding:10px 12px 12px}
+      .top-row{gap:8px;margin-bottom:10px}
+      .search-box{min-height:44px;border-radius:14px}
+      .list-free-btn{min-height:44px;padding:0 13px;font-size:12px;border-radius:12px}
+      .type-tabs{width:100%;margin-bottom:10px}
+      .type-tab{flex:1;padding:9px 10px;text-align:center}
+      .filter-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+      .fgroup{min-width:0}
+      .fsel{font-size:13px;min-height:42px;border-radius:12px}
+      .fsel-sort{min-width:0}
+      .results-bar{padding:9px 12px}
+      .grid-wrap{padding:12px 12px 24px}
+      .property-grid{grid-template-columns:1fr;gap:12px}
       .card{border-radius:18px}
       .img-wrap{height:190px}
-      .card-body{padding:12px}
-      .price{font-size:20px}
-      .card-actions{padding:10px 10px 10px}
     }
 
-    @media (max-width: 420px){
-      .list-free-top{display:none}
-      .results-cta{padding:8px 10px}
-      .title{font-size:14px}
-      .price{font-size:19px}
+    @media(min-width:500px) and (max-width:768px){
+      .property-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
 
-    @media (hover:none){
+    @media(max-width:420px){
+      .list-free-btn{display:none}
+      .type-tab{padding:8px 6px;font-size:12px}
+      .filter-bar{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+
+    @media(hover:none){
       .card:hover{transform:none}
       .card:active{transform:scale(.985)}
     }
@@ -624,46 +447,132 @@
 <div class="page" id="page">
   <div id="navbar-root"></div>
 
-  <div class="browse-shell">
-    <div class="browse-header">
-      <div class="browse-header-inner">
-        <div class="top-row">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input
-              id="q"
-              class="search-input"
-              type="text"
-              placeholder="City, area, title…"
-              autocomplete="off"
-            />
-            <span id="clear-wrap"></span>
-          </div>
-          <a href="/list-property.html" class="list-free-top">🏠 List Free</a>
+  <div class="browse-header">
+    <div class="browse-header-inner">
+
+      <!-- Search row -->
+      <div class="top-row">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            id="q"
+            class="search-input"
+            type="text"
+            placeholder="Search city, area, title…"
+            autocomplete="off"
+          />
+        </div>
+        <button id="clear-btn" class="clear-filters-btn" onclick="clearAll()">✕ Clear</button>
+        <a href="/list-property.html" class="list-free-btn">🏠 List Free</a>
+      </div>
+
+      <!-- Type tabs -->
+      <div class="type-tabs">
+        <button class="type-tab active" data-tab="" onclick="setType('')">All</button>
+        <button class="type-tab" data-tab="rent" onclick="setType('rent')">Rent</button>
+        <button class="type-tab" data-tab="buy" onclick="setType('buy')">Buy / Sale</button>
+      </div>
+
+      <!-- Dropdown filter bar -->
+      <div class="filter-bar">
+
+        <div class="fgroup">
+          <label class="flabel" for="f-proptype">Property Type</label>
+          <select class="fsel" id="f-proptype" onchange="go()">
+            <option value="">All Types</option>
+            <option value="apartment">Apartment</option>
+            <option value="villa">Villa</option>
+            <option value="house">Independent House</option>
+            <option value="plot">Plot / Land</option>
+            <option value="commercial">Commercial</option>
+            <option value="pg">PG / Hostel</option>
+          </select>
         </div>
 
-        <div class="type-tabs">
-          <button class="type-tab active" data-tab="" onclick="setType('')">All</button>
-          <button class="type-tab" data-tab="rent" onclick="setType('rent')">Rent</button>
-          <button class="type-tab" data-tab="buy" onclick="setType('buy')">Buy / Sale</button>
+        <div class="fgroup">
+          <label class="flabel" for="f-bhk">BHK</label>
+          <select class="fsel" id="f-bhk" onchange="go()">
+            <option value="">Any BHK</option>
+            <option value="1">1 BHK</option>
+            <option value="2">2 BHK</option>
+            <option value="3">3 BHK</option>
+            <option value="4">4 BHK</option>
+            <option value="5">5+ BHK</option>
+          </select>
         </div>
 
-        <div class="filter-rail" id="filter-rail"></div>
+        <div class="fgroup">
+          <label class="flabel" for="f-city">City</label>
+          <select class="fsel" id="f-city" onchange="go()">
+            <option value="">All Cities</option>
+            <option value="Bengaluru">Bengaluru</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Chennai">Chennai</option>
+            <option value="Pune">Pune</option>
+          </select>
+        </div>
+
+        <div class="fgroup">
+          <label class="flabel" for="f-vastu">Vastu</label>
+          <select class="fsel" id="f-vastu" onchange="go()">
+            <option value="">Vastu: Any</option>
+            <option value="yes">✓ Vastu Compliant</option>
+          </select>
+        </div>
+
+        <div class="fgroup">
+          <label class="flabel" for="f-facing">Facing</label>
+          <select class="fsel" id="f-facing" onchange="go()">
+            <option value="">Any Facing</option>
+            <option value="east">🧭 East (Best)</option>
+            <option value="northeast">🧭 North-East</option>
+            <option value="north">🧭 North</option>
+            <option value="west">🧭 West</option>
+            <option value="south">🧭 South</option>
+            <option value="northwest">🧭 North-West</option>
+            <option value="southeast">🧭 South-East</option>
+            <option value="southwest">🧭 South-West</option>
+          </select>
+        </div>
+
+        <div class="fgroup">
+          <label class="flabel" for="f-furnished">Furnishing</label>
+          <select class="fsel" id="f-furnished" onchange="go()">
+            <option value="">Any Furnishing</option>
+            <option value="fully">Fully Furnished</option>
+            <option value="semi">Semi-Furnished</option>
+            <option value="unfurnished">Unfurnished</option>
+          </select>
+        </div>
+
+        <div class="fgroup">
+          <label class="flabel" for="f-sort">Sort By</label>
+          <select class="fsel fsel-sort" id="f-sort" onchange="go()">
+            <option value="newest">🕐 Newest First</option>
+            <option value="price_asc">₹ Price: Low → High</option>
+            <option value="price_desc">₹ Price: High → Low</option>
+          </select>
+        </div>
+
       </div>
     </div>
+  </div>
 
-    <div class="results-bar">
-      <div class="results-left">
-        <div class="results-count" id="cnt">Loading…</div>
-      </div>
-      <a href="/list-property.html" class="results-cta">+ List Free</a>
+  <!-- Results bar -->
+  <div class="results-bar">
+    <div class="results-count" id="cnt">Loading…</div>
+    <div class="results-right">
+      <a href="/list-property.html" class="results-list-btn">+ List Free</a>
     </div>
+  </div>
 
-    <div class="grid-wrap">
-      <div class="property-grid" id="grid"></div>
-      <div class="load-more-wrap" id="lmw" style="display:none">
-        <button class="load-more" onclick="more()">Load More</button>
-      </div>
+  <!-- Grid -->
+  <div class="grid-wrap">
+    <div class="property-grid" id="grid"></div>
+    <div class="load-more-wrap" id="lmw" style="display:none">
+      <button class="load-more-btn" onclick="more()">Load More Properties</button>
     </div>
   </div>
 </div>
@@ -671,49 +580,15 @@
 <div class="toast" id="toast-el"></div>
 
 <script>
-let all = [];
-let filtered = [];
-let shown = 0;
-let type = '';
-let propType = '';
-let bhk = '';
-let city = '';
-let vastu = false;
-let facing = '';
-let sort = 'newest';
-let cu = null;
-let tok = null;
+let all = [], filtered = [], shown = 0;
+let listingType = '';
+let cu = null, tok = null;
 let favs = new Set();
 let searchTimer = null;
 
 const PAGE_SIZE = 12;
 
-const PROPERTY_TYPES = [
-  { value: '',           label: 'All' },
-  { value: 'apartment',  label: 'Apartment' },
-  { value: 'villa',      label: 'Villa' },
-  { value: 'house',      label: 'House' },
-  { value: 'plot',       label: 'Plot' },
-  { value: 'commercial', label: 'Commercial' },
-  { value: 'pg',         label: 'PG/Hostel' }
-];
-
-const BHK_OPTS = ['Any', '1', '2', '3', '4', '5+'];
-const CITIES = ['All', 'Bengaluru', 'Mumbai', 'Delhi', 'Hyderabad', 'Chennai', 'Pune'];
-const SORT_OPTS = [
-  { value: 'newest',    label: '🕐 Newest' },
-  { value: 'price_asc', label: '₹ Low→High' },
-  { value: 'price_desc',label: '₹ High→Low' }
-];
-const FACING_OPTS = [
-  { value: '',           label: 'Any' },
-  { value: 'east',       label: '🧭 East' },
-  { value: 'northeast',  label: '🧭 NE' },
-  { value: 'north',      label: '🧭 North' },
-  { value: 'west',       label: '🧭 West' },
-  { value: 'south',      label: '🧭 South' }
-];
-
+/* ── Init ──────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     const s = await getSession();
@@ -729,132 +604,15 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   await initNavbar({ active: 'browse' });
 
-  renderFilterRail();
-  bindSearch();
+  document.getElementById('q').addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { go(); updateClearBtn(); }, 280);
+  });
+
   await loadAll();
 });
 
-function bindSearch() {
-  const q = document.getElementById('q');
-  q.addEventListener('input', (e) => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      go();
-    }, 280);
-    renderClear();
-  });
-}
-
-function renderClear() {
-  const count = activeFilterCount();
-  const hasQuery = !!document.getElementById('q').value.trim();
-  document.getElementById('clear-wrap').innerHTML = (count || hasQuery)
-    ? `<button class="clear-btn" onclick="clearAll()">✕ ${count + (hasQuery ? 1 : 0)}</button>`
-    : '';
-}
-
-function renderFilterRail() {
-  const rail = document.getElementById('filter-rail');
-  rail.innerHTML = [
-    groupHtml('Type', PROPERTY_TYPES.map(pt =>
-      chipHtml(pt.label, propType === pt.value, `setFilter('propType','${pt.value}')`)
-    )),
-    dividerHtml(),
-    groupHtml('BHK', BHK_OPTS.map(b =>
-      chipHtml(b, (b === 'Any' ? bhk === '' : bhk === b), `setFilter('bhk','${b === 'Any' ? '' : b}')`)
-    )),
-    dividerHtml(),
-    groupHtml('City', CITIES.map(c =>
-      chipHtml(c, (c === 'All' ? city === '' : city === c), `setFilter('city','${c === 'All' ? '' : c}')`)
-    )),
-    dividerHtml(),
-    groupHtml('Vastu', [
-      chipHtml('✓ Vastu', vastu, `toggleVastu()`)
-    ]),
-    dividerHtml(),
-    groupHtml('Facing', FACING_OPTS.map(f =>
-      chipHtml(f.label, facing === f.value, `setFilter('facing','${f.value}')`)
-    )),
-    dividerHtml(),
-    groupHtml('Sort', SORT_OPTS.map(s =>
-      chipHtml(s.label, sort === s.value, `setFilter('sort','${s.value}')`)
-    ))
-  ].join('');
-
-  renderTypeTabs();
-  renderClear();
-}
-
-function groupHtml(label, chips) {
-  return `
-    <div class="filter-group">
-      <div class="filter-label">${x(label)}</div>
-      <div class="chip-row">${chips.join('')}</div>
-    </div>
-  `;
-}
-
-function dividerHtml() {
-  return `<div class="divider"></div>`;
-}
-
-function chipHtml(label, active, onClick) {
-  return `<button class="chip ${active ? 'active' : ''}" onclick="${onClick}">${x(label)}</button>`;
-}
-
-function renderTypeTabs() {
-  document.querySelectorAll('.type-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === type);
-  });
-}
-
-function activeFilterCount() {
-  return [
-    type,
-    propType,
-    bhk && bhk !== 'Any',
-    city && city !== 'All',
-    vastu,
-    facing,
-    sort !== 'newest'
-  ].filter(Boolean).length;
-}
-
-function setType(val) {
-  type = val;
-  renderTypeTabs();
-  go();
-}
-
-function setFilter(key, val) {
-  if (key === 'propType') propType = val;
-  if (key === 'bhk') bhk = val;
-  if (key === 'city') city = val;
-  if (key === 'facing') facing = val;
-  if (key === 'sort') sort = val;
-  renderFilterRail();
-  go();
-}
-
-function toggleVastu() {
-  vastu = !vastu;
-  renderFilterRail();
-  go();
-}
-
-function clearAll() {
-  document.getElementById('q').value = '';
-  type = '';
-  propType = '';
-  bhk = '';
-  city = '';
-  vastu = false;
-  facing = '';
-  sort = 'newest';
-  renderFilterRail();
-  go();
-}
-
+/* ── API ───────────────────────────────────────────────────── */
 async function loadAll() {
   try {
     const r = await fetch('/api/properties');
@@ -883,52 +641,123 @@ async function loadFavs() {
   } catch (e) {}
 }
 
+/* ── Type tabs ─────────────────────────────────────────────── */
+function setType(val) {
+  listingType = val;
+  document.querySelectorAll('.type-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === val);
+  });
+  go();
+  updateClearBtn();
+}
+
+/* ── Filter & sort ─────────────────────────────────────────── */
+function getFilters() {
+  return {
+    q:         document.getElementById('q').value.trim().toLowerCase(),
+    propType:  document.getElementById('f-proptype').value,
+    bhk:       document.getElementById('f-bhk').value,
+    city:      document.getElementById('f-city').value,
+    vastu:     document.getElementById('f-vastu').value,
+    facing:    document.getElementById('f-facing').value,
+    furnished: document.getElementById('f-furnished').value,
+    sort:      document.getElementById('f-sort').value,
+  };
+}
+
 function go() {
-  const q = document.getElementById('q').value.trim().toLowerCase();
+  const f = getFilters();
 
   let res = all.filter(p => {
-    if (type && p.type !== type) return false;
-    if (propType && p.property_type !== propType) return false;
+    if (listingType && p.type !== listingType) return false;
+    if (f.propType && p.property_type !== f.propType) return false;
 
-    if (bhk) {
-      if (bhk === '5+') {
+    if (f.bhk) {
+      if (f.bhk === '5') {
         if (Number(p.bhk) < 5) return false;
-      } else if (String(p.bhk) !== bhk) {
+      } else if (String(p.bhk) !== f.bhk) {
         return false;
       }
     }
 
-    if (city && !String(p.city || '').toLowerCase().includes(city.toLowerCase())) return false;
-    if (vastu && !(p.vastu || p.vastu_compliance === 'yes')) return false;
-    if (facing && p.facing !== facing) return false;
+    if (f.city && !String(p.city || '').toLowerCase().includes(f.city.toLowerCase())) return false;
+    if (f.vastu === 'yes' && !(p.vastu || p.vastu_compliance === 'yes')) return false;
+    if (f.facing && p.facing !== f.facing) return false;
+    if (f.furnished && p.furnished !== f.furnished) return false;
 
-    if (q) {
+    if (f.q) {
       const hay = [p.title, p.locality, p.city, p.description]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      if (!hay.includes(q)) return false;
+        .filter(Boolean).join(' ').toLowerCase();
+      if (!hay.includes(f.q)) return false;
     }
 
     return true;
   });
 
-  if (sort === 'price_asc') {
-    res = [...res].sort((a, b) => (a.price || 0) - (b.price || 0));
-  } else if (sort === 'price_desc') {
-    res = [...res].sort((a, b) => (b.price || 0) - (a.price || 0));
-  } else {
-    res = [...res].sort((a, b) => new Date(b.posted_at || 0) - new Date(a.posted_at || 0));
-  }
+  if (f.sort === 'price_asc')  res = [...res].sort((a, b) => (a.price || 0) - (b.price || 0));
+  else if (f.sort === 'price_desc') res = [...res].sort((a, b) => (b.price || 0) - (a.price || 0));
+  else res = [...res].sort((a, b) => new Date(b.posted_at || 0) - new Date(a.posted_at || 0));
 
   filtered = res;
   shown = 0;
-  document.getElementById('grid').innerHTML = '';
+
+  const fc = activeFilterCount();
   document.getElementById('cnt').textContent =
-    `${filtered.length} propert${filtered.length === 1 ? 'y' : 'ies'}${activeFilterCount() ? ` · ${activeFilterCount()} filter${activeFilterCount() > 1 ? 's' : ''}` : ''}`;
+    `${filtered.length} propert${filtered.length === 1 ? 'y' : 'ies'}` +
+    (fc ? ` · ${fc} filter${fc > 1 ? 's' : ''} active` : '');
+
+  document.getElementById('grid').innerHTML = '';
+  highlightActiveSelects();
+  updateClearBtn();
   more();
 }
 
+function activeFilterCount() {
+  const f = getFilters();
+  return [
+    listingType,
+    f.propType,
+    f.bhk,
+    f.city,
+    f.vastu,
+    f.facing,
+    f.furnished,
+    f.sort !== 'newest',
+    f.q
+  ].filter(Boolean).length;
+}
+
+function highlightActiveSelects() {
+  ['f-proptype','f-bhk','f-city','f-vastu','f-facing','f-furnished'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', !!el.value);
+  });
+  const sortEl = document.getElementById('f-sort');
+  if (sortEl) sortEl.classList.toggle('active', sortEl.value !== 'newest');
+}
+
+function updateClearBtn() {
+  const btn = document.getElementById('clear-btn');
+  if (btn) btn.classList.toggle('show', activeFilterCount() > 0);
+}
+
+function clearAll() {
+  document.getElementById('q').value = '';
+  document.getElementById('f-proptype').value = '';
+  document.getElementById('f-bhk').value = '';
+  document.getElementById('f-city').value = '';
+  document.getElementById('f-vastu').value = '';
+  document.getElementById('f-facing').value = '';
+  document.getElementById('f-furnished').value = '';
+  document.getElementById('f-sort').value = 'newest';
+  listingType = '';
+  document.querySelectorAll('.type-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === '');
+  });
+  go();
+}
+
+/* ── Render ────────────────────────────────────────────────── */
 function more() {
   const slice = filtered.slice(shown, shown + PAGE_SIZE);
   const grid = document.getElementById('grid');
@@ -939,17 +768,14 @@ function more() {
         <div class="empty-icon">🏚️</div>
         <div class="empty-title">No properties found</div>
         <div class="empty-sub">Try adjusting or clearing your filters</div>
-        <button class="btn btn-primary" onclick="clearAll()">Clear All Filters</button>
+        <button class="btn btn-primary" onclick="clearAll()" style="margin:0 auto">Clear Filters</button>
       </div>
     `;
     document.getElementById('lmw').style.display = 'none';
     return;
   }
 
-  slice.forEach(p => {
-    grid.insertAdjacentHTML('beforeend', cardHtml(p));
-  });
-
+  slice.forEach(p => grid.insertAdjacentHTML('beforeend', cardHtml(p)));
   shown += slice.length;
   document.getElementById('lmw').style.display = shown < filtered.length ? 'flex' : 'none';
 }
@@ -962,62 +788,62 @@ function cardHtml(item) {
   const isOwn = cu && String(cu.id) === String(item.listed_by);
   const isVastu = item.vastu || item.vastu_compliance === 'yes';
   const noBrokerage = item.no_brokerage || item.brokerage_applicable === 'no' || item.nobrokerage;
-
   const title = x(item.title || 'Property');
   const loc = x([item.locality, item.city].filter(Boolean).join(', '));
-  const img = item.photos?.[0]
+
+  const imgHtml = item.photos?.[0]
     ? `<img class="card-img" src="${x(item.photos[0])}" alt="${title}" loading="lazy"/>`
     : `<div class="img-ph">🏠</div>`;
+
+  const priceHtml = price
+    ? `<div class="price">${price}${rent ? `<span class="price-sub"> /mo</span>` : ''}</div>`
+    : `<div class="price-na">Price on request</div>`;
+
+  const depositHtml = rent && deposit ? `<div class="deposit">Dep: ${deposit}</div>` : '';
+
+  const statsHtml = [
+    item.bhk ? `<span class="stat">🛏 ${x(item.bhk)} BHK</span>` : '',
+    item.bathrooms ? `<span class="stat">🚿 ${x(item.bathrooms)} Bath</span>` : '',
+    item.area ? `<span class="stat">📐 ${x(item.area)} ft²</span>` : '',
+    item.furnished && item.furnished !== 'unfurnished'
+      ? `<span class="stat">🪑 ${item.furnished === 'fully' ? 'Furnished' : 'Semi-Furn'}</span>` : '',
+    item.property_type ? `<span class="stat-type">${x(cap(item.property_type))}</span>` : ''
+  ].filter(Boolean).join('');
+
+  const badgesHtml = [
+    isVastu ? `<span class="mini-badge vastu">✓ Vastu</span>` : '',
+    noBrokerage ? `<span class="mini-badge zero">₹0 Brokerage</span>` : '',
+    item.facing ? `<span class="mini-badge face">🧭 ${x(cap(item.facing))}</span>` : ''
+  ].filter(Boolean).join('');
+
+  const actionsHtml = !isOwn && item.listed_by
+    ? `<button class="btn btn-secondary" onclick="messageOwner(event,'${item.id}','${item.listed_by}')">💬 Message</button>`
+    : `<div class="own-pill">✏️ Your Listing</div>`;
 
   return `
     <article class="card" onclick="openProperty(event,'${item.id}')">
       <div class="img-wrap">
-        ${img}
+        ${imgHtml}
         <div class="type-badge ${rent ? 'rent' : 'buy'}">${rent ? 'RENT' : 'SALE'}</div>
         <button class="heart-btn ${faved ? 'saved' : ''}" onclick="toggleFav(event,'${item.id}')">${faved ? '❤️' : '🤍'}</button>
         <div class="e49">E49</div>
       </div>
-
       <div class="card-body">
-        <div class="price-row">
-          ${
-            price
-              ? `<div class="price">${price}${rent ? `<span class="price-sub"> /mo</span>` : ''}</div>`
-              : `<div class="price-na">Price on request</div>`
-          }
-          ${rent && deposit ? `<div class="deposit">Dep: ${deposit}</div>` : ''}
-        </div>
-
-        <div class="title">${title}</div>
-        <div class="loc">📍 ${loc || 'Location not specified'}</div>
-
-        <div class="stats-row">
-          ${item.bhk ? `<span class="stat">🛏 ${x(item.bhk)} BHK</span>` : ''}
-          ${item.bathrooms ? `<span class="stat">🚿 ${x(item.bathrooms)} Bath</span>` : ''}
-          ${item.area ? `<span class="stat">📐 ${x(item.area)} ft²</span>` : ''}
-          ${item.furnished && item.furnished !== 'unfurnished' ? `<span class="stat">🪑 ${item.furnished === 'fully' ? 'Furnished' : 'Semi-Furn'}</span>` : ''}
-          ${item.property_type ? `<span class="stat-type">${x(cap(item.property_type))}</span>` : ''}
-        </div>
-
-        <div class="badge-row">
-          ${isVastu ? `<span class="mini-badge vastu">✓ Vastu</span>` : ''}
-          ${noBrokerage ? `<span class="mini-badge zero">₹0 Brokerage</span>` : ''}
-          ${item.facing ? `<span class="mini-badge face">🧭 ${x(cap(item.facing))}</span>` : ''}
-        </div>
+        <div class="price-row">${priceHtml}${depositHtml}</div>
+        <div class="ctitle">${title}</div>
+        <div class="cloc">📍 ${loc || 'Location not specified'}</div>
+        ${statsHtml ? `<div class="stats-row">${statsHtml}</div>` : ''}
+        ${badgesHtml ? `<div class="badge-row">${badgesHtml}</div>` : ''}
       </div>
-
       <div class="card-actions">
         <button class="btn btn-primary" onclick="openProperty(event,'${item.id}')">View Details</button>
-        ${
-          !isOwn && item.listed_by
-            ? `<button class="btn btn-secondary" onclick="messageOwner(event,'${item.id}','${item.listed_by}')">💬 Message</button>`
-            : `<div class="own-pill">✏️ Your Listing</div>`
-        }
+        ${actionsHtml}
       </div>
     </article>
   `;
 }
 
+/* ── Navigation ────────────────────────────────────────────── */
 function openProperty(e, id) {
   if (e.target.closest('.heart-btn,.card-actions')) return;
   window.location.href = `/property.html?id=${id}`;
@@ -1025,20 +851,23 @@ function openProperty(e, id) {
 
 function messageOwner(e, propertyId, ownerId) {
   e.stopPropagation();
-  if (!cu) {
-    showLoginPrompt('Sign in to contact the owner');
-    return;
-  }
+  if (!cu) { showLoginPrompt('Sign in to contact the owner'); return; }
   window.location.href = `/messages.html?to=${ownerId}&listing=${propertyId}`;
 }
 
+/* ── Favorites ─────────────────────────────────────────────── */
 async function toggleFav(e, propertyId) {
   e.stopPropagation();
+  let freshTok = tok;
+  let freshUser = cu;
 
-  const s = await getSession().catch(() => null);
-  const freshTok = s?.access_token || tok;
+  try {
+    const s = await getSession();
+    freshTok = s?.access_token || tok;
+    freshUser = s?.user || cu;
+  } catch (err) {}
 
-  if (!s?.user || !freshTok) {
+  if (!freshTok || !freshUser) {
     showLoginPrompt('Sign in to save properties');
     return;
   }
@@ -1068,54 +897,67 @@ async function toggleFav(e, propertyId) {
       favs.add(id);
       toast('❤️ Saved!');
     }
-
-    document.querySelectorAll('.heart-btn').forEach(btn => {
-      const card = btn.closest('.card');
-      if (!card) return;
-    });
-
     go();
   } catch (err) {
-    toast('Could not save');
+    toast('Could not save — try again');
   }
 }
 
+/* ── Login prompt ──────────────────────────────────────────── */
 function showLoginPrompt(msg) {
   document.getElementById('login-prompt')?.remove();
   document.body.insertAdjacentHTML('beforeend', `
-    <div id="login-prompt" style="position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
-      <div style="background:#fff;border-radius:24px;padding:30px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 44px rgba(15,23,42,.25)">
+    <div id="login-prompt" style="
+      position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:9999;
+      display:flex;align-items:center;justify-content:center;padding:20px
+    ">
+      <div style="
+        background:#fff;border-radius:24px;padding:30px 24px;
+        max-width:360px;width:100%;text-align:center;
+        box-shadow:0 20px 44px rgba(15,23,42,.25)
+      ">
         <div style="font-size:44px;margin-bottom:12px">🔐</div>
         <div style="font-size:22px;font-weight:900;color:#111827;margin-bottom:8px">Sign In Required</div>
         <div style="font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:22px">${x(msg)}</div>
         <div style="display:flex;flex-direction:column;gap:10px">
-          <a href="/login.html" class="btn btn-primary" style="text-align:center;justify-content:center;text-decoration:none;min-height:46px">Sign In</a>
-          <a href="/login.html?mode=signup" class="btn btn-secondary" style="text-align:center;justify-content:center;text-decoration:none;min-height:46px">Create Free Account</a>
-          <button onclick="document.getElementById('login-prompt').remove()" style="font-size:13px;color:#6b7280;background:none;border:none;cursor:pointer;margin-top:2px">Maybe later</button>
+          <a href="/login.html" style="
+            display:flex;align-items:center;justify-content:center;
+            min-height:46px;border-radius:14px;
+            background:#c0392b;color:#fff;font-size:13px;font-weight:800;
+            text-decoration:none;box-shadow:0 10px 22px rgba(192,57,43,.2);
+          ">Sign In</a>
+          <a href="/login.html?mode=signup" style="
+            display:flex;align-items:center;justify-content:center;
+            min-height:46px;border-radius:14px;
+            background:#fff;color:#1f2937;font-size:13px;font-weight:800;
+            text-decoration:none;border:1.5px solid #e5e7eb;
+          ">Create Free Account</a>
+          <button onclick="document.getElementById('login-prompt').remove()" style="
+            font-size:13px;color:#6b7280;background:none;border:none;cursor:pointer;margin-top:2px;font-family:inherit
+          ">Maybe later</button>
         </div>
       </div>
     </div>
   `);
 }
 
+/* ── Helpers ───────────────────────────────────────────────── */
 function fmtPrice(n) {
   if (n === null || n === undefined || n === '') return null;
   const v = Number(n);
-  if (!Number.isFinite(v)) return null;
+  if (!Number.isFinite(v) || v <= 0) return null;
   if (v >= 10000000) return `₹${(v / 10000000).toFixed(1).replace(/\.0$/, '')}Cr`;
-  if (v >= 100000) return `₹${(v / 100000).toFixed(1).replace(/\.0$/, '')}L`;
+  if (v >= 100000)   return `₹${(v / 100000).toFixed(1).replace(/\.0$/, '')}L`;
   return `₹${v.toLocaleString('en-IN')}`;
 }
 
-function cap(s) {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-}
+function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
 function x(t) {
   return String(t || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
 }
 
 function toast(msg) {
