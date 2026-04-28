@@ -1,971 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Browse — Estate49</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/auth.js"></script>
-  <script src="/nav.js"></script>
+  <script src="/auth.js"></script><script src="/nav.js"></script>
   <link rel="stylesheet" href="/style.css"/>
   <style>
-    :root{
-      --app-bg:#f7f6f2;
-      --card-bg:#ffffff;
-      --text-strong:#111827;
-      --text-soft:#6b7280;
-      --line:#e5e7eb;
-      --line-soft:#f1f5f9;
-      --brand:#c0392b;
-      --brand-dark:#a93226;
-      --brand-soft:#fff1ef;
-      --green:#2e7d32;
-      --green-soft:#e8f5e9;
-      --blue:#1565c0;
-      --blue-soft:#e3f2fd;
-      --amber:#e65100;
-      --amber-soft:#fff8e1;
-      --purple:#6a1b9a;
-      --purple-soft:#f3e5f5;
-      --shadow-card:0 10px 28px rgba(15,23,42,.08);
-      --shadow-soft:0 6px 20px rgba(15,23,42,.06);
-    }
-
-    *{box-sizing:border-box}
-    html,body{margin:0;padding:0;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--app-bg);color:var(--text-strong)}
-    body{min-height:100vh}
-    .page{display:none}
-
-    /* ── Header ─────────────────────────────────────────────── */
-    .browse-header{
-      position:sticky;
-      top:var(--nav-h, 70px);
-      z-index:30;
-      background:rgba(255,255,255,.96);
-      backdrop-filter:blur(18px);
-      -webkit-backdrop-filter:blur(18px);
-      border-bottom:1px solid rgba(229,231,235,.9);
-      box-shadow:0 10px 28px rgba(15,23,42,.05);
-    }
-
-    .browse-header-inner{
-      max-width:1360px;
-      margin:0 auto;
-      padding:14px 20px 14px;
-    }
-
-    /* ── Search row ─────────────────────────────────────────── */
-    .top-row{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:12px;
-    }
-
-    .search-box{
-      flex:1;
-      display:flex;
-      align-items:center;
-      gap:9px;
-      min-height:48px;
-      padding:0 12px 0 14px;
-      border:1.5px solid var(--line);
-      border-radius:16px;
-      background:#f8fafc;
-      transition:border-color .2s, box-shadow .2s;
-    }
-
-    .search-box:focus-within{
-      border-color:rgba(192,57,43,.5);
-      background:#fff;
-      box-shadow:0 0 0 4px rgba(192,57,43,.07);
-    }
-
-    .search-icon{font-size:16px;color:#94a3b8;flex-shrink:0}
-
-    .search-input{
-      flex:1;
-      border:none;
-      outline:none;
-      background:transparent;
-      font-size:14px;
-      font-weight:600;
-      color:var(--text-strong);
-      font-family:inherit;
-      min-width:0;
-    }
-    .search-input::placeholder{color:#9ca3af;font-weight:500}
-
-    .clear-filters-btn{
-      display:none;
-      align-items:center;
-      gap:6px;
-      border:none;
-      background:#fee2e2;
-      color:var(--brand);
-      height:32px;
-      padding:0 11px;
-      border-radius:10px;
-      font-size:11px;
-      font-weight:800;
-      cursor:pointer;
-      white-space:nowrap;
-      flex-shrink:0;
-    }
-    .clear-filters-btn.show{display:inline-flex}
-
-    .list-free-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:7px;
-      min-height:48px;
-      padding:0 18px;
-      border:none;
-      border-radius:14px;
-      background:linear-gradient(180deg,#cf4a3b 0%,#c0392b 100%);
-      color:#fff;
-      font-size:13px;
-      font-weight:800;
-      font-family:inherit;
-      text-decoration:none;
-      white-space:nowrap;
-      flex-shrink:0;
-      box-shadow:0 10px 24px rgba(192,57,43,.22);
-      cursor:pointer;
-      transition:background .2s, transform .15s;
-    }
-    .list-free-btn:hover{background:#a93226;transform:translateY(-1px)}
-
-    /* ── Type tabs ──────────────────────────────────────────── */
-    .type-tabs{
-      display:flex;
-      gap:4px;
-      padding:4px;
-      background:#f1f5f9;
-      border:1px solid var(--line);
-      border-radius:14px;
-      margin-bottom:12px;
-      width:max-content;
-    }
-
-    .type-tab{
-      border:none;
-      background:transparent;
-      color:#64748b;
-      border-radius:11px;
-      padding:10px 22px;
-      font-size:13px;
-      font-weight:700;
-      cursor:pointer;
-      font-family:inherit;
-      transition:.2s ease;
-      white-space:nowrap;
-    }
-
-    .type-tab.active{
-      background:#fff;
-      color:var(--brand);
-      box-shadow:0 4px 14px rgba(15,23,42,.08);
-    }
-
-    /* ── Dropdown filter bar ────────────────────────────────── */
-    .filter-bar{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .fgroup{
-      display:flex;
-      flex-direction:column;
-      gap:3px;
-      flex:1 1 auto;
-      min-width:118px;
-    }
-
-    .flabel{
-      font-size:10px;
-      font-weight:800;
-      color:#94a3b8;
-      text-transform:uppercase;
-      letter-spacing:.07em;
-      padding-left:2px;
-      white-space:nowrap;
-    }
-
-    .fsel{
-      appearance:none;
-      -webkit-appearance:none;
-      width:100%;
-      min-height:40px;
-      padding:0 30px 0 11px;
-      border:1.5px solid var(--line);
-      border-radius:12px;
-      background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
-      background-size:14px;
-      font-size:13px;
-      font-weight:600;
-      color:var(--text-strong);
-      font-family:inherit;
-      cursor:pointer;
-      transition:border-color .18s, box-shadow .18s;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .fsel:focus{
-      outline:none;
-      border-color:rgba(192,57,43,.5);
-      box-shadow:0 0 0 4px rgba(192,57,43,.07);
-    }
-
-    .fsel.active{
-      border-color:var(--brand);
-      color:var(--brand);
-      background-color:#fff5f5;
-      font-weight:800;
-    }
-
-    .fsel-sort{
-      flex:0 0 auto;
-      min-width:132px;
-    }
-
-    /* ── Results bar ────────────────────────────────────────── */
-    .results-bar{
-      max-width:1360px;
-      margin:0 auto;
-      padding:11px 20px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      border-bottom:1px solid rgba(229,231,235,.7);
-      background:rgba(255,255,255,.7);
-    }
-
-    .results-count{
-      font-size:13px;
-      font-weight:600;
-      color:var(--text-soft);
-      white-space:nowrap;
-      min-width:0;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .results-right{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      flex-shrink:0;
-    }
-
-    .results-list-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-      background:var(--brand);
-      color:#fff;
-      text-decoration:none;
-      border-radius:10px;
-      padding:8px 12px;
-      font-size:12px;
-      font-weight:800;
-      box-shadow:0 6px 16px rgba(192,57,43,.18);
-      transition:background .18s;
-    }
-    .results-list-btn:hover{background:var(--brand-dark)}
-
-    /* ── Grid ───────────────────────────────────────────────── */
-    .grid-wrap{
-      max-width:1360px;
-      margin:0 auto;
-      padding:20px 20px 32px;
-    }
-
-    .property-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
-      gap:18px;
-    }
-
-    /* ── Card ───────────────────────────────────────────────── */
-    .card{
-      background:var(--card-bg);
-      border:1px solid rgba(229,231,235,.95);
-      border-radius:22px;
-      overflow:hidden;
-      box-shadow:var(--shadow-card);
-      transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
-      cursor:pointer;
-      display:flex;
-      flex-direction:column;
-    }
-    .card:hover{transform:translateY(-3px);border-color:rgba(192,57,43,.2);box-shadow:0 16px 38px rgba(15,23,42,.11)}
-
-    .img-wrap{position:relative;height:194px;background:#eef2f7;overflow:hidden}
-    .card-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .38s ease}
-    .card:hover .card-img{transform:scale(1.04)}
-    .img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:44px;background:linear-gradient(180deg,#f3f4f6,#e5e7eb)}
-
-    .type-badge{
-      position:absolute;top:10px;left:10px;z-index:2;
-      padding:5px 10px;border-radius:8px;color:#fff;
-      font-size:11px;font-weight:800;letter-spacing:.05em;
-    }
-    .type-badge.rent{background:var(--blue)}
-    .type-badge.buy{background:var(--green)}
-
-    .heart-btn{
-      position:absolute;top:8px;right:8px;z-index:2;
-      width:38px;height:38px;border:none;border-radius:50%;
-      background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
-      display:flex;align-items:center;justify-content:center;
-      font-size:16px;cursor:pointer;box-shadow:0 8px 18px rgba(15,23,42,.14);
-    }
-    .heart-btn.saved{background:#fff5f5}
-
-    .e49{
-      position:absolute;bottom:8px;right:8px;z-index:2;
-      background:var(--brand);color:#fff;
-      padding:4px 8px;border-radius:7px;
-      font-size:10px;font-weight:900;letter-spacing:.08em;opacity:.96;
-    }
-
-    .card-body{padding:14px;display:flex;flex-direction:column;gap:7px;flex:1;min-width:0}
-
-    .price-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;min-width:0}
-    .price{font-size:21px;line-height:1.1;font-weight:900;color:var(--brand);min-width:0}
-    .price-sub{font-size:13px;font-weight:500;color:#9ca3af}
-    .price-na{font-size:14px;color:#9ca3af;font-style:italic;font-weight:600}
-    .deposit{flex-shrink:0;font-size:11px;color:#7c4a03;background:#fff3e0;padding:4px 8px;border-radius:8px;font-weight:700}
-
-    .ctitle{font-size:15px;font-weight:800;color:var(--text-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .cloc{font-size:12px;color:var(--text-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-    .stats-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
-    .stat{font-size:11px;font-weight:700;color:#4b5563;background:#f5f5f5;padding:4px 8px;border-radius:8px}
-    .stat-type{font-size:11px;font-weight:800;color:var(--blue);background:var(--blue-soft);padding:4px 8px;border-radius:8px}
-
-    .badge-row{display:flex;flex-wrap:wrap;gap:6px}
-    .mini-badge{
-      display:inline-flex;align-items:center;justify-content:center;
-      padding:4px 8px;border-radius:999px;
-      font-size:11px;font-weight:800;border:1px solid transparent;
-    }
-    .mini-badge.vastu{background:var(--green-soft);color:var(--green);border-color:#a5d6a7}
-    .mini-badge.zero{background:var(--amber-soft);color:var(--amber);border-color:#ffe082}
-    .mini-badge.face{background:var(--purple-soft);color:var(--purple);border-color:#ce93d8}
-
-    .card-actions{display:flex;gap:8px;padding:10px 12px 12px;border-top:1px solid var(--line-soft)}
-    .btn{
-      border:none;border-radius:11px;min-height:42px;padding:0 14px;
-      font-size:13px;font-weight:800;cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;
-      text-decoration:none;font-family:inherit;transition:.18s ease;
-    }
-    .btn-primary{flex:1;background:var(--brand);color:#fff;box-shadow:0 8px 18px rgba(192,57,43,.18)}
-    .btn-primary:hover{background:var(--brand-dark)}
-    .btn-secondary{flex:1;background:#fff;color:#1f2937;border:1.5px solid var(--line)}
-    .btn-secondary:hover{border-color:#d1d5db;background:#fafafa}
-    .own-pill{
-      flex:1;min-height:42px;border-radius:11px;
-      background:#effaf1;color:var(--green);border:1px solid #b7dfbb;
-      display:flex;align-items:center;justify-content:center;
-      font-size:12px;font-weight:800;padding:0 12px;text-align:center;
-    }
-
-    /* ── Empty & Load more ──────────────────────────────────── */
-    .empty-state{
-      grid-column:1/-1;background:#fff;border:1px solid var(--line);
-      border-radius:22px;padding:48px 20px;text-align:center;box-shadow:var(--shadow-soft);
-    }
-    .empty-icon{font-size:54px;margin-bottom:10px}
-    .empty-title{font-size:20px;font-weight:800;margin-bottom:6px}
-    .empty-sub{font-size:14px;color:var(--text-soft);margin-bottom:18px}
-
-    .load-more-wrap{display:flex;justify-content:center;padding:24px 0 4px}
-    .load-more-btn{
-      min-height:46px;padding:0 24px;border-radius:14px;
-      border:1.5px solid var(--line);background:#fff;
-      color:#111827;font-size:13px;font-weight:800;
-      cursor:pointer;font-family:inherit;box-shadow:var(--shadow-soft);
-    }
-
-    /* ── Responsive ─────────────────────────────────────────── */
-    @media(max-width:1024px){
-      .property-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-    }
-
+    .filters{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .sw{position:relative;flex:1;min-width:180px;max-width:300px;}
+    .sw svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;}
+    .sw input{padding-left:36px;}
+    .ttabs{display:flex;background:var(--surface-2);border-radius:var(--radius-md);padding:3px;gap:2px;border:1px solid var(--border);}
+    .tt{padding:7px 14px;border-radius:6px;font-size:var(--text-sm);font-weight:600;color:var(--muted);transition:all var(--transition);cursor:pointer;border:none;background:none;}
+    .tt.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm);}
+    .fsel{padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-md);background:var(--surface);font-size:var(--text-sm);min-width:100px;}
+    .fsel:focus{outline:none;border-color:var(--primary);}
+    .ml{margin-left:auto;}
+    .rbar{display:flex;align-items:center;justify-content:space-between;padding:10px 32px;font-size:var(--text-sm);color:var(--muted);border-bottom:1px solid var(--divider);}
+    .gwrap{padding:24px 32px;}
+    .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:20px;}
+    .pc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:all var(--transition);cursor:pointer;display:flex;flex-direction:column;}
+    .pc:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:rgba(192,57,43,0.18);}
+    .ci{position:relative;height:196px;background:var(--surface-3);overflow:hidden;}
+    .ci img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s;}
+    .pc:hover .ci img{transform:scale(1.04);}
+    .cph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px;}
+    .cbdg{position:absolute;top:10px;left:10px;}
+    .cht{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.9);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;font-size:16px;transition:all var(--transition);box-shadow:var(--shadow-sm);border:none;cursor:pointer;z-index:2;}
+    .cht:hover{transform:scale(1.15);}
+    .cht.sv{background:var(--primary-light);}
+    .e49-sticker{position:absolute;bottom:8px;right:8px;background:#c0392b;color:#fff;font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;opacity:0.88;pointer-events:none;letter-spacing:0.3px;z-index:1;}
+    .cb{padding:14px;flex:1;}
+    .cprice{font-size:var(--text-xl);font-weight:800;color:var(--primary);margin-bottom:2px;}
+    .cprice span{font-size:var(--text-xs);font-weight:500;color:var(--muted);}
+    .ctitle{font-size:var(--text-sm);font-weight:600;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cloc{font-size:var(--text-xs);color:var(--muted);margin-bottom:12px;}
+    .cstats{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--divider);flex-wrap:wrap;}
+    .cstat{font-size:var(--text-xs);color:var(--muted);}
+    .cstat.vastu-yes{color:#2e7d32;font-weight:600;}
+    .cacts{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--divider);}
+    .cbtn{flex:1;padding:7px;border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:600;border:1.5px solid var(--border);background:var(--surface);transition:all var(--transition);cursor:pointer;}
+    .cbtn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-xlight);}
+    .cbtn.p{background:var(--primary);color:#fff;border-color:var(--primary);}
+    .cbtn.p:hover{background:var(--primary-dark);}
+    .lmw{display:flex;justify-content:center;padding:32px;}
+    .mob-list-btn{display:none;}
     @media(max-width:768px){
-      .browse-header{top:var(--nav-h,64px)}
-      .browse-header-inner{padding:10px 12px 12px}
-      .top-row{gap:8px;margin-bottom:10px}
-      .search-box{min-height:44px;border-radius:14px}
-      .list-free-btn{min-height:44px;padding:0 13px;font-size:12px;border-radius:12px}
-      .type-tabs{width:100%;margin-bottom:10px}
-      .type-tab{flex:1;padding:9px 10px;text-align:center}
-      .filter-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-      .fgroup{min-width:0}
-      .fsel{font-size:13px;min-height:42px;border-radius:12px}
-      .fsel-sort{min-width:0}
-      .results-bar{padding:9px 12px}
-      .grid-wrap{padding:12px 12px 24px}
-      .property-grid{grid-template-columns:1fr;gap:12px}
-      .card{border-radius:18px}
-      .img-wrap{height:190px}
+      .filters{padding:10px 14px;gap:8px;}
+      .sw{min-width:0;max-width:100%;flex:1 1 100%;}
+      .ml{margin-left:0;}
+      .gwrap{padding:12px 14px;}
+      .rbar{padding:8px 14px;}
+      .pgrid{grid-template-columns:1fr;}
+      .mob-list-btn{
+        display:inline-flex;align-items:center;gap:6px;
+        background:var(--primary);color:#fff;
+        border:none;border-radius:var(--radius-md);
+        padding:9px 14px;font-size:var(--text-sm);font-weight:700;
+        cursor:pointer;text-decoration:none;white-space:nowrap;flex-shrink:0;
+        box-shadow:0 2px 10px rgba(192,57,43,0.4);
+        animation:pulseBtn 2.5s ease infinite;
+      }
+      @keyframes pulseBtn{0%,100%{box-shadow:0 2px 10px rgba(192,57,43,0.4);}50%{box-shadow:0 4px 20px rgba(192,57,43,0.65);}}
     }
-
-    @media(min-width:500px) and (max-width:768px){
-      .property-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-    }
-
-    @media(max-width:420px){
-      .list-free-btn{display:none}
-      .type-tab{padding:8px 6px;font-size:12px}
-      .filter-bar{grid-template-columns:repeat(2,minmax(0,1fr))}
-    }
-
-    @media(hover:none){
-      .card:hover{transform:none}
-      .card:active{transform:scale(.985)}
-    }
+    @media(min-width:480px) and (max-width:768px){.pgrid{grid-template-columns:repeat(2,1fr);}}
+    @media(hover:none){.pc:active{transform:scale(0.98)}.cbtn:active{opacity:0.85}}
   </style>
 </head>
 <body>
-<div class="auth-loading" id="al">
-  <div class="al-icon">🏠</div>
-  <div class="al-spin"></div>
-</div>
-
+<div class="auth-loading" id="al"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
 <div class="page" id="page">
   <div id="navbar-root"></div>
-
-  <div class="browse-header">
-    <div class="browse-header-inner">
-
-      <!-- Search row -->
-      <div class="top-row">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input
-            id="q"
-            class="search-input"
-            type="text"
-            placeholder="Search city, area, title…"
-            autocomplete="off"
-          />
-        </div>
-        <button id="clear-btn" class="clear-filters-btn" onclick="clearAll()">✕ Clear</button>
-        <a href="/list-property.html" class="list-free-btn">🏠 List Free</a>
-      </div>
-
-      <!-- Type tabs -->
-      <div class="type-tabs">
-        <button class="type-tab active" data-tab="" onclick="setType('')">All</button>
-        <button class="type-tab" data-tab="rent" onclick="setType('rent')">Rent</button>
-        <button class="type-tab" data-tab="buy" onclick="setType('buy')">Buy / Sale</button>
-      </div>
-
-      <!-- Dropdown filter bar -->
-      <div class="filter-bar">
-
-        <div class="fgroup">
-          <label class="flabel" for="f-proptype">Property Type</label>
-          <select class="fsel" id="f-proptype" onchange="go()">
-            <option value="">All Types</option>
-            <option value="apartment">Apartment</option>
-            <option value="villa">Villa</option>
-            <option value="house">Independent House</option>
-            <option value="plot">Plot / Land</option>
-            <option value="commercial">Commercial</option>
-            <option value="pg">PG / Hostel</option>
-          </select>
-        </div>
-
-        <div class="fgroup">
-          <label class="flabel" for="f-bhk">BHK</label>
-          <select class="fsel" id="f-bhk" onchange="go()">
-            <option value="">Any BHK</option>
-            <option value="1">1 BHK</option>
-            <option value="2">2 BHK</option>
-            <option value="3">3 BHK</option>
-            <option value="4">4 BHK</option>
-            <option value="5">5+ BHK</option>
-          </select>
-        </div>
-
-        <div class="fgroup">
-          <label class="flabel" for="f-city">City</label>
-          <select class="fsel" id="f-city" onchange="go()">
-            <option value="">All Cities</option>
-            <option value="Bengaluru">Bengaluru</option>
-            <option value="Mumbai">Mumbai</option>
-            <option value="Delhi">Delhi</option>
-            <option value="Hyderabad">Hyderabad</option>
-            <option value="Chennai">Chennai</option>
-            <option value="Pune">Pune</option>
-          </select>
-        </div>
-
-        <div class="fgroup">
-          <label class="flabel" for="f-vastu">Vastu</label>
-          <select class="fsel" id="f-vastu" onchange="go()">
-            <option value="">Vastu: Any</option>
-            <option value="yes">✓ Vastu Compliant</option>
-          </select>
-        </div>
-
-        <div class="fgroup">
-          <label class="flabel" for="f-facing">Facing</label>
-          <select class="fsel" id="f-facing" onchange="go()">
-            <option value="">Any Facing</option>
-            <option value="east">🧭 East (Best)</option>
-            <option value="northeast">🧭 North-East</option>
-            <option value="north">🧭 North</option>
-            <option value="west">🧭 West</option>
-            <option value="south">🧭 South</option>
-            <option value="northwest">🧭 North-West</option>
-            <option value="southeast">🧭 South-East</option>
-            <option value="southwest">🧭 South-West</option>
-          </select>
-        </div>
-
-        <div class="fgroup">
-          <label class="flabel" for="f-furnished">Furnishing</label>
-          <select class="fsel" id="f-furnished" onchange="go()">
-            <option value="">Any Furnishing</option>
-            <option value="fully">Fully Furnished</option>
-            <option value="semi">Semi-Furnished</option>
-            <option value="unfurnished">Unfurnished</option>
-          </select>
-        </div>
-
-        <div class="fgroup">
-          <label class="flabel" for="f-sort">Sort By</label>
-          <select class="fsel fsel-sort" id="f-sort" onchange="go()">
-            <option value="newest">🕐 Newest First</option>
-            <option value="price_asc">₹ Price: Low → High</option>
-            <option value="price_desc">₹ Price: High → Low</option>
-          </select>
-        </div>
-
-      </div>
+  <div class="filters">
+    <div class="sw">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" class="form-input" id="q" placeholder="City, area, title…" style="width:100%"/>
     </div>
+    <div class="ttabs">
+      <button class="tt active" onclick="setT('')">All</button>
+      <button class="tt" onclick="setT('rent')">Rent</button>
+      <button class="tt" onclick="setT('buy')">Buy</button>
+    </div>
+    <select class="fsel" id="fb" onchange="go()"><option value="">All BHK</option><option>1</option><option>2</option><option>3</option><option>4</option></select>
+    <select class="fsel" id="fc" onchange="go()"><option value="">All Cities</option><option>Bengaluru</option><option>Mumbai</option><option>Delhi</option><option>Hyderabad</option><option>Chennai</option><option>Pune</option></select>
+    <select class="fsel" id="fvastu" onchange="go()">
+      <option value="">Vastu: Any</option>
+      <option value="yes">✓ Vastu Compliant</option>
+    </select>
+    <select class="fsel" id="ffacing" onchange="go()">
+      <option value="">Any Facing</option>
+      <option value="east">🧭 East (Best)</option>
+      <option value="northeast">🧭 North-East</option>
+      <option value="north">🧭 North</option>
+      <option value="west">🧭 West</option>
+      <option value="south">🧭 South</option>
+      <option value="northwest">🧭 North-West</option>
+      <option value="southeast">🧭 South-East</option>
+      <option value="southwest">🧭 South-West</option>
+    </select>
+    <select class="fsel ml" id="fs" onchange="go()"><option value="newest">Newest</option><option value="price_asc">Price ↑</option><option value="price_desc">Price ↓</option></select>
+    <a href="/list-property.html" class="mob-list-btn">🏠 List Free</a>
   </div>
 
-  <!-- Results bar -->
-  <div class="results-bar">
-    <div class="results-count" id="cnt">Loading…</div>
-    <div class="results-right">
-      <a href="/list-property.html" class="results-list-btn">+ List Free</a>
-    </div>
-  </div>
-
-  <!-- Grid -->
-  <div class="grid-wrap">
-    <div class="property-grid" id="grid"></div>
-    <div class="load-more-wrap" id="lmw" style="display:none">
-      <button class="load-more-btn" onclick="more()">Load More Properties</button>
+  <div class="rbar"><span id="cnt">Loading…</span></div>
+  <div class="gwrap">
+    <div class="pgrid" id="grid"></div>
+    <div class="lmw" id="lmw" style="display:none">
+      <button class="btn btn-secondary" onclick="more()">Load More</button>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast-el"></div>
 
 <script>
-let all = [], filtered = [], shown = 0;
-let listingType = '';
-let cu = null, tok = null;
-let favs = new Set();
-let searchTimer = null;
+let all=[],fil=[],shown=0,typ='',cu=null,tok=null,favs=new Set();
+const PS=12;
 
-const PAGE_SIZE = 12;
-
-/* ── Init ──────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const s = await getSession();
-    if (s) {
-      cu = s.user;
-      tok = s.access_token;
-      await loadFavs();
-    }
-  } catch (e) {}
-
-  document.getElementById('al').style.display = 'none';
-  document.getElementById('page').style.display = 'block';
-
-  await initNavbar({ active: 'browse' });
-
-  document.getElementById('q').addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => { go(); updateClearBtn(); }, 280);
-  });
-
+  const s=await getSession();
+  if(s){ cu=s.user; tok=s.access_token; await loadFavs(); }
+  document.getElementById('al').style.display='none';
+  document.getElementById('page').style.display='block';
+  await initNavbar({active:'browse'});
   await loadAll();
+  let t; document.getElementById('q').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(go,280);});
 });
 
-/* ── API ───────────────────────────────────────────────────── */
-async function loadAll() {
-  try {
-    const r = await fetch('/api/properties');
-    const data = await r.json();
-    all = Array.isArray(data) ? data : [];
-    go();
-  } catch (e) {
-    toast('Failed to load properties');
-    document.getElementById('cnt').textContent = 'Failed to load';
-  }
+async function loadAll(){
+  try{ const r=await fetch('/api/properties'); all=await r.json(); if(!Array.isArray(all))all=[]; go(); }
+  catch(e){ toast('Failed to load'); }
 }
 
-async function loadFavs() {
-  if (!tok) return;
-  try {
-    const r = await fetch('/api/favorites', {
-      headers: { Authorization: `Bearer ${tok}` }
-    });
-    if (!r.ok) return;
-    const data = await r.json();
-    favs = new Set(
-      (Array.isArray(data) ? data : [])
-        .map(f => String(f.property_id ?? f.propertyId ?? ''))
-        .filter(Boolean)
-    );
-  } catch (e) {}
+async function loadFavs(){
+  if(!tok) return;
+  try{
+    const r=await fetch('/api/favorites',{headers:{Authorization:`Bearer ${tok}`}});
+    if(r.ok){
+      const d=await r.json();
+      // FIX: handle both snake_case and camelCase from API
+      (d||[]).forEach(f=>favs.add(String(f.property_id??f.propertyId??'')));
+    }
+  }catch(e){}
 }
 
-/* ── Type tabs ─────────────────────────────────────────────── */
-function setType(val) {
-  listingType = val;
-  document.querySelectorAll('.type-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === val);
-  });
+function setT(t){
+  typ=t;
+  document.querySelectorAll('.tt').forEach((el,i)=>el.classList.toggle('active',i===['','rent','buy'].indexOf(t)));
   go();
-  updateClearBtn();
 }
 
-/* ── Filter & sort ─────────────────────────────────────────── */
-function getFilters() {
-  return {
-    q:         document.getElementById('q').value.trim().toLowerCase(),
-    propType:  document.getElementById('f-proptype').value,
-    bhk:       document.getElementById('f-bhk').value,
-    city:      document.getElementById('f-city').value,
-    vastu:     document.getElementById('f-vastu').value,
-    facing:    document.getElementById('f-facing').value,
-    furnished: document.getElementById('f-furnished').value,
-    sort:      document.getElementById('f-sort').value,
-  };
-}
-
-function go() {
-  const f = getFilters();
-
-  let res = all.filter(p => {
-    if (listingType && p.type !== listingType) return false;
-    if (f.propType && p.property_type !== f.propType) return false;
-
-    if (f.bhk) {
-      if (f.bhk === '5') {
-        if (Number(p.bhk) < 5) return false;
-      } else if (String(p.bhk) !== f.bhk) {
-        return false;
-      }
-    }
-
-    if (f.city && !String(p.city || '').toLowerCase().includes(f.city.toLowerCase())) return false;
-    if (f.vastu === 'yes' && !(p.vastu || p.vastu_compliance === 'yes')) return false;
-    if (f.facing && p.facing !== f.facing) return false;
-    if (f.furnished && p.furnished !== f.furnished) return false;
-
-    if (f.q) {
-      const hay = [p.title, p.locality, p.city, p.description]
-        .filter(Boolean).join(' ').toLowerCase();
-      if (!hay.includes(f.q)) return false;
-    }
-
+function go(){
+  const q=document.getElementById('q').value.toLowerCase();
+  const bhk=document.getElementById('fb').value;
+  const city=document.getElementById('fc').value;
+  const sort=document.getElementById('fs').value;
+  const vastu=document.getElementById('fvastu').value;
+  const facing=document.getElementById('ffacing').value;
+  fil=all.filter(p=>{
+    if(typ&&p.type!==typ)return false;
+    if(bhk&&String(p.bhk)!==bhk)return false;
+    if(city&&!p.city?.toLowerCase().includes(city.toLowerCase()))return false;
+    if(q&&![p.title,p.locality,p.city,p.description].filter(Boolean).join(' ').toLowerCase().includes(q))return false;
+    if(vastu==='yes'&&!(p.vastu||p.vastu_compliance==='yes'))return false;
+    if(facing&&p.facing!==facing)return false;
     return true;
   });
-
-  if (f.sort === 'price_asc')  res = [...res].sort((a, b) => (a.price || 0) - (b.price || 0));
-  else if (f.sort === 'price_desc') res = [...res].sort((a, b) => (b.price || 0) - (a.price || 0));
-  else res = [...res].sort((a, b) => new Date(b.posted_at || 0) - new Date(a.posted_at || 0));
-
-  filtered = res;
-  shown = 0;
-
-  const fc = activeFilterCount();
-  document.getElementById('cnt').textContent =
-    `${filtered.length} propert${filtered.length === 1 ? 'y' : 'ies'}` +
-    (fc ? ` · ${fc} filter${fc > 1 ? 's' : ''} active` : '');
-
-  document.getElementById('grid').innerHTML = '';
-  highlightActiveSelects();
-  updateClearBtn();
+  if(sort==='price_asc')fil.sort((a,b)=>a.price-b.price);
+  else if(sort==='price_desc')fil.sort((a,b)=>b.price-a.price);
+  else fil.sort((a,b)=>new Date(b.posted_at)-new Date(a.posted_at));
+  shown=0; document.getElementById('grid').innerHTML='';
+  document.getElementById('cnt').textContent=`${fil.length} propert${fil.length===1?'y':'ies'}`;
   more();
 }
 
-function activeFilterCount() {
-  const f = getFilters();
-  return [
-    listingType,
-    f.propType,
-    f.bhk,
-    f.city,
-    f.vastu,
-    f.facing,
-    f.furnished,
-    f.sort !== 'newest',
-    f.q
-  ].filter(Boolean).length;
-}
-
-function highlightActiveSelects() {
-  ['f-proptype','f-bhk','f-city','f-vastu','f-facing','f-furnished'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('active', !!el.value);
-  });
-  const sortEl = document.getElementById('f-sort');
-  if (sortEl) sortEl.classList.toggle('active', sortEl.value !== 'newest');
-}
-
-function updateClearBtn() {
-  const btn = document.getElementById('clear-btn');
-  if (btn) btn.classList.toggle('show', activeFilterCount() > 0);
-}
-
-function clearAll() {
-  document.getElementById('q').value = '';
-  document.getElementById('f-proptype').value = '';
-  document.getElementById('f-bhk').value = '';
-  document.getElementById('f-city').value = '';
-  document.getElementById('f-vastu').value = '';
-  document.getElementById('f-facing').value = '';
-  document.getElementById('f-furnished').value = '';
-  document.getElementById('f-sort').value = 'newest';
-  listingType = '';
-  document.querySelectorAll('.type-tab').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === '');
-  });
-  go();
-}
-
-/* ── Render ────────────────────────────────────────────────── */
-function more() {
-  const slice = filtered.slice(shown, shown + PAGE_SIZE);
-  const grid = document.getElementById('grid');
-
-  if (shown === 0 && !slice.length) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🏚️</div>
-        <div class="empty-title">No properties found</div>
-        <div class="empty-sub">Try adjusting or clearing your filters</div>
-        <button class="btn btn-primary" onclick="clearAll()" style="margin:0 auto">Clear Filters</button>
-      </div>
-    `;
-    document.getElementById('lmw').style.display = 'none';
-    return;
+function more(){
+  const sl=fil.slice(shown,shown+PS); const g=document.getElementById('grid');
+  if(shown===0&&!sl.length){
+    g.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏚️</div><div class="empty-title">No properties found</div><div class="empty-sub">Try adjusting your filters</div></div>';
+    document.getElementById('lmw').style.display='none'; return;
   }
-
-  slice.forEach(p => grid.insertAdjacentHTML('beforeend', cardHtml(p)));
-  shown += slice.length;
-  document.getElementById('lmw').style.display = shown < filtered.length ? 'flex' : 'none';
+  sl.forEach(p=>g.insertAdjacentHTML('beforeend',card(p)));
+  shown+=sl.length;
+  document.getElementById('lmw').style.display=shown<fil.length?'flex':'none';
 }
 
-function cardHtml(item) {
-  const rent = item.type === 'rent';
-  const price = fmtPrice(item.price);
-  const deposit = fmtPrice(item.deposit);
-  const faved = favs.has(String(item.id));
-  const isOwn = cu && String(cu.id) === String(item.listed_by);
-  const isVastu = item.vastu || item.vastu_compliance === 'yes';
-  const noBrokerage = item.no_brokerage || item.brokerage_applicable === 'no' || item.nobrokerage;
-  const title = x(item.title || 'Property');
-  const loc = x([item.locality, item.city].filter(Boolean).join(', '));
-
-  const imgHtml = item.photos?.[0]
-    ? `<img class="card-img" src="${x(item.photos[0])}" alt="${title}" loading="lazy"/>`
-    : `<div class="img-ph">🏠</div>`;
-
-  const priceHtml = price
-    ? `<div class="price">${price}${rent ? `<span class="price-sub"> /mo</span>` : ''}</div>`
-    : `<div class="price-na">Price on request</div>`;
-
-  const depositHtml = rent && deposit ? `<div class="deposit">Dep: ${deposit}</div>` : '';
-
-  const statsHtml = [
-    item.bhk ? `<span class="stat">🛏 ${x(item.bhk)} BHK</span>` : '',
-    item.bathrooms ? `<span class="stat">🚿 ${x(item.bathrooms)} Bath</span>` : '',
-    item.area ? `<span class="stat">📐 ${x(item.area)} ft²</span>` : '',
-    item.furnished && item.furnished !== 'unfurnished'
-      ? `<span class="stat">🪑 ${item.furnished === 'fully' ? 'Furnished' : 'Semi-Furn'}</span>` : '',
-    item.property_type ? `<span class="stat-type">${x(cap(item.property_type))}</span>` : ''
-  ].filter(Boolean).join('');
-
-  const badgesHtml = [
-    isVastu ? `<span class="mini-badge vastu">✓ Vastu</span>` : '',
-    noBrokerage ? `<span class="mini-badge zero">₹0 Brokerage</span>` : '',
-    item.facing ? `<span class="mini-badge face">🧭 ${x(cap(item.facing))}</span>` : ''
-  ].filter(Boolean).join('');
-
-  const actionsHtml = !isOwn && item.listed_by
-    ? `<button class="btn btn-secondary" onclick="messageOwner(event,'${item.id}','${item.listed_by}')">💬 Message</button>`
-    : `<div class="own-pill">✏️ Your Listing</div>`;
-
-  return `
-    <article class="card" onclick="openProperty(event,'${item.id}')">
-      <div class="img-wrap">
-        ${imgHtml}
-        <div class="type-badge ${rent ? 'rent' : 'buy'}">${rent ? 'RENT' : 'SALE'}</div>
-        <button class="heart-btn ${faved ? 'saved' : ''}" onclick="toggleFav(event,'${item.id}')">${faved ? '❤️' : '🤍'}</button>
-        <div class="e49">E49</div>
-      </div>
-      <div class="card-body">
-        <div class="price-row">${priceHtml}${depositHtml}</div>
-        <div class="ctitle">${title}</div>
-        <div class="cloc">📍 ${loc || 'Location not specified'}</div>
-        ${statsHtml ? `<div class="stats-row">${statsHtml}</div>` : ''}
-        ${badgesHtml ? `<div class="badge-row">${badgesHtml}</div>` : ''}
-      </div>
-      <div class="card-actions">
-        <button class="btn btn-primary" onclick="openProperty(event,'${item.id}')">View Details</button>
-        ${actionsHtml}
-      </div>
-    </article>
-  `;
-}
-
-/* ── Navigation ────────────────────────────────────────────── */
-function openProperty(e, id) {
-  if (e.target.closest('.heart-btn,.card-actions')) return;
-  window.location.href = `/property.html?id=${id}`;
-}
-
-function messageOwner(e, propertyId, ownerId) {
-  e.stopPropagation();
-  if (!cu) { showLoginPrompt('Sign in to contact the owner'); return; }
-  window.location.href = `/messages.html?to=${ownerId}&listing=${propertyId}`;
-}
-
-/* ── Favorites ─────────────────────────────────────────────── */
-async function toggleFav(e, propertyId) {
-  e.stopPropagation();
-  let freshTok = tok;
-  let freshUser = cu;
-
-  try {
-    const s = await getSession();
-    freshTok = s?.access_token || tok;
-    freshUser = s?.user || cu;
-  } catch (err) {}
-
-  if (!freshTok || !freshUser) {
-    showLoginPrompt('Sign in to save properties');
-    return;
-  }
-
-  const id = String(propertyId);
-  const wasFaved = favs.has(id);
-
-  try {
-    if (wasFaved) {
-      const res = await fetch(`/api/favorites/${propertyId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${freshTok}` }
-      });
-      if (!res.ok) throw new Error('Failed');
-      favs.delete(id);
-      toast('Removed from saved');
-    } else {
-      const res = await fetch('/api/favorites', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${freshTok}`
-        },
-        body: JSON.stringify({ property_id: Number(propertyId) })
-      });
-      if (!res.ok) throw new Error('Failed');
-      favs.add(id);
-      toast('❤️ Saved!');
-    }
-    go();
-  } catch (err) {
-    toast('Could not save — try again');
-  }
-}
-
-/* ── Login prompt ──────────────────────────────────────────── */
-function showLoginPrompt(msg) {
-  document.getElementById('login-prompt')?.remove();
-  document.body.insertAdjacentHTML('beforeend', `
-    <div id="login-prompt" style="
-      position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:9999;
-      display:flex;align-items:center;justify-content:center;padding:20px
-    ">
-      <div style="
-        background:#fff;border-radius:24px;padding:30px 24px;
-        max-width:360px;width:100%;text-align:center;
-        box-shadow:0 20px 44px rgba(15,23,42,.25)
-      ">
-        <div style="font-size:44px;margin-bottom:12px">🔐</div>
-        <div style="font-size:22px;font-weight:900;color:#111827;margin-bottom:8px">Sign In Required</div>
-        <div style="font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:22px">${x(msg)}</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <a href="/login.html" style="
-            display:flex;align-items:center;justify-content:center;
-            min-height:46px;border-radius:14px;
-            background:#c0392b;color:#fff;font-size:13px;font-weight:800;
-            text-decoration:none;box-shadow:0 10px 22px rgba(192,57,43,.2);
-          ">Sign In</a>
-          <a href="/login.html?mode=signup" style="
-            display:flex;align-items:center;justify-content:center;
-            min-height:46px;border-radius:14px;
-            background:#fff;color:#1f2937;font-size:13px;font-weight:800;
-            text-decoration:none;border:1.5px solid #e5e7eb;
-          ">Create Free Account</a>
-          <button onclick="document.getElementById('login-prompt').remove()" style="
-            font-size:13px;color:#6b7280;background:none;border:none;cursor:pointer;margin-top:2px;font-family:inherit
-          ">Maybe later</button>
-        </div>
+function card(p){
+  const rent=p.type==='rent', sv=favs.has(String(p.id)), own=cu&&p.listed_by===cu.id;
+  const pr=rent?`₹${Number(p.price).toLocaleString('en-IN')}<span>/mo</span>`:`₹${fp(p.price)}`;
+  const isVastuCompliant = p.vastu || p.vastu_compliance==='yes';
+  const facingLabel = p.facing ? `🧭 ${p.facing.charAt(0).toUpperCase()+p.facing.slice(1)}` : '';
+  return`<div class="pc" onclick="gp(event,'${p.id}')">
+    <div class="ci">
+      ${p.photos?.[0]?`<img src="${p.photos[0]}" alt="${x(p.title)}" loading="lazy" width="400" height="196"/>`:'<div class="cph">🏠</div>'}
+      <span class="cbdg badge badge-${rent?'rent':'buy'}">${rent?'Rent':'Buy'}</span>
+      <button class="cht ${sv?'sv':''}" data-id="${p.id}" onclick="tf(event,'${p.id}')">${sv?'❤️':'🤍'}</button>
+      <div class="e49-sticker">E49</div>
+    </div>
+    <div class="cb">
+      <div class="cprice">${pr}</div>
+      <div class="ctitle">${x(p.title||'Property')}</div>
+      <div class="cloc">📍 ${x([p.locality,p.city].filter(Boolean).join(', '))}</div>
+      <div class="cstats">
+        ${p.bhk?`<span class="cstat">🛏 ${p.bhk}BHK</span>`:''}
+        ${p.area?`<span class="cstat">📐 ${p.area}ft²</span>`:''}
+        ${p.furnished?`<span class="cstat">🛋 ${cp(p.furnished)}</span>`:''}
+        ${isVastuCompliant?`<span class="cstat vastu-yes">✓ Vastu</span>`:''}
+        ${facingLabel?`<span class="cstat">${facingLabel}</span>`:''}
       </div>
     </div>
-  `);
+    <div class="cacts">
+      <button class="cbtn p" onclick="gp(event,'${p.id}')">View</button>
+      ${!own&&p.listed_by?`<button class="cbtn" onclick="gm(event,'${p.id}','${p.listed_by}')">💬 Msg</button>`:''}
+      <button class="cbtn ${sv?'p':''}" id="sb${p.id}" onclick="tf(event,'${p.id}')">${sv?'❤️':'🤍'}</button>
+    </div>
+  </div>`;
 }
 
-/* ── Helpers ───────────────────────────────────────────────── */
-function fmtPrice(n) {
-  if (n === null || n === undefined || n === '') return null;
-  const v = Number(n);
-  if (!Number.isFinite(v) || v <= 0) return null;
-  if (v >= 10000000) return `₹${(v / 10000000).toFixed(1).replace(/\.0$/, '')}Cr`;
-  if (v >= 100000)   return `₹${(v / 100000).toFixed(1).replace(/\.0$/, '')}L`;
-  return `₹${v.toLocaleString('en-IN')}`;
+function gp(e,id){if(e.target.closest('.cht,.cacts'))return;window.location.href=`/property.html?id=${id}`;}
+
+function gm(e,id,oid){
+  e.stopPropagation();
+  if(!cu){ showLoginPrompt('Sign in to contact the owner'); return; }
+  window.location.href=`/messages.html?to=${oid}&listing=${id}`;
 }
 
-function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+async function tf(e,id){
+  e.stopPropagation();
 
-function x(t) {
-  return String(t || '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
+  // FIX: get fresh session so token is never stale
+  let freshCu=cu, freshTok=tok;
+  try{
+    const s=await getSession();
+    freshCu=s?.user||cu;
+    freshTok=s?.access_token||tok;
+  }catch(_){}
+
+  if(!freshCu){ showLoginPrompt('Sign in to save properties'); return; }
+
+  const sv=favs.has(String(id));
+  try{
+    if(sv){
+      const res=await fetch(`/api/favorites/${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${freshTok}`}});
+      if(!res.ok) throw new Error('delete failed');
+      favs.delete(String(id)); toast('Removed from saved');
+    }else{
+      const res=await fetch('/api/favorites',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${freshTok}`},body:JSON.stringify({property_id:Number(id)})});
+      if(!res.ok) throw new Error('save failed');
+      favs.add(String(id)); toast('❤️ Saved!');
+    }
+    document.querySelectorAll(`[data-id="${id}"].cht`).forEach(b=>{b.textContent=favs.has(String(id))?'❤️':'🤍';b.classList.toggle('sv',favs.has(String(id)));});
+    const sb=document.getElementById('sb'+id);
+    if(sb){sb.textContent=favs.has(String(id))?'❤️':'🤍';sb.classList.toggle('p',favs.has(String(id)));}
+  }catch(ex){toast('Could not save — please try again');}
 }
 
-function toast(msg) {
-  const el = document.getElementById('toast-el');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2400);
+function showLoginPrompt(msg){
+  document.getElementById('login-prompt')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`
+    <div id="login-prompt" style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px">
+      <div style="background:var(--surface);border-radius:var(--radius-xl);padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:var(--shadow-lg)">
+        <div style="font-size:44px;margin-bottom:12px">🔐</div>
+        <div style="font-size:var(--text-lg);font-weight:800;margin-bottom:8px">Sign In Required</div>
+        <div style="font-size:var(--text-sm);color:var(--muted);margin-bottom:24px">${msg}</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="/login.html" class="btn btn-primary btn-full" style="text-align:center">Sign In</a>
+          <a href="/login.html?mode=signup" class="btn btn-secondary btn-full" style="text-align:center">Create Free Account</a>
+          <button onclick="document.getElementById('login-prompt').remove()" style="font-size:var(--text-sm);color:var(--muted);background:none;border:none;cursor:pointer;margin-top:2px">Maybe later</button>
+        </div>
+      </div>
+    </div>`);
 }
+
+function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN');}
+function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cp(s){return s?s.charAt(0).toUpperCase()+s.slice(1):'';}
+function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
 </script>
 </body>
 </html>
