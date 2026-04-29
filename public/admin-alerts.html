@@ -8,85 +8,73 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --red: #c0392b; --red-dark: #96281b; --red-light: #fdecea;
-      --green: #2e7d32; --green-light: #e8f5e9;
-      --blue: #1565c0; --blue-light: #e3f2fd;
-      --orange: #e65100; --orange-light: #fff3e0;
-      --bg: #f4f4f4; --card: #fff; --border: #e0e0e0;
-      --text: #111; --muted: #777;
-      --radius: 12px; --shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --red:#c0392b; --red-light:#fdecea;
+      --green:#2e7d32; --green-light:#e8f5e9;
+      --blue:#1565c0; --blue-light:#e3f2fd;
+      --orange:#e65100; --orange-light:#fff3e0;
+      --bg:#f4f4f4; --card:#fff; --border:#e0e0e0;
+      --text:#111; --muted:#777;
+      --radius:12px; --shadow:0 2px 12px rgba(0,0,0,0.08);
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-           background: var(--bg); color: var(--text); min-height: 100vh; }
-    #login-screen { display:flex; flex-direction:column; align-items:center;
-      justify-content:center; min-height:100vh; padding:24px; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    #login-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
     .brand { font-size:32px; font-weight:900; color:var(--red); margin-bottom:8px; }
     .brand-sub { font-size:14px; color:var(--muted); margin-bottom:36px; }
-    .login-card { background:var(--card); border-radius:var(--radius); padding:32px;
-      box-shadow:var(--shadow); width:100%; max-width:400px; }
+    .login-card { background:var(--card); border-radius:var(--radius); padding:32px; box-shadow:var(--shadow); width:100%; max-width:400px; }
     .login-card h2 { font-size:20px; font-weight:700; margin-bottom:24px; }
     #app-screen { display:none; }
-    .topbar { background:var(--card); border-bottom:1px solid var(--border);
-      padding:14px 28px; display:flex; align-items:center; justify-content:space-between;
-      position:sticky; top:0; z-index:10; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .topbar { background:var(--card); border-bottom:1px solid var(--border); padding:14px 28px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:10; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
     .topbar-brand { font-size:20px; font-weight:900; color:var(--red); }
     .topbar-right { display:flex; align-items:center; gap:12px; }
-    .user-pill { font-size:13px; color:var(--muted); background:#f5f5f5;
-      padding:6px 14px; border-radius:20px; }
-    .main { max-width:1100px; margin:0 auto; padding:28px 20px;
-      display:grid; grid-template-columns:1fr 1.4fr; gap:24px; }
+    .user-pill { font-size:13px; color:var(--muted); background:#f5f5f5; padding:6px 14px; border-radius:20px; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .main { max-width:1100px; margin:0 auto; padding:28px 20px; display:grid; grid-template-columns:1fr 1.4fr; gap:24px; }
     @media(max-width:700px){.main{grid-template-columns:1fr;}}
-    .panel { background:var(--card); border-radius:var(--radius);
-      box-shadow:var(--shadow); overflow:hidden; }
-    .panel-header { padding:18px 22px; border-bottom:1px solid var(--border);
-      display:flex; align-items:center; justify-content:space-between; }
+    .panel { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .panel-header { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
     .panel-title { font-size:16px; font-weight:800; }
     .panel-body { padding:22px; }
     .form-group { margin-bottom:18px; }
     label { display:block; font-size:13px; font-weight:600; color:#444; margin-bottom:7px; }
-    input[type="text"],input[type="email"],input[type="password"],textarea,select {
-      width:100%; padding:12px 14px; border:1.5px solid var(--border);
-      border-radius:10px; font-size:15px; color:var(--text); background:#fff;
-      transition:border-color .2s; font-family:inherit; }
-    input:focus,textarea:focus,select:focus { outline:none; border-color:var(--red); }
+    input[type="text"],input[type="email"],input[type="password"],textarea {
+      width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:15px; color:var(--text); background:#fff; transition:border-color .2s; font-family:inherit;
+    }
+    input:focus,textarea:focus { outline:none; border-color:var(--red); }
     textarea { min-height:100px; resize:vertical; line-height:1.5; }
     .type-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .type-btn { padding:10px 12px; border:2px solid var(--border); border-radius:10px;
-      cursor:pointer; font-size:13px; font-weight:600; background:#fff;
-      text-align:center; transition:all .15s; }
+    .type-btn { padding:10px 12px; border:2px solid var(--border); border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#fff; text-align:center; transition:all .15s; }
     .type-btn.sel-info    { border-color:var(--blue);   background:var(--blue-light);   color:var(--blue); }
     .type-btn.sel-warning { border-color:var(--orange); background:var(--orange-light); color:var(--orange); }
     .type-btn.sel-success { border-color:var(--green);  background:var(--green-light);  color:var(--green); }
     .type-btn.sel-urgent  { border-color:var(--red);    background:var(--red-light);    color:var(--red); }
-    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      padding:12px 22px; border-radius:10px; font-size:15px; font-weight:700;
-      cursor:pointer; border:none; transition:opacity .15s,transform .1s; font-family:inherit; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 22px; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; border:none; transition:opacity .15s,transform .1s; font-family:inherit; }
     .btn:active { transform:scale(0.98); }
-    .btn-primary { background:var(--red); color:#fff; width:100%; margin-top:4px; }
+    .btn-primary  { background:var(--red); color:#fff; width:100%; margin-top:4px; }
     .btn-primary:hover { opacity:.9; }
-    .btn-danger  { background:transparent; color:#c0392b; padding:6px 12px;
-      font-size:13px; border:1px solid #fdecea; border-radius:8px; }
+    .btn-google   { background:#fff; color:#111; width:100%; border:1.5px solid var(--border); margin-bottom:14px; box-shadow:0 1px 4px rgba(0,0,0,0.07); }
+    .btn-google:hover { background:#f9f9f9; }
+    .btn-danger   { background:transparent; color:#c0392b; padding:6px 12px; font-size:13px; border:1px solid #fdecea; border-radius:8px; }
     .btn-danger:hover { background:var(--red-light); }
-    .btn-sm { padding:7px 14px; font-size:13px; }
-    .btn-outline { background:transparent; color:var(--red); border:1.5px solid var(--red);
-      font-size:13px; padding:8px 16px; }
+    .btn-sm     { padding:7px 14px; font-size:13px; }
+    .btn-outline { background:transparent; color:var(--red); border:1.5px solid var(--red); font-size:13px; padding:8px 16px; }
     .btn:disabled { opacity:.5; cursor:not-allowed; }
+    .divider { display:flex; align-items:center; gap:10px; margin:4px 0 18px; }
+    .divider-line { flex:1; height:1px; background:var(--border); }
+    .divider-text { font-size:12px; color:#bbb; font-weight:500; }
     .alerts-list { display:flex; flex-direction:column; gap:12px; }
     .alert-item { border-radius:10px; padding:16px; border-left:4px solid #ccc; }
     .alert-item.info    { border-left-color:var(--blue);   background:var(--blue-light); }
     .alert-item.warning { border-left-color:var(--orange); background:var(--orange-light); }
     .alert-item.success { border-left-color:var(--green);  background:var(--green-light); }
     .alert-item.urgent  { border-left-color:var(--red);    background:var(--red-light); }
-    .alert-meta { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
-    .alert-badge { font-size:11px; font-weight:800; text-transform:uppercase;
-      padding:3px 10px; border-radius:20px; letter-spacing:0.5px; }
+    .alert-meta   { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+    .alert-badge  { font-size:11px; font-weight:800; text-transform:uppercase; padding:3px 10px; border-radius:20px; letter-spacing:.5px; }
     .badge-info    { background:#bbdefb; color:var(--blue); }
     .badge-warning { background:#ffe0b2; color:var(--orange); }
     .badge-success { background:#c8e6c9; color:var(--green); }
     .badge-urgent  { background:#ffcdd2; color:var(--red); }
-    .alert-time { font-size:12px; color:var(--muted); margin-left:auto; }
+    .alert-time       { font-size:12px; color:var(--muted); margin-left:auto; }
     .alert-title-text { font-size:15px; font-weight:700; margin-bottom:5px; }
-    .alert-msg-text { font-size:13px; color:#444; line-height:1.5; margin-bottom:10px; }
+    .alert-msg-text   { font-size:13px; color:#444; line-height:1.5; margin-bottom:10px; }
     .alert-footer { display:flex; align-items:center; justify-content:space-between; }
     .alert-expiry { font-size:11px; color:#999; }
     .empty-state { text-align:center; padding:48px 20px; color:var(--muted); }
@@ -96,58 +84,72 @@
     .stat-card { background:var(--card); border-radius:10px; padding:14px 16px; box-shadow:var(--shadow); }
     .stat-num { font-size:24px; font-weight:900; }
     .stat-lbl { font-size:12px; color:var(--muted); margin-top:2px; }
-    .stat-card.red   .stat-num { color:var(--red); }
-    .stat-card.blue  .stat-num { color:var(--blue); }
-    .stat-card.ora   .stat-num { color:var(--orange); }
-    .stat-card.grn   .stat-num { color:var(--green); }
+    .stat-card.red  .stat-num { color:var(--red); }
+    .stat-card.blue .stat-num { color:var(--blue); }
+    .stat-card.ora  .stat-num { color:var(--orange); }
+    .stat-card.grn  .stat-num { color:var(--green); }
     @media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr);}}
-    #preview-box { margin-top:18px; border-radius:10px; padding:16px;
-      border-left:4px solid #ccc; background:#f9f9f9; display:none; }
-    #preview-box.show { display:block; }
-    .toast { position:fixed; bottom:24px; right:24px; background:#222; color:#fff;
-      padding:14px 22px; border-radius:10px; font-size:14px; font-weight:600;
-      z-index:999; opacity:0; transform:translateY(10px);
-      transition:all .3s; pointer-events:none; }
+    #preview-box { margin-top:18px; border-radius:10px; padding:16px; border-left:4px solid #ccc; background:#f9f9f9; display:none; }
+    .toast { position:fixed; bottom:24px; right:24px; background:#222; color:#fff; padding:14px 22px; border-radius:10px; font-size:14px; font-weight:600; z-index:999; opacity:0; transform:translateY(10px); transition:all .3s; pointer-events:none; }
     .toast.show { opacity:1; transform:translateY(0); }
     .toast.success { background:var(--green); }
     .toast.error   { background:var(--red); }
-    .spinner { width:18px; height:18px; border:2px solid rgba(255,255,255,.4);
-      border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; }
+    .spinner { width:18px; height:18px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
     .scrollable { max-height:520px; overflow-y:auto; padding-right:4px; }
     .scrollable::-webkit-scrollbar { width:4px; }
     .scrollable::-webkit-scrollbar-thumb { background:#ddd; border-radius:4px; }
     #login-error { color:#c0392b; font-size:13px; margin-bottom:14px; display:none; }
+    .google-g { font-size:16px; font-weight:900; color:#4285F4; }
+    #checking-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; gap:14px; }
+    .spin-red { width:36px; height:36px; border:3px solid #fdecea; border-top-color:var(--red); border-radius:50%; animation:spin .7s linear infinite; }
   </style>
 </head>
 <body>
 
-<div id="login-screen">
-  <div class="brand">&#127968; Estate49</div>
+<div id="checking-screen">
+  <div class="spin-red"></div>
+  <p style="color:#999;font-size:14px;font-weight:600">Loading Estate49 Admin...</p>
+</div>
+
+<div id="login-screen" style="display:none">
+  <div class="brand">🏠 Estate49</div>
   <div class="brand-sub">Admin Alert Manager</div>
   <div class="login-card">
     <h2>Admin Sign In</h2>
+
+    <button class="btn btn-google" onclick="loginGoogle()">
+      <span class="google-g">G</span> Continue with Google
+    </button>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <span class="divider-text">or use email</span>
+      <div class="divider-line"></div>
+    </div>
+
     <div class="form-group">
       <label>Email</label>
       <input type="email" id="login-email" placeholder="admin@estate49.com" />
     </div>
     <div class="form-group">
       <label>Password</label>
-      <input type="password" id="login-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+      <input type="password" id="login-password" placeholder="••••••••" />
     </div>
     <div id="login-error"></div>
-    <button class="btn btn-primary" id="login-btn" onclick="doLogin()">Sign In</button>
+    <button class="btn btn-primary" id="login-btn" onclick="loginEmail()">Sign In</button>
   </div>
 </div>
 
-<div id="app-screen">
+<div id="app-screen" style="display:none">
   <div class="topbar">
-    <div class="topbar-brand">&#127968; Estate49 Alerts</div>
+    <div class="topbar-brand">🏠 Estate49 Alerts</div>
     <div class="topbar-right">
       <span class="user-pill" id="user-email-display"></span>
       <button class="btn btn-outline btn-sm" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
+
   <div style="max-width:1100px;margin:0 auto;padding:24px 20px">
     <div class="stats">
       <div class="stat-card red"><div class="stat-num" id="s-total">-</div><div class="stat-lbl">Total Active</div></div>
@@ -155,192 +157,290 @@
       <div class="stat-card ora"><div class="stat-num" id="s-warning">-</div><div class="stat-lbl">Warnings</div></div>
       <div class="stat-card blue"><div class="stat-num" id="s-info">-</div><div class="stat-lbl">Info / Updates</div></div>
     </div>
+
     <div class="main" style="padding:0">
       <div class="panel">
-        <div class="panel-header"><div class="panel-title">&#128226; Send New Alert</div></div>
+        <div class="panel-header"><div class="panel-title">📢 Send New Alert</div></div>
         <div class="panel-body">
           <div class="form-group">
             <label>Alert Type</label>
             <div class="type-grid">
-              <button class="type-btn sel-info"    data-type="info"    onclick="selectType(this,'info')">&#8505;&#65039; Info</button>
-              <button class="type-btn"              data-type="warning" onclick="selectType(this,'warning')">&#9888;&#65039; Warning</button>
-              <button class="type-btn"              data-type="success" onclick="selectType(this,'success')">&#9989; Update</button>
-              <button class="type-btn"              data-type="urgent"  onclick="selectType(this,'urgent')">&#128680; Urgent</button>
+              <button class="type-btn sel-info" data-type="info" onclick="selType(this,'info')">ℹ️ Info</button>
+              <button class="type-btn" data-type="warning" onclick="selType(this,'warning')">⚠️ Warning</button>
+              <button class="type-btn" data-type="success" onclick="selType(this,'success')">✅ Update</button>
+              <button class="type-btn" data-type="urgent" onclick="selType(this,'urgent')">🚨 Urgent</button>
             </div>
           </div>
+
           <div class="form-group">
             <label>Title</label>
             <input type="text" id="alert-title" placeholder="e.g. New feature available" oninput="updatePreview()" maxlength="80" />
           </div>
+
           <div class="form-group">
             <label>Message</label>
             <textarea id="alert-message" placeholder="Write the alert message for users..." oninput="updatePreview()" maxlength="500"></textarea>
             <div style="font-size:11px;color:#bbb;text-align:right;margin-top:4px"><span id="char-count">0</span>/500</div>
           </div>
+
           <div id="preview-box">
             <div class="alert-meta">
               <span class="alert-badge" id="preview-badge"></span>
-              <span class="alert-time">Just now &middot; expires in 15 days</span>
+              <span class="alert-time">Just now · expires in 15 days</span>
             </div>
             <div class="alert-title-text" id="preview-title"></div>
-            <div class="alert-msg-text"   id="preview-msg"></div>
+            <div class="alert-msg-text" id="preview-msg"></div>
           </div>
+
           <button class="btn btn-primary" id="send-btn" onclick="sendAlert()">
-            <span id="send-inner">&#128640; Send Alert to All Users</span>
+            <span id="send-inner">🚀 Send Alert to All Users</span>
           </button>
         </div>
       </div>
+
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">&#128203; Active Alerts</div>
-          <button class="btn btn-sm btn-outline" onclick="loadAlerts()">&#8635; Refresh</button>
+          <div class="panel-title">📋 Active Alerts</div>
+          <button class="btn btn-sm btn-outline" onclick="loadAlerts()">↻ Refresh</button>
         </div>
         <div class="panel-body">
           <div class="scrollable">
             <div id="alerts-list" class="alerts-list">
-              <div class="empty-state"><div class="empty-icon">&#128276;</div><div class="empty-text">Loading...</div></div>
+              <div class="empty-state"><div class="empty-icon">🔔</div><div class="empty-text">Loading...</div></div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL  = "https://qbbxdtbfxlliqxxlaoed.supabase.co";
-const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiYnhkdGJmeGxsaXF4eGxhb2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzY0MzUsImV4cCI6MjA5MTUxMjQzNX0.g86SW28zVacKDKzb0bZcsJvGTQ1N7Ahy3Ib3_DRNL90";
-const BACKEND       = "https://www.estate49.com";
+const SUPABASE_URL = 'https://qbbxdtbfxlliqxxlaoed.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiYnhkdGJmeGxsaXF4eGxhb2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzY0MzUsImV4cCI6MjA5MTUxMjQzNX0.g86SW28zVacKDKzb0bZcsJvGTQ1N7Ahy3Ib3_DRNL90'; // keep your same anon key here
+const BACKEND = 'https://www.estate49.com';
+
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentType = "info";
+let currentType = 'info';
 let currentToken = null;
 
 const TMETA = {
-  info:    { icon:"ℹ️", label:"Info",    badge:"badge-info",    cls:"sel-info" },
-  warning: { icon:"⚠️", label:"Warning", badge:"badge-warning", cls:"sel-warning" },
-  success: { icon:"✅", label:"Update",  badge:"badge-success", cls:"sel-success" },
-  urgent:  { icon:"🚨", label:"Urgent",  badge:"badge-urgent",  cls:"sel-urgent" },
+  info:    { label:'Info',    badge:'badge-info' },
+  warning: { label:'Warning', badge:'badge-warning' },
+  success: { label:'Update',  badge:'badge-success' },
+  urgent:  { label:'Urgent',  badge:'badge-urgent' },
 };
 
-document.getElementById("login-password")
-  .addEventListener("keydown", e => { if(e.key==="Enter") doLogin(); });
+window.addEventListener('DOMContentLoaded', async () => {
+  db.auth.onAuthStateChange(async (_event, session) => {
+    if (session) {
+      currentToken = session.access_token;
+      showApp(session.user);
+    } else {
+      showLogin();
+    }
+  });
 
-async function doLogin() {
-  const email = document.getElementById("login-email").value.trim();
-  const pass  = document.getElementById("login-password").value;
-  const errEl = document.getElementById("login-error");
-  const btn   = document.getElementById("login-btn");
-  if(!email||!pass){ errEl.textContent="Please enter email and password"; errEl.style.display="block"; return; }
-  btn.disabled=true; btn.textContent="Signing in...";
-  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
-  if(error){ errEl.textContent=error.message; errEl.style.display="block"; btn.disabled=false; btn.textContent="Sign In"; return; }
-  currentToken = data.session.access_token;
-  document.getElementById("user-email-display").textContent = email;
-  document.getElementById("login-screen").style.display="none";
-  document.getElementById("app-screen").style.display="block";
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    currentToken = session.access_token;
+    showApp(session.user);
+  } else {
+    showLogin();
+  }
+});
+
+function showApp(user) {
+  document.getElementById('checking-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('user-email-display').textContent = user.email || 'Admin';
   loadAlerts();
-  db.channel("alerts-watch").on("postgres_changes",{event:"*",schema:"public",table:"alerts"},loadAlerts).subscribe();
+  db.channel('alerts-watch')
+    .on('postgres_changes', { event:'*', schema:'public', table:'alerts' }, loadAlerts)
+    .subscribe();
 }
 
-async function doLogout(){ await db.auth.signOut(); location.reload(); }
+function showLogin() {
+  document.getElementById('checking-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+}
 
-function selectType(el, t) {
+async function loginGoogle() {
+  const { error } = await db.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.href },
+  });
+  if (error) showToast('Google sign-in failed: ' + error.message, 'error');
+}
+
+async function loginEmail() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  const btn   = document.getElementById('login-btn');
+
+  if (!email || !pass) {
+    errEl.textContent = 'Enter email and password';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  const { error } = await db.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    errEl.textContent = error.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('login-password')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') loginEmail();
+  });
+});
+
+async function doLogout() {
+  await db.auth.signOut();
+  showLogin();
+}
+
+function selType(_el, t) {
   currentType = t;
-  document.querySelectorAll(".type-btn").forEach(b => {
-    b.className = "type-btn";
-    if(b.dataset.type===t) b.classList.add("sel-"+t);
+  document.querySelectorAll('.type-btn').forEach(b => {
+    b.className = 'type-btn';
+    if (b.dataset.type === t) b.classList.add('sel-' + t);
   });
   updatePreview();
 }
 
 function updatePreview() {
-  const title = document.getElementById("alert-title").value.trim();
-  const msg   = document.getElementById("alert-message").value.trim();
-  document.getElementById("char-count").textContent = document.getElementById("alert-message").value.length;
-  const box = document.getElementById("preview-box");
-  if(!title&&!msg){ box.className="alert-item"; box.style.display="none"; return; }
+  const title = document.getElementById('alert-title').value.trim();
+  const msg   = document.getElementById('alert-message').value.trim();
+  document.getElementById('char-count').textContent = document.getElementById('alert-message').value.length;
+  const box = document.getElementById('preview-box');
+
+  if (!title && !msg) {
+    box.style.display = 'none';
+    return;
+  }
+
   const m = TMETA[currentType];
-  box.className="alert-item "+currentType+" show";
-  document.getElementById("preview-badge").className="alert-badge "+m.badge;
-  document.getElementById("preview-badge").textContent=m.icon+" "+m.label;
-  document.getElementById("preview-title").textContent=title||"(Title)";
-  document.getElementById("preview-msg").textContent=msg||"(Message)";
+  box.className = 'alert-item ' + currentType;
+  box.style.display = 'block';
+  document.getElementById('preview-badge').className = 'alert-badge ' + m.badge;
+  document.getElementById('preview-badge').textContent = m.label;
+  document.getElementById('preview-title').textContent = title || '(Title)';
+  document.getElementById('preview-msg').textContent = msg || '(Message)';
 }
 
 async function sendAlert() {
-  const title = document.getElementById("alert-title").value.trim();
-  const msg   = document.getElementById("alert-message").value.trim();
-  if(!title){ showToast("Please enter a title","error"); return; }
-  if(!msg)  { showToast("Please enter a message","error"); return; }
-  const btn = document.getElementById("send-btn");
-  btn.disabled=true;
-  document.getElementById("send-inner").innerHTML="<div class=\"spinner\"></div> Sending...";
+  const title = document.getElementById('alert-title').value.trim();
+  const msg   = document.getElementById('alert-message').value.trim();
+
+  if (!title) return showToast('Please enter a title', 'error');
+  if (!msg) return showToast('Please enter a message', 'error');
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  document.getElementById('send-inner').innerHTML = '<div class="spinner"></div> Sending...';
+
   try {
-    const res = await fetch(BACKEND+"/api/admin/alerts", {
-      method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer "+currentToken},
-      body:JSON.stringify({ title, message:msg, type:currentType }),
+    const res = await fetch(BACKEND + '/api/admin/alerts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + currentToken,
+      },
+      body: JSON.stringify({ title, message: msg, type: currentType }),
     });
-    if(!res.ok){
-      const { error } = await db.from("alerts").insert({ title, message:msg, type:currentType });
-      if(error) throw error;
-      showToast("Alert sent! (push via backend not available)","success");
+
+    if (!res.ok) {
+      const { error } = await db.from('alerts').insert({ title, message: msg, type: currentType });
+      if (error) throw error;
+      showToast('Alert sent (backend push unavailable)', 'success');
     } else {
-      showToast("Alert sent to all users!","success");
+      showToast('Alert sent to all users!', 'success');
     }
-    document.getElementById("alert-title").value="";
-    document.getElementById("alert-message").value="";
-    document.getElementById("char-count").textContent="0";
-    document.getElementById("preview-box").style.display="none";
-    selectType(document.querySelector("[data-type=info]"),"info");
+
+    document.getElementById('alert-title').value = '';
+    document.getElementById('alert-message').value = '';
+    document.getElementById('char-count').textContent = '0';
+    document.getElementById('preview-box').style.display = 'none';
     loadAlerts();
-  } catch(e) {
-    showToast("Error: "+e.message,"error");
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
   } finally {
-    btn.disabled=false;
-    document.getElementById("send-inner").textContent="🚀 Send Alert to All Users";
+    btn.disabled = false;
+    document.getElementById('send-inner').textContent = '🚀 Send Alert to All Users';
   }
 }
 
 async function loadAlerts() {
-  const { data } = await db.from("alerts").select("*")
-    .gt("expires_at", new Date().toISOString())
-    .order("created_at",{ascending:false});
-  const list = data||[];
-  document.getElementById("s-total").textContent  = list.length;
-  document.getElementById("s-urgent").textContent = list.filter(a=>a.type==="urgent").length;
-  document.getElementById("s-warning").textContent= list.filter(a=>a.type==="warning").length;
-  document.getElementById("s-info").textContent   = list.filter(a=>a.type==="info"||a.type==="success").length;
-  const el = document.getElementById("alerts-list");
-  if(!list.length){
-    el.innerHTML="<div class=\"empty-state\"><div class=\"empty-icon\">🔕</div><div class=\"empty-text\">No active alerts</div><p style=\"font-size:13px;color:#bbb;margin-top:8px\">Send one using the form.</p></div>";
+  const { data } = await db.from('alerts')
+    .select('*')
+    .gt('expires_at', new Date().toISOString())
+    .order('created_at', { ascending: false });
+
+  const list = data || [];
+  document.getElementById('s-total').textContent = list.length;
+  document.getElementById('s-urgent').textContent = list.filter(a => a.type === 'urgent').length;
+  document.getElementById('s-warning').textContent = list.filter(a => a.type === 'warning').length;
+  document.getElementById('s-info').textContent = list.filter(a => a.type === 'info' || a.type === 'success').length;
+
+  const el = document.getElementById('alerts-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔕</div><div class="empty-text">No active alerts</div></div>';
     return;
   }
-  el.innerHTML = list.map(a=>{
-    const m = TMETA[a.type]||TMETA.info;
-    const created = new Date(a.created_at).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
-    const expires = new Date(a.expires_at).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
-    return "<div class=\"alert-item "+a.type+"\"><div class=\"alert-meta\"><span class=\"alert-badge "+m.badge+"\">"+m.icon+" "+m.label+"</span><span class=\"alert-time\">"+created+"</span></div><div class=\"alert-title-text\">"+esc(a.title)+"</div><div class=\"alert-msg-text\">"+esc(a.message)+"</div><div class=\"alert-footer\"><span class=\"alert-expiry\">🗓 Expires "+expires+"</span><button class=\"btn btn-danger\" onclick=\"delAlert('"+a.id+"')\">🗑 Delete</button></div></div>";
-  }).join("");
+
+  el.innerHTML = list.map(a => {
+    const m = TMETA[a.type] || TMETA.info;
+    const created = new Date(a.created_at).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    const expires = new Date(a.expires_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+    return `
+      <div class="alert-item ${a.type}">
+        <div class="alert-meta">
+          <span class="alert-badge ${m.badge}">${m.label}</span>
+          <span class="alert-time">${created}</span>
+        </div>
+        <div class="alert-title-text">${esc(a.title)}</div>
+        <div class="alert-msg-text">${esc(a.message)}</div>
+        <div class="alert-footer">
+          <span class="alert-expiry">Expires ${expires}</span>
+          <button class="btn btn-danger" onclick="delAlert('${a.id}')">Delete</button>
+        </div>
+      </div>`;
+  }).join('');
 }
 
-async function delAlert(id){
-  if(!confirm("Delete this alert?")) return;
-  const { error } = await db.from("alerts").delete().eq("id",id);
-  if(error){ showToast("Delete failed","error"); return; }
-  showToast("Deleted","success"); loadAlerts();
+async function delAlert(id) {
+  if (!confirm('Delete this alert?')) return;
+  const { error } = await db.from('alerts').delete().eq('id', id);
+  if (error) return showToast('Delete failed', 'error');
+  showToast('Deleted', 'success');
+  loadAlerts();
 }
 
-function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 let tt;
-function showToast(msg,type="success"){
-  const t=document.getElementById("toast");
-  t.textContent=msg; t.className="toast show "+type;
-  clearTimeout(tt); tt=setTimeout(()=>t.classList.remove("show"),3500);
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(tt);
+  tt = setTimeout(() => t.classList.remove('show'), 3500);
 }
 </script>
 </body>
