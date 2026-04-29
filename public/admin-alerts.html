@@ -17,7 +17,9 @@
       --radius:12px; --shadow:0 2px 12px rgba(0,0,0,0.08);
     }
     body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-    #login-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+    #checking-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; gap:14px; }
+    .spin-red { width:36px; height:36px; border:3px solid #fdecea; border-top-color:var(--red); border-radius:50%; animation:spin .7s linear infinite; }
+    #login-screen { display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
     .brand { font-size:32px; font-weight:900; color:var(--red); margin-bottom:8px; }
     .brand-sub { font-size:14px; color:var(--muted); margin-bottom:36px; }
     .login-card { background:var(--card); border-radius:var(--radius); padding:32px; box-shadow:var(--shadow); width:100%; max-width:400px; }
@@ -35,9 +37,7 @@
     .panel-body { padding:22px; }
     .form-group { margin-bottom:18px; }
     label { display:block; font-size:13px; font-weight:600; color:#444; margin-bottom:7px; }
-    input[type="text"],input[type="email"],input[type="password"],textarea {
-      width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:15px; color:var(--text); background:#fff; transition:border-color .2s; font-family:inherit;
-    }
+    input[type="text"],input[type="email"],input[type="password"],textarea { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-size:15px; color:var(--text); background:#fff; transition:border-color .2s; font-family:inherit; }
     input:focus,textarea:focus { outline:none; border-color:var(--red); }
     textarea { min-height:100px; resize:vertical; line-height:1.5; }
     .type-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
@@ -48,13 +48,13 @@
     .type-btn.sel-urgent  { border-color:var(--red);    background:var(--red-light);    color:var(--red); }
     .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 22px; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; border:none; transition:opacity .15s,transform .1s; font-family:inherit; }
     .btn:active { transform:scale(0.98); }
-    .btn-primary  { background:var(--red); color:#fff; width:100%; margin-top:4px; }
+    .btn-primary { background:var(--red); color:#fff; width:100%; margin-top:4px; }
     .btn-primary:hover { opacity:.9; }
-    .btn-google   { background:#fff; color:#111; width:100%; border:1.5px solid var(--border); margin-bottom:14px; box-shadow:0 1px 4px rgba(0,0,0,0.07); }
+    .btn-google  { background:#fff; color:#111; width:100%; border:1.5px solid var(--border); margin-bottom:14px; box-shadow:0 1px 4px rgba(0,0,0,0.07); }
     .btn-google:hover { background:#f9f9f9; }
-    .btn-danger   { background:transparent; color:#c0392b; padding:6px 12px; font-size:13px; border:1px solid #fdecea; border-radius:8px; }
+    .btn-danger  { background:transparent; color:#c0392b; padding:6px 12px; font-size:13px; border:1px solid #fdecea; border-radius:8px; }
     .btn-danger:hover { background:var(--red-light); }
-    .btn-sm     { padding:7px 14px; font-size:13px; }
+    .btn-sm      { padding:7px 14px; font-size:13px; }
     .btn-outline { background:transparent; color:var(--red); border:1.5px solid var(--red); font-size:13px; padding:8px 16px; }
     .btn:disabled { opacity:.5; cursor:not-allowed; }
     .divider { display:flex; align-items:center; gap:10px; margin:4px 0 18px; }
@@ -101,8 +101,6 @@
     .scrollable::-webkit-scrollbar-thumb { background:#ddd; border-radius:4px; }
     #login-error { color:#c0392b; font-size:13px; margin-bottom:14px; display:none; }
     .google-g { font-size:16px; font-weight:900; color:#4285F4; }
-    #checking-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; gap:14px; }
-    .spin-red { width:36px; height:36px; border:3px solid #fdecea; border-top-color:var(--red); border-radius:50%; animation:spin .7s linear infinite; }
   </style>
 </head>
 <body>
@@ -112,22 +110,19 @@
   <p style="color:#999;font-size:14px;font-weight:600">Loading Estate49 Admin...</p>
 </div>
 
-<div id="login-screen" style="display:none">
+<div id="login-screen">
   <div class="brand">🏠 Estate49</div>
   <div class="brand-sub">Admin Alert Manager</div>
   <div class="login-card">
     <h2>Admin Sign In</h2>
-
     <button class="btn btn-google" onclick="loginGoogle()">
       <span class="google-g">G</span> Continue with Google
     </button>
-
     <div class="divider">
       <div class="divider-line"></div>
       <span class="divider-text">or use email</span>
       <div class="divider-line"></div>
     </div>
-
     <div class="form-group">
       <label>Email</label>
       <input type="email" id="login-email" placeholder="admin@estate49.com" />
@@ -141,7 +136,7 @@
   </div>
 </div>
 
-<div id="app-screen" style="display:none">
+<div id="app-screen">
   <div class="topbar">
     <div class="topbar-brand">🏠 Estate49 Alerts</div>
     <div class="topbar-right">
@@ -218,7 +213,7 @@
 
 <script>
 const SUPABASE_URL = 'https://qbbxdtbfxlliqxxlaoed.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiYnhkdGJmeGxsaXF4eGxhb2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzY0MzUsImV4cCI6MjA5MTUxMjQzNX0.g86SW28zVacKDKzb0bZcsJvGTQ1N7Ahy3Ib3_DRNL90'; // keep your same anon key here
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFiYnhkdGJmeGxsaXF4eGxhb2VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MzY0MzUsImV4cCI6MjA5MTUxMjQzNX0.g86SW28zVacKDKzb0bZcsJvGTQ1N7Ahy3Ib3_DRNL90';
 const BACKEND = 'https://www.estate49.com';
 
 const { createClient } = supabase;
@@ -226,6 +221,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentType = 'info';
 let currentToken = null;
+let appReady = false;
 
 const TMETA = {
   info:    { label:'Info',    badge:'badge-info' },
@@ -235,11 +231,12 @@ const TMETA = {
 };
 
 window.addEventListener('DOMContentLoaded', async () => {
-  db.auth.onAuthStateChange(async (_event, session) => {
+  db.auth.onAuthStateChange((_event, session) => {
     if (session) {
       currentToken = session.access_token;
       showApp(session.user);
     } else {
+      appReady = false;
       showLogin();
     }
   });
@@ -254,13 +251,18 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 function showApp(user) {
+  if (appReady) return;
+  appReady = true;
+
   document.getElementById('checking-screen').style.display = 'none';
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-screen').style.display = 'block';
   document.getElementById('user-email-display').textContent = user.email || 'Admin';
+
   loadAlerts();
+
   db.channel('alerts-watch')
-    .on('postgres_changes', { event:'*', schema:'public', table:'alerts' }, loadAlerts)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'alerts' }, loadAlerts)
     .subscribe();
 }
 
@@ -309,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function doLogout() {
+  appReady = false;
   await db.auth.signOut();
   showLogin();
 }
@@ -366,7 +369,7 @@ async function sendAlert() {
     if (!res.ok) {
       const { error } = await db.from('alerts').insert({ title, message: msg, type: currentType });
       if (error) throw error;
-      showToast('Alert sent (backend push unavailable)', 'success');
+      showToast('Alert sent! (push notifications via backend unavailable)', 'success');
     } else {
       showToast('Alert sent to all users!', 'success');
     }
@@ -375,12 +378,17 @@ async function sendAlert() {
     document.getElementById('alert-message').value = '';
     document.getElementById('char-count').textContent = '0';
     document.getElementById('preview-box').style.display = 'none';
+    currentType = 'info';
+    document.querySelectorAll('.type-btn').forEach(b => {
+      b.className = 'type-btn';
+      if (b.dataset.type === 'info') b.classList.add('sel-info');
+    });
     loadAlerts();
   } catch (e) {
     showToast('Error: ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    document.getElementById('send-inner').textContent = '🚀 Send Alert to All Users';
+    document.getElementById('send-inner').textContent = 'Send Alert to All Users';
   }
 }
 
@@ -398,7 +406,7 @@ async function loadAlerts() {
 
   const el = document.getElementById('alerts-list');
   if (!list.length) {
-    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔕</div><div class="empty-text">No active alerts</div></div>';
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">🔕</div><div class="empty-text">No active alerts</div><p style="font-size:13px;color:#bbb;margin-top:8px">Send one using the form.</p></div>';
     return;
   }
 
@@ -416,17 +424,17 @@ async function loadAlerts() {
         <div class="alert-msg-text">${esc(a.message)}</div>
         <div class="alert-footer">
           <span class="alert-expiry">Expires ${expires}</span>
-          <button class="btn btn-danger" onclick="delAlert('${a.id}')">Delete</button>
+          <button class="btn btn-danger" onclick="delAlert('${a.id}')">🗑 Delete</button>
         </div>
       </div>`;
   }).join('');
 }
 
 async function delAlert(id) {
-  if (!confirm('Delete this alert?')) return;
+  if (!confirm('Delete this alert? Users will no longer see it.')) return;
   const { error } = await db.from('alerts').delete().eq('id', id);
-  if (error) return showToast('Delete failed', 'error');
-  showToast('Deleted', 'success');
+  if (error) return showToast('Delete failed: ' + error.message, 'error');
+  showToast('Alert deleted', 'success');
   loadAlerts();
 }
 
@@ -434,13 +442,13 @@ function esc(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-let tt;
+let toastTimer;
 function showToast(msg, type='success') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show ' + type;
-  clearTimeout(tt);
-  tt = setTimeout(() => t.classList.remove('show'), 3500);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
 }
 </script>
 </body>

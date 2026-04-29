@@ -1,31 +1,31 @@
-const express    = require('express');
-const router     = express.Router();
+const express = require('express');
+const router  = express.Router();
 const { createClient } = require('@supabase/supabase-js');
 
-const sb = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const ADMINS = (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim());
+const sb = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY   // service key — can bypass RLS
+);
 
-function isAdmin(req, res, next) {
-  if (!ADMINS.includes(req.user?.email))
-    return res.status(403).json({ error: 'Admin only' });
-  next();
-}
-
-// POST /api/admin/alerts  → insert + push to all users
-router.post('/admin/alerts', isAdmin, async (req, res) => {
+// POST /api/admin/alerts
+router.post('/alerts', async (req, res) => {
   const { title, message, type = 'info' } = req.body;
   if (!title?.trim() || !message?.trim())
     return res.status(400).json({ error: 'Title and message required' });
 
   const { data: alert, error } = await sb
-    .from('alerts').insert({ title, message, type }).select().single();
+    .from('alerts')
+    .insert({ title, message, type })
+    .select()
+    .single();
+
   if (error) return res.status(500).json({ error: error.message });
 
-  // Push notifications to all registered devices
+  // Push notifications to all users
   try {
-    const { data: rows } = await sb.from('user_push_tokens').select('token');
-    if (rows?.length) {
-      const msgs = rows.map(({ token }) => ({
+    const { data: tokens } = await sb.from('user_push_tokens').select('token');
+    if (tokens?.length) {
+      const msgs = tokens.map(({ token }) => ({
         to: token, sound: 'default', title, body: message,
         data: { type: 'alert', alertId: alert.id },
       }));
@@ -43,7 +43,7 @@ router.post('/admin/alerts', isAdmin, async (req, res) => {
 });
 
 // DELETE /api/admin/alerts/:id
-router.delete('/admin/alerts/:id', isAdmin, async (req, res) => {
+router.delete('/alerts/:id', async (req, res) => {
   const { error } = await sb.from('alerts').delete().eq('id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
