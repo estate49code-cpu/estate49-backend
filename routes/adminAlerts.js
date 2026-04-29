@@ -4,7 +4,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const sb = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY   // service key — can bypass RLS
+  process.env.SUPABASE_SERVICE_KEY
 );
 
 // POST /api/admin/alerts
@@ -21,23 +21,35 @@ router.post('/alerts', async (req, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
 
-  // Push notifications to all users
+  // ✅ Read from profiles table — matches where pushNotifications.js saves tokens
   try {
-    const { data: tokens } = await sb.from('user_push_tokens').select('token');
-    if (tokens?.length) {
-      const msgs = tokens.map(({ token }) => ({
-        to: token, sound: 'default', title, body: message,
-        data: { type: 'alert', alertId: alert.id },
+    const { data: profiles } = await sb
+      .from('profiles')
+      .select('push_token')
+      .not('push_token', 'is', null);
+
+    if (profiles?.length) {
+      const msgs = profiles.map(({ push_token }) => ({
+        to:    push_token,
+        sound: 'default',
+        title,
+        body:  message,
+        data:  { type: 'alert', alertId: alert.id },
       }));
+
+      // Expo allows max 100 per batch
       for (let i = 0; i < msgs.length; i += 100) {
         await fetch('https://exp.host/--/api/v2/push/send', {
-          method: 'POST',
+          method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(msgs.slice(i, i + 100)),
+          body:    JSON.stringify(msgs.slice(i, i + 100)),
         });
       }
+      console.log(`[Alerts] Push sent to ${profiles.length} devices`);
     }
-  } catch (e) { console.error('Push error:', e.message); }
+  } catch (e) {
+    console.error('[Alerts] Push error:', e.message);
+  }
 
   res.json(alert);
 });
