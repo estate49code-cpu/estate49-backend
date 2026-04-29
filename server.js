@@ -12,10 +12,9 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, { cors: { origin: '*', methods: ['GET','POST'] } });
 
-// ─── Force www redirect (must be FIRST, before all other middleware) ─────────
+// ─── Force www redirect ───────────────────────────────────────────────────────
 app.use((req, res, next) => {
   const host = req.headers.host || '';
-  // In production, redirect bare domain → www
   if (host === 'estate49.com') {
     return res.redirect(301, 'https://www.estate49.com' + req.originalUrl);
   }
@@ -26,7 +25,7 @@ app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '25mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── API Routes ─────────────────────────────
+// ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/properties',    require('./routes/properties'));
 app.use('/api/favorites',     require('./routes/favorites'));
 app.use('/api/messages',      require('./routes/messages'));
@@ -35,8 +34,9 @@ app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/upload',        require('./routes/upload'));
 app.use('/api/support',       require('./routes/support'));
 app.use('/api/upload', uploadRouter);
+app.use('/api/admin',         require('./routes/adminAlerts'));  // ← NEW
 
-// ─── AI REST endpoint ────────────────────────
+// ─── AI REST endpoint ─────────────────────────────────────────────────────────
 app.post('/api/chat', async (req, res) => {
   try {
     const { history, mode } = req.body;
@@ -51,25 +51,28 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// ─── API 404 guard — must be BEFORE page routes ──
+// ─── API 404 guard ────────────────────────────────────────────────────────────
 app.all('/api/*', (req, res) => {
   res.status(404).json({ error: 'API route not found', path: req.path });
 });
 
-// ─── Auth callback route ─────────────────────
+// ─── Auth callback route ──────────────────────────────────────────────────────
 app.get('/auth/callback', (req, res) =>
   res.sendFile(path.join(__dirname, 'public', 'auth', 'callback.html')));
 
-// ─── Page routes ─────────────────────────────
-const pages = ['login','browse','property','list-property','messages',
-               'profile','favorites','notifications','chat','admin',
-               'support','admin-support'];
+// ─── Page routes ──────────────────────────────────────────────────────────────
+const pages = [
+  'login', 'browse', 'property', 'list-property', 'messages',
+  'profile', 'favorites', 'notifications', 'chat', 'admin',
+  'support', 'admin-support',
+  'admin-alerts',   // ← NEW — serves admin-alerts.html
+];
 pages.forEach(p => {
   app.get(`/${p}`,      (req, res) => res.sendFile(path.join(__dirname, 'public', `${p}.html`)));
   app.get(`/${p}.html`, (req, res) => res.sendFile(path.join(__dirname, 'public', `${p}.html`)));
 });
 
-// ─── Wildcard ───
+// ─── Wildcard ─────────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   if (req.path.endsWith('.html')) {
     const file = path.join(__dirname, 'public', path.basename(req.path));
@@ -80,7 +83,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ─── Socket.io AI Chat ────────────────────────
+// ─── Socket.io AI Chat ────────────────────────────────────────────────────────
 const sessions = new Map();
 const LISTER_KW = ['list','listing','sell','rent out','add property','post property',
                    'my property','i own','want to sell','want to rent my','owner'];
@@ -138,7 +141,7 @@ io.on('connection', socket => {
   socket.on('disconnect', () => sessions.delete(socket.id));
 });
 
-// ─── Startup ─────────────────────────────────
+// ─── Startup ──────────────────────────────────────────────────────────────────
 db.from('properties').select('id').limit(1).then(({ error }) =>
   console.log(error ? '⚠️  DB: ' + error.message : '✅ Supabase connected')
 );
