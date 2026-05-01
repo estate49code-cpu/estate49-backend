@@ -37,6 +37,16 @@
     .sbadge.rejected{background:#f8d7da;color:#721c24;}
     .admin-note{font-size:11px;color:#721c24;padding:6px 12px;background:#fff5f5;border-top:1px solid #f8d7da;display:flex;gap:6px;align-items:flex-start;}
     .lc-acts{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--divider);}
+
+    /* ── Phone Verification Card ── */
+    .pv-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+    .pv-left{display:flex;align-items:center;gap:14px;}
+    .pv-icon{font-size:32px;flex-shrink:0;}
+    .pv-title{font-size:var(--text-base);font-weight:700;margin-bottom:3px;}
+    .pv-sub{font-size:var(--text-xs);color:var(--muted);line-height:1.55;}
+    .pv-badge-yes{display:inline-flex;align-items:center;gap:5px;background:#d4edda;color:#155724;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+    .pv-badge-no{display:inline-flex;align-items:center;gap:5px;background:#fff3cd;color:#856404;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+
     @media(max-width:768px){
       .pw{padding:14px 14px 80px;}
       .pcard{padding:18px 14px;}
@@ -46,6 +56,7 @@
       .avatar-row{gap:14px;}
       .p-avatar{width:60px;height:60px;font-size:22px;}
       .p-name{font-size:var(--text-lg);}
+      .pv-row{flex-direction:column;align-items:flex-start;}
     }
   </style>
 </head>
@@ -59,7 +70,10 @@
       <button class="ptab" onclick="sw('listings')">🏠 My Listings</button>
     </div>
 
+    <!-- ── PROFILE TAB ── -->
     <div class="psec active" id="sec-profile">
+
+      <!-- Personal Details Card -->
       <div class="pcard">
         <div class="avatar-row">
           <div class="p-avatar" id="pav">?</div>
@@ -79,7 +93,11 @@
           </div>
           <div class="form-2" style="margin-bottom:16px">
             <div class="form-group"><label class="form-label">I am a</label>
-              <select class="form-select" id="role"><option value="owner">Owner</option><option value="agent">Agent</option><option value="builder">Builder</option></select>
+              <select class="form-select" id="role">
+                <option value="owner">Owner</option>
+                <option value="agent">Agent</option>
+                <option value="builder">Builder</option>
+              </select>
             </div>
             <div class="form-group"><label class="form-label">Agency Name</label><input type="text" class="form-input" id="agency_name" placeholder="Optional"/></div>
           </div>
@@ -90,8 +108,29 @@
           <button type="submit" class="btn btn-primary" id="save-btn">💾 Save Profile</button>
         </form>
       </div>
-    </div>
 
+      <!-- ── Phone Verification Card ── -->
+      <div class="pcard">
+        <div class="pv-row">
+          <div class="pv-left">
+            <div class="pv-icon">📱</div>
+            <div>
+              <div class="pv-title">Phone Verification</div>
+              <div class="pv-sub" id="pv-sub">
+                Verify your phone to build trust with buyers &amp; renters.<br>
+                Your number is <strong>never</strong> shown publicly.
+              </div>
+            </div>
+          </div>
+          <div id="pv-action">
+            <!-- filled by loadPhoneVerifyStatus() -->
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /#sec-profile -->
+
+    <!-- ── LISTINGS TAB ── -->
     <div class="psec" id="sec-listings">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
         <div style="font-size:var(--text-lg);font-weight:700">My Listed Properties</div>
@@ -106,6 +145,7 @@
         <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)">Loading…</div>
       </div>
     </div>
+
   </div>
 </div>
 <div class="toast" id="toast-el"></div>
@@ -120,6 +160,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadProfile();
   if(new URLSearchParams(window.location.search).get('tab')==='listings') sw('listings');
 });
+
 async function loadProfile(){
   try{
     const r=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${tok}`}});
@@ -131,8 +172,22 @@ async function loadProfile(){
     document.getElementById('p-name').textContent=name;
     document.getElementById('p-email').textContent=cu.email||'';
     ['fullname','phone','bio','role','agency_name','rera_number'].forEach(k=>{const el=document.getElementById(k);if(el&&p[k])el.value=p[k];});
+    loadPhoneVerifyStatus(p);
   }catch(e){document.getElementById('p-name').textContent=cu.email||'User';}
 }
+
+function loadPhoneVerifyStatus(p){
+  const actionEl = document.getElementById('pv-action');
+  const subEl    = document.getElementById('pv-sub');
+  if(p.phone_verified){
+    subEl.innerHTML = `Verified as <strong>${p.phone || 'your number'}</strong>. Buyers &amp; renters see a ✅ Verified badge on your profile.`;
+    actionEl.innerHTML = `<span class="pv-badge-yes">✅ Verified</span>`;
+  } else {
+    subEl.innerHTML = `Verify your phone to build trust with buyers &amp; renters.<br>Your number is <strong>never</strong> shown publicly.`;
+    actionEl.innerHTML = `<a href="/phone-verify.html" class="btn btn-primary" style="white-space:nowrap">📱 Verify Now</a>`;
+  }
+}
+
 async function saveProfile(e){
   e.preventDefault();
   const btn=document.getElementById('save-btn'); btn.disabled=true; btn.textContent='Saving…';
@@ -146,6 +201,7 @@ async function saveProfile(e){
   }catch(ex){toast('Error: '+ex.message);}
   finally{btn.disabled=false;btn.textContent='💾 Save Profile';}
 }
+
 async function loadListings(){
   try{
     const r=await fetch('/api/properties/mine',{headers:{Authorization:`Bearer ${tok}`}});
@@ -180,11 +236,13 @@ async function loadListings(){
     }).join('');
   }catch(e){document.getElementById('lgrid').innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><div class="empty-title">Could not load listings</div></div>';}
 }
+
 async function delListing(id){
   if(!confirm('Delete this listing? This cannot be undone.'))return;
   try{await fetch(`/api/properties/${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});toast('Listing deleted');await loadListings();}
   catch(e){toast('Failed to delete');}
 }
+
 function sw(tab){
   document.querySelectorAll('.psec').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.ptab').forEach(el=>el.classList.remove('active'));
@@ -192,6 +250,7 @@ function sw(tab){
   document.querySelectorAll('.ptab').forEach((el,i)=>{if((i===0&&tab==='profile')||(i===1&&tab==='listings'))el.classList.add('active');});
   if(tab==='listings') loadListings();
 }
+
 function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN');}
 function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}

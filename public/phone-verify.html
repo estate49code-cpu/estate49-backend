@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Phone · Estate49</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth.js"></script>
+  <script src="nav.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .vw { max-width: 460px; margin: 0 auto; padding: 48px 20px 80px; }
+    .vcard {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 40px 36px;
+      box-shadow: var(--shadow-md);
+    }
+    .vcard-icon { font-size: 52px; text-align: center; margin-bottom: 14px; }
+    .vcard-title {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .vcard-sub {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 28px;
+      line-height: 1.65;
+    }
+    .step { display: none; }
+    .step.active { display: block; }
+    .phone-row { display: flex; gap: 10px; margin-bottom: 14px; }
+    .phone-prefix {
+      background: var(--surface-2, #f5f5f5);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      font-size: 15px;
+      font-weight: 700;
+      white-space: nowrap;
+      color: var(--text);
+      flex-shrink: 0;
+      gap: 6px;
+    }
+    .otp-inp-wrap { margin-bottom: 14px; }
+    .otp-input {
+      text-align: center;
+      font-size: 30px;
+      letter-spacing: 14px;
+      font-weight: 800;
+      padding: 14px 8px;
+      font-family: monospace;
+    }
+    .ph-sent-note {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+    .ph-sent-note b { color: var(--text); }
+    .err-msg {
+      background: #fee2e2;
+      color: var(--primary);
+      border: 1px solid rgba(192,57,43,0.2);
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      margin-bottom: 14px;
+      display: none;
+    }
+    .resend-row { text-align: center; margin-top: 12px; }
+    .resend-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 4px 8px;
+    }
+    .resend-btn:hover:not(:disabled) { text-decoration: underline; }
+    .resend-btn:disabled { color: var(--muted); cursor: not-allowed; }
+    .done-wrap { text-align: center; padding: 16px 0 8px; }
+    .done-icon { font-size: 64px; margin-bottom: 14px; }
+    .done-title {
+      font-size: var(--text-xl);
+      font-weight: 800;
+      color: #2e7d32;
+      margin-bottom: 8px;
+    }
+    .done-sub {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      margin-bottom: 28px;
+      line-height: 1.65;
+    }
+    .vcard-back { text-align: center; margin-top: 18px; }
+    .back-link {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--primary); }
+    @media (max-width: 500px) {
+      .vw { padding: 20px 12px 80px; }
+      .vcard { padding: 28px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-loading" id="al"><div class="al-icon"></div><div class="al-spin"></div></div>
+  <div class="page" id="page" style="display:none">
+    <div id="navbar-root"></div>
+
+    <div class="vw">
+      <div class="vcard">
+
+        <div class="vcard-icon">📱</div>
+        <div class="vcard-title">Verify Your Phone</div>
+        <div class="vcard-sub">
+          Verified phone builds trust with buyers &amp; renters.<br>
+          Your number is <strong>never</strong> shown publicly.
+        </div>
+
+        <div class="err-msg" id="err-msg"></div>
+
+        <!-- ── STEP 1 : Enter phone number ──────────── -->
+        <div class="step active" id="step-phone">
+          <label class="form-label">Mobile Number</label>
+          <div class="phone-row">
+            <div class="phone-prefix">🇮🇳 +91</div>
+            <input
+              type="tel"
+              id="phone-inp"
+              class="form-input"
+              placeholder="10-digit number"
+              maxlength="10"
+              inputmode="numeric"
+              style="flex:1"
+              onkeydown="if(event.key==='Enter') sendOTP()"
+            />
+          </div>
+          <button class="btn btn-primary" id="send-btn" onclick="sendOTP()" style="width:100%">
+            Send OTP via SMS
+          </button>
+          <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.6">
+            By verifying, you agree to receive a one-time SMS.<br>
+            Standard messaging rates may apply.
+          </p>
+        </div>
+
+        <!-- ── STEP 2 : Enter OTP ───────────────────── -->
+        <div class="step" id="step-otp">
+          <div class="ph-sent-note">
+            OTP sent to <b id="ph-display">+91 XXXXXXXXXX</b>.<br>
+            Enter the 6-digit code below.
+          </div>
+          <div class="otp-inp-wrap">
+            <input
+              type="tel"
+              id="otp-inp"
+              class="form-input otp-input"
+              placeholder="— — — — — —"
+              maxlength="6"
+              inputmode="numeric"
+              onkeydown="if(event.key==='Enter') verifyOTP()"
+            />
+          </div>
+          <button class="btn btn-primary" id="verify-btn" onclick="verifyOTP()" style="width:100%">
+            Verify &amp; Confirm
+          </button>
+          <div class="resend-row">
+            <button class="resend-btn" id="resend-btn" onclick="resendOTP()" disabled>
+              Resend in <span id="timer-txt">60s</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── STEP 3 : Success ─────────────────────── -->
+        <div class="step" id="step-done">
+          <div class="done-wrap">
+            <div class="done-icon">✅</div>
+            <div class="done-title">Phone Verified!</div>
+            <div class="done-sub">
+              Your phone number has been verified successfully.<br>
+              Your profile now shows a <strong>Verified</strong> badge.
+            </div>
+            <a href="profile.html" class="btn btn-primary"
+               style="display:block;text-align:center;text-decoration:none">
+              Back to Profile
+            </a>
+          </div>
+        </div>
+
+        <div class="vcard-back">
+          <a href="profile.html" class="back-link">← Back to Profile</a>
+        </div>
+
+      </div><!-- /.vcard -->
+    </div><!-- /.vw -->
+  </div><!-- /.page -->
+
+  <div id="toast-el" class="toast"></div>
+
+  <!-- ══════════════════════════════════════════════════
+       Firebase JS SDK — ES Module
+       All values from your registered web app
+  ══════════════════════════════════════════════════════ -->
+  <script type="module">
+    import { initializeApp }
+      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber }
+      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyDWrA5dD2ubijUUHMPw_-q-UdZ0CSGzQWk",
+      authDomain:        "estate49-752b4.firebaseapp.com",
+      projectId:         "estate49-752b4",
+      storageBucket:     "estate49-752b4.firebasestorage.app",
+      messagingSenderId: "525259427816",
+      appId:             "1:525259427816:web:7bf07725a62099a47b9e5d",
+      measurementId:     "G-HZC5YE6SSP"
+    };
+
+    const fbApp  = initializeApp(firebaseConfig);
+    const fbAuth = getAuth(fbApp);
+
+    // Expose to global scope for the regular script below
+    window._fbAuth                = fbAuth;
+    window._RecaptchaVerifier     = RecaptchaVerifier;
+    window._signInWithPhoneNumber = signInWithPhoneNumber;
+  </script>
+
+  <!-- ══════════════════════════════════════════════════
+       Page Logic
+  ══════════════════════════════════════════════════════ -->
+  <script>
+    let tok = null, cu = null, phoneNum = '', confirmResult = null;
+    let timerInterval;
+
+    /* ── Init ──────────────────────────────────────── */
+    window.addEventListener('DOMContentLoaded', async () => {
+      const s = await getSession();
+      if (!s) { window.location.href = 'login.html'; return; }
+      cu  = s.user;
+      tok = s.accessToken;
+
+      document.getElementById('al').style.display   = 'none';
+      document.getElementById('page').style.display = 'block';
+      await initNavbar({ active: 'profile' });
+
+      waitFirebase();
+    });
+
+    /* Wait for the ES-module Firebase to finish loading */
+    function waitFirebase() {
+      if (window._fbAuth && window._RecaptchaVerifier) {
+        initRecaptcha();
+      } else {
+        setTimeout(waitFirebase, 200);
+      }
+    }
+
+    function initRecaptcha() {
+      try {
+        window._recaptchaVerifier = new window._RecaptchaVerifier(
+          window._fbAuth,
+          'send-btn',
+          { size: 'invisible', callback: () => {} }
+        );
+      } catch (e) {
+        console.warn('reCAPTCHA init:', e.message);
+      }
+    }
+
+    /* ── Helpers ───────────────────────────────────── */
+    function showErr(msg) {
+      const el = document.getElementById('err-msg');
+      el.textContent   = msg;
+      el.style.display = 'block';
+    }
+    function hideErr() {
+      document.getElementById('err-msg').style.display = 'none';
+    }
+    function goStep(name) {
+      document.querySelectorAll('.step')
+        .forEach(s => s.classList.remove('active'));
+      document.getElementById('step-' + name).classList.add('active');
+    }
+    function toast(msg) {
+      const el = document.getElementById('toast-el');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    /* ── Resend countdown timer ────────────────────── */
+    function startTimer(secs) {
+      clearInterval(timerInterval);
+      let remaining   = secs;
+      const timerEl   = document.getElementById('timer-txt');
+      const resendBtn = document.getElementById('resend-btn');
+      resendBtn.disabled  = true;
+      timerEl.textContent = remaining + 's';
+      timerInterval = setInterval(() => {
+        remaining--;
+        timerEl.textContent = remaining + 's';
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          resendBtn.disabled   = false;
+          resendBtn.textContent = 'Resend OTP';
+        }
+      }, 1000);
+    }
+
+    /* ── STEP 1 : Send OTP ─────────────────────────── */
+    window.sendOTP = async function () {
+      const phone = document.getElementById('phone-inp').value.trim();
+
+      if (!/^[6-9]\d{9}$/.test(phone)) {
+        showErr('Enter a valid 10-digit Indian mobile number (must start with 6–9).');
+        return;
+      }
+      if (!window._signInWithPhoneNumber || !window._recaptchaVerifier) {
+        showErr('Firebase is still loading. Please wait a moment and try again.');
+        return;
+      }
+
+      phoneNum = phone;
+      const btn = document.getElementById('send-btn');
+      btn.disabled    = true;
+      btn.textContent = 'Sending OTP…';
+      hideErr();
+
+      try {
+        const result = await window._signInWithPhoneNumber(
+          window._fbAuth,
+          '+91' + phone,
+          window._recaptchaVerifier
+        );
+        confirmResult = result;
+
+        document.getElementById('ph-display').textContent = '+91 ' + phone;
+        goStep('otp');
+        startTimer(60);
+        setTimeout(() => document.getElementById('otp-inp').focus(), 150);
+
+      } catch (e) {
+        let msg = e.message || 'Failed to send OTP. Please try again.';
+        if (e.code === 'auth/too-many-requests')
+          msg = 'Too many attempts. Please wait a few minutes and try again.';
+        if (e.code === 'auth/invalid-phone-number')
+          msg = 'Invalid phone number. Please check and retry.';
+        if (e.code === 'auth/captcha-check-failed')
+          msg = 'Security check failed. Please refresh the page and try again.';
+
+        showErr(msg);
+
+        // Reset reCAPTCHA so the user can retry
+        try {
+          const id = await window._recaptchaVerifier.render();
+          window.grecaptcha && window.grecaptcha.reset(id);
+        } catch (_) {}
+
+        btn.disabled    = false;
+        btn.textContent = 'Send OTP via SMS';
+      }
+    };
+
+    /* ── STEP 2 : Verify OTP ───────────────────────── */
+    window.verifyOTP = async function () {
+      const otp = document.getElementById('otp-inp').value.trim();
+
+      if (!/^\d{6}$/.test(otp)) {
+        showErr('Enter the 6-digit OTP sent to your phone.');
+        return;
+      }
+      if (!confirmResult) {
+        showErr('Session expired. Please go back and request a new OTP.');
+        return;
+      }
+
+      const btn = document.getElementById('verify-btn');
+      btn.disabled    = true;
+      btn.textContent = 'Verifying…';
+      hideErr();
+
+      try {
+        // 1️⃣  Confirm OTP with Firebase
+        await confirmResult.confirm(otp);
+
+        // 2️⃣  Mark phone_verified = true in Estate49 backend
+        const res = await fetch('/api/profiles/me', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${tok}`
+          },
+          body: JSON.stringify({ phone: phoneNum, phone_verified: true })
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Could not save verification status.');
+        }
+
+        goStep('done');
+
+      } catch (e) {
+        let msg = e.message || 'Verification failed. Please try again.';
+        if (e.code === 'auth/invalid-verification-code')
+          msg = 'Incorrect OTP. Please check the code and try again.';
+        if (e.code === 'auth/code-expired')
+          msg = 'OTP has expired. Please request a new one.';
+
+        showErr(msg);
+        btn.disabled    = false;
+        btn.textContent = 'Verify & Confirm';
+      }
+    };
+
+    /* ── Resend : go back to phone step ────────────── */
+    window.resendOTP = async function () {
+      clearInterval(timerInterval);
+      confirmResult = null;
+      document.getElementById('otp-inp').value = '';
+      hideErr();
+      goStep('phone');
+
+      // Re-initialise reCAPTCHA for the new attempt
+      try {
+        window._recaptchaVerifier = new window._RecaptchaVerifier(
+          window._fbAuth,
+          'send-btn',
+          { size: 'invisible', callback: () => {} }
+        );
+      } catch (_) {}
+
+      setTimeout(() => document.getElementById('phone-inp').focus(), 120);
+    };
+  </script>
+</body>
+</html>

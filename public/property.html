@@ -222,7 +222,6 @@ async function checkFav(){
   if(!tok) return;
   try{
     const r=await fetch('/api/favorites',{headers:{Authorization:`Bearer ${tok}`}});
-    // FIX: guard against null/undefined + handle both snake_case and camelCase
     if(r.ok){const d=await r.json();isFav=(d||[]).some(f=>String(f.property_id??f.propertyId??'')===String(pid));}
   }catch(e){}
 }
@@ -461,14 +460,12 @@ function msgOwner(){
 }
 
 async function toggleFav(){
-  // FIX: get fresh session so token is never stale
   let freshCu=cu, freshTok=tok;
   try{
     const s=await getSession();
     freshCu=s?.user||cu;
     freshTok=s?.access_token||tok;
   }catch(_){}
-
   if(!freshCu){showLoginPrompt('Sign in to save this property');return;}
   try{
     if(isFav){

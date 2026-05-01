@@ -304,8 +304,8 @@
 
   <div class="save-bar">
     <span class="prog" id="prog-txt"></span>
-    <button class="btn btn-secondary" onclick="window.location.href='/browse.html'">Cancel</button>
-    <button class="btn btn-primary btn-lg" id="sub-btn" onclick="submit()">🏠 Submit Listing</button>
+    <button class="btn btn-secondary" onclick="history.back()">Cancel</button>
+    <button class="btn btn-primary" id="sub-btn" onclick="submit()">🏠 Submit Listing</button>
   </div>
 </div>
 <div class="toast" id="toast-el"></div>
@@ -313,184 +313,128 @@
 <script>
 let tok=null, cu=null, ltype='rent', photos=[], editId=null;
 
-// ─── E49 Watermark — simple round stamp, top-left corner ──────────────────
-// Two concentric rings + bold "E49" in centre. No curved text. Clean & works.
-function stampE49(file) {
-  return new Promise((resolve) => {
-    const img    = new Image();
-    const objUrl = URL.createObjectURL(file);
-    img.onload = () => {
-      const W = img.width, H = img.height;
-      const canvas = document.createElement('canvas');
-      canvas.width = W; canvas.height = H;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-
-      // Stamp radius = 9% of shorter side
-      const r      = Math.round(Math.min(W, H) * 0.09);
-      const margin = Math.round(r * 0.55);
-      const cx     = margin + r;
-      const cy     = margin + r;
-
-      // Watermark colour — semi-transparent Estate49 red
-      const col = 'rgba(192,57,43,0.28)';
-
-      ctx.save();
-
-      // 1. Outer ring
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.strokeStyle = col;
-      ctx.lineWidth   = Math.round(r * 0.07);
-      ctx.stroke();
-
-      // 2. Inner ring
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.72, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(192,57,43,0.18)';
-      ctx.lineWidth   = Math.round(r * 0.03);
-      ctx.stroke();
-
-      // 3. "E49" bold in centre
-      const fs = Math.round(r * 0.50);
-      ctx.font         = `900 ${fs}px Arial, Helvetica, sans-serif`;
-      ctx.fillStyle    = 'rgba(192,57,43,0.32)';
-      ctx.textAlign    = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('E49', cx, cy);
-
-      ctx.restore();
-
-      canvas.toBlob((blob) => {
-        URL.revokeObjectURL(objUrl);
-        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
-      }, 'image/jpeg', 0.88);
-    };
-    img.onerror = () => { URL.revokeObjectURL(objUrl); resolve(file); };
-    img.src = objUrl;
-  });
-}
-// ──────────────────────────────────────────────────────────────────────────
-
 window.addEventListener('DOMContentLoaded', async () => {
-  const s = await getSession();
-  if (!s) { window.location.href = '/login.html'; return; }
-  cu = s.user; tok = s.access_token;
-  document.getElementById('al').style.display   = 'none';
-  document.getElementById('page').style.display = 'block';
-  await initNavbar({ active: 'list' });
-
-  try {
-    const r = await fetch('/api/profiles/me', { headers: { Authorization: `Bearer ${tok}` } });
-    if (r.ok) {
-      const p = await r.json();
-      if (p.fullname) document.getElementById('contact_name').value  = p.fullname;
-      if (p.phone)    document.getElementById('contact_phone').value = p.phone;
-      if (p.phone)    document.getElementById('whatsapp').value      = p.phone;
-    }
-  } catch(e) {}
+  const s=await getSession();
+  if(!s){window.location.href='/login.html';return;}
+  cu=s.user; tok=s.access_token;
+  document.getElementById('al').style.display='none';
+  document.getElementById('page').style.display='block';
+  await initNavbar({active:'list'});
 
   editId = new URLSearchParams(window.location.search).get('edit');
-  if (editId) {
-    document.getElementById('page-title').textContent = 'Edit Listing';
-    document.getElementById('sub-btn').textContent    = '💾 Save Changes';
-    try {
-      const r = await fetch(`/api/properties/${editId}`);
-      const p = await r.json();
-      if (p.listed_by !== cu.id) { toast('Not your listing'); return; }
-      setType(p.type || 'rent');
-      ['title','city','locality','address','description','price','deposit','maintenance',
-       'area','carpet_area','floor','furnished','available_from','contact_name',
-       'contact_phone','contact_email','contact_role','contact_time','prop_type',
-       'bhk','bathrooms','whatsapp','map_link','facing','vastu_compliance',
-       'rera_number','brokerage_applicable'
-      ].forEach(k => { const el = document.getElementById(k); if (el && p[k] != null) el.value = p[k]; });
-      ['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
-       'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
-       'gated','vastu','water_24','no_brokerage'
-      ].forEach(k => {
-        if (p[k]) {
-          const el = document.getElementById(k);
-          if (el) { el.checked = true; document.getElementById('ci-'+k)?.classList.add('checked'); }
-        }
-      });
-      photos = [...(p.photos || [])]; renderPhotos();
-      onRoleChange();
-    } catch(e) { toast('Failed to load listing'); }
+  if(editId){
+    document.getElementById('page-title').textContent='Edit Listing';
+    document.getElementById('sub-btn').textContent='💾 Save Changes';
+    await loadEdit(editId);
   }
 });
 
-function onRoleChange() {
-  const role = document.getElementById('contact_role').value;
-  const sec  = document.getElementById('rera-brokerage-section');
-  if (role==='agent'||role==='builder') { sec.classList.remove('hidden'); }
-  else {
-    sec.classList.add('hidden');
-    document.getElementById('rera_number').value          = '';
-    document.getElementById('brokerage_applicable').value = 'no';
-  }
-}
+async function loadEdit(id){
+  try{
+    const r=await fetch(`/api/properties/${id}`);
+    if(!r.ok) throw new Error();
+    const p=await r.json();
+    if(p.listed_by!==cu.id){toast('Not your listing');return;}
 
-function setType(t) {
-  ltype = t;
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('sel', b.dataset.t===t));
-}
-function tgl(k) {
-  document.getElementById('ci-'+k)?.classList.toggle('checked', !!document.getElementById(k)?.checked);
-}
-function pickPhoto() { document.getElementById('file-inp').click(); }
+    setType(p.type||'rent');
+    ['prop_type','bhk','bathrooms','title','city','locality','address','description',
+     'price','deposit','maintenance','area','carpet_area','floor','furnished',
+     'available_from','contact_name','contact_phone','contact_email','contact_role',
+     'contact_time','whatsapp','map_link','facing','vastu_compliance',
+     'rera_number','brokerage_applicable'].forEach(k=>{
+      const el=document.getElementById(k);
+      if(el&&p[k]!=null) el.value=p[k];
+    });
 
-async function handleFiles(e) {
-  const files = Array.from(e.target.files || []);
-  e.target.value = '';
-  const avail = 10 - photos.length;
-  if (avail <= 0) { toast('Max 10 photos'); return; }
-  const toUp     = files.slice(0, avail);
-  const statusEl = document.getElementById('upload-status');
-  let uploaded   = 0;
+    onRoleChange();
 
-  for (const f of toUp) {
-    try {
-      statusEl.textContent = `Stamping & uploading ${uploaded+1} of ${toUp.length}…`;
-      const stamped = await stampE49(f);
-      const fd = new FormData();
-      fd.append('file', stamped);
+    ['parking','gym','pool','lift','security','cctv','clubhouse','garden',
+     'powerbackup','ac','balcony','modular_kitchen','washing_machine','fridge','wifi',
+     'pet_friendly','gated','vastu','water_24','no_brokerage'].forEach(k=>{
+      const el=document.getElementById(k);
+      if(el) el.checked=!!p[k];
+    });
 
-      const r = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${tok}` },
-        body: fd
-      });
-      if (!r.ok) throw new Error(await r.text());
-
-      const result = await r.json();
-      const url = typeof result === 'string' ? result
-        : (result.url || result.publicUrl || (Array.isArray(result.urls) ? result.urls[0] : null));
-      if (!url) throw new Error('No URL returned');
-
-      photos.push(url); uploaded++;
-      renderPhotos();
-      statusEl.textContent = `${uploaded} of ${toUp.length} uploaded…`;
-    } catch(ex) {
-      console.error(ex);
-      toast('Upload failed: ' + f.name);
+    if(p.brokerage_applicable){
+      const el=document.getElementById('brokerage_applicable');
+      if(el) el.value='yes';
     }
+
+    photos=p.photos||[];
+    renderPhotos();
+  }catch(e){toast('Could not load listing');}
+}
+
+function setType(t){
+  ltype=t;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('sel',b.dataset.t===t));
+}
+
+function onRoleChange(){
+  const role=document.getElementById('contact_role')?.value;
+  const sec=document.getElementById('rera-brokerage-section');
+  if(sec) sec.classList.toggle('hidden',role==='owner');
+}
+
+function tgl(id){
+  const el=document.getElementById(id);
+  const ci=document.getElementById('ci-'+id);
+  if(ci) ci.classList.toggle('active',el?.checked);
+}
+
+function pickPhoto(){
+  if(photos.length>=10){toast('Max 10 photos allowed');return;}
+  document.getElementById('file-inp').click();
+}
+
+async function handleFiles(e){
+  const files=[...e.target.files];
+  e.target.value='';
+  const remaining=10-photos.length;
+  const toProcess=files.slice(0,remaining);
+  if(files.length>remaining) toast(`Only ${remaining} more photo(s) allowed`);
+
+  const statusEl=document.getElementById('upload-status');
+  statusEl.textContent=`Uploading ${toProcess.length} photo(s)…`;
+
+  for(const file of toProcess){
+    if(file.size>15*1024*1024){toast(`${file.name} is too large (max 15MB)`);continue;}
+    try{
+      const fd=new FormData(); fd.append('photo',file);
+      const r=await fetch('/api/upload/photo',{method:'POST',headers:{Authorization:`Bearer ${tok}`},body:fd});
+      if(!r.ok) throw new Error((await r.json()).error||'Upload failed');
+      const {url}=await r.json();
+      photos.push(url);
+      renderPhotos();
+    }catch(ex){toast('Upload failed: '+ex.message);}
   }
-  statusEl.textContent = photos.length ? `✅ ${photos.length} photo(s) ready` : '';
+  statusEl.textContent=photos.length?`${photos.length} photo(s) added`:'';
 }
 
-function renderPhotos() {
-  const g = document.getElementById('photos-grid');
-  g.innerHTML = photos.map((url, i) => `
-    <div class="photo-slot">
-      <img src="${url}" alt="photo ${i+1}" loading="lazy"/>
-      ${i===0?`<div style="position:absolute;bottom:4px;left:4px;background:var(--primary);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700">COVER</div>`:''}
-      <div class="photo-rm" onclick="rmPhoto(${i})">✕</div>
-    </div>`).join('');
-  if (photos.length < 10) g.insertAdjacentHTML('beforeend','<div class="photo-slot" onclick="pickPhoto()">📷</div>');
+function renderPhotos(){
+  const grid=document.getElementById('photos-grid');
+  grid.innerHTML='';
+  photos.forEach((url,i)=>{
+    const slot=document.createElement('div');
+    slot.className='photo-slot';
+    slot.innerHTML=`<img src="${url}" alt="Photo ${i+1}"/><div class="photo-rm" onclick="rmPhoto(${i})">✕</div>`;
+    grid.appendChild(slot);
+  });
+  if(photos.length<10){
+    const add=document.createElement('div');
+    add.className='photo-slot';
+    add.innerHTML='📷';
+    add.onclick=pickPhoto;
+    grid.appendChild(add);
+  }
 }
 
-function rmPhoto(i) { photos.splice(i,1); renderPhotos(); }
+function rmPhoto(i){
+  photos.splice(i,1);
+  renderPhotos();
+  const statusEl=document.getElementById('upload-status');
+  statusEl.textContent=photos.length?`${photos.length} photo(s) added`:'';
+}
 
 function generateAdId() {
   const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
