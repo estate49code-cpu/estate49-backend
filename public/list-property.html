@@ -29,10 +29,39 @@
     .map-hint{font-size:11px;color:#4285f4;font-weight:600;margin-top:4px;}
     .vastu-hint{font-size:11px;color:#2e7d32;font-weight:600;margin-top:4px;}
     .rera-hint{font-size:11px;color:#1565c0;font-weight:600;margin-top:5px;line-height:1.6;background:#e3f2fd;border-radius:6px;padding:8px 10px;}
+    .check-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px;}
+    .check-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--radius-md);cursor:pointer;transition:all var(--transition);font-size:var(--text-xs);font-weight:600;user-select:none;}
+    .check-item.checked{border-color:var(--primary);background:var(--primary-xlight);color:var(--primary);}
+    .check-item input[type=checkbox]{display:none;}
     .save-bar{position:sticky;bottom:0;background:rgba(255,255,255,0.96);backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:16px 24px;display:flex;gap:12px;align-items:center;justify-content:flex-end;z-index:100;}
     .prog{font-size:var(--text-xs);color:var(--muted);flex:1;}
     #contact_phone.required-highlight{border-color:var(--primary);box-shadow:0 0 0 3px rgba(192,57,43,0.15);}
     .hidden{display:none;}
+
+    /* Verification Banner */
+    .verify-banner{background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:20px;display:flex;align-items:flex-start;gap:14px;}
+    .verify-banner .vb-icon{font-size:28px;flex-shrink:0;}
+    .verify-banner .vb-title{font-size:var(--text-sm);font-weight:700;color:#856404;margin-bottom:4px;}
+    .verify-banner .vb-sub{font-size:var(--text-xs);color:#856404;line-height:1.6;}
+    .verify-banner.done{background:#d4edda;border-color:#28a745;}
+    .verify-banner.done .vb-title,.verify-banner.done .vb-sub{color:#155724;}
+
+    /* OTP Modal */
+    .otp-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:4000;align-items:center;justify-content:center;padding:20px;}
+    .otp-overlay.open{display:flex;}
+    .otp-box{background:var(--surface);border-radius:var(--radius-xl);padding:32px 28px;max-width:390px;width:100%;box-shadow:var(--shadow-lg);text-align:center;}
+    .otp-icon{font-size:44px;margin-bottom:12px;}
+    .otp-title{font-size:var(--text-lg);font-weight:800;margin-bottom:6px;}
+    .otp-sub{font-size:var(--text-sm);color:var(--muted);margin-bottom:20px;line-height:1.6;}
+    .otp-err{color:#c0392b;font-size:var(--text-xs);min-height:18px;margin-bottom:10px;}
+    .otp-phone-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-base);font-family:inherit;margin-bottom:12px;background:var(--bg,#fff);text-align:left;box-sizing:border-box;}
+    .otp-phone-input:focus{outline:none;border-color:var(--primary);}
+    .otp-code-input{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:var(--radius-md);font-size:1.5rem;font-family:monospace;letter-spacing:10px;text-align:center;font-weight:700;margin-bottom:12px;background:var(--bg,#fff);box-sizing:border-box;}
+    .otp-code-input:focus{outline:none;border-color:var(--primary);}
+    #recaptcha-container{margin:0 auto 12px;}
+    .otp-resend{font-size:var(--text-xs);color:var(--muted);margin-top:10px;}
+    .otp-resend span{color:var(--primary);cursor:pointer;text-decoration:underline;}
+
     @media(max-width:768px){
       .lw{padding:14px 14px 0;}
       .lh{font-size:var(--text-xl);}
@@ -45,7 +74,6 @@
       .type-btn{padding:9px 18px;font-size:var(--text-xs);}
     }
     @media(max-width:380px){.photos-grid{grid-template-columns:repeat(3,1fr);}}
-    @media(hover:none){.type-btn:active{transform:scale(0.97);}.photo-slot:active{opacity:0.8;}}
   </style>
 </head>
 <body>
@@ -54,22 +82,32 @@
   <div id="navbar-root"></div>
   <div class="lw">
     <div class="lh" id="page-title">List Your Property</div>
-    <div class="lsub">Fill in the details below. All starred (*) fields are required.</div>
+    <div class="lsub">Fill in the details below. All starred fields are required.</div>
 
-    <!-- STEP 1 -->
+    <!-- Verification Banner -->
+    <div class="verify-banner" id="verify-banner">
+      <div class="vb-icon">📱</div>
+      <div>
+        <div class="vb-title">Verify your mobile before listing</div>
+        <div class="vb-sub">Estate49 requires a one-time mobile OTP verification for all property owners. This ensures authentic listings and builds trust with seekers. Valid for 6 months — verify once, list anytime.</div>
+        <button class="btn btn-primary" style="margin-top:12px;font-size:var(--text-xs);padding:9px 20px;" onclick="openOTPModal()">📲 Verify Now</button>
+      </div>
+    </div>
+
+    <!-- Step 1 -->
     <div class="step">
       <div class="step-title"><div class="step-num">1</div>Property Type &amp; Listing</div>
       <div class="form-group" style="margin-bottom:16px">
-        <label class="form-label">Listing For *</label>
+        <label class="form-label">Listing For</label>
         <div class="type-btns">
-          <button type="button" class="type-btn sel" data-t="rent" onclick="setType('rent')">🔑 Rent</button>
-          <button type="button" class="type-btn" data-t="buy" onclick="setType('buy')">🏠 Sale</button>
+          <button type="button" class="type-btn sel" data-t="rent" onclick="setType('rent')">🏠 Rent</button>
+          <button type="button" class="type-btn" data-t="buy" onclick="setType('buy')">🏷️ Sale</button>
         </div>
       </div>
       <div class="form-3">
         <div class="form-group">
-          <label class="form-label">Property Type *</label>
-          <select class="form-select" id="prop_type">
+          <label class="form-label">Property Type</label>
+          <select class="form-select" id="property_type">
             <option value="apartment">Apartment</option>
             <option value="house">Independent House</option>
             <option value="villa">Villa</option>
@@ -95,7 +133,7 @@
       </div>
     </div>
 
-    <!-- STEP 2 -->
+    <!-- Step 2 -->
     <div class="step">
       <div class="step-title"><div class="step-num">2</div>Title &amp; Location</div>
       <div class="form-group" style="margin-bottom:16px">
@@ -124,11 +162,11 @@
       </div>
       <div class="form-group">
         <label class="form-label">Description</label>
-        <textarea class="form-textarea" id="description" placeholder="Describe the property — neighborhood, nearby landmarks, special features…"></textarea>
+        <textarea class="form-textarea" id="description" placeholder="Describe the property — neighbourhood, nearby landmarks, special features…"></textarea>
       </div>
     </div>
 
-    <!-- STEP 3 -->
+    <!-- Step 3 -->
     <div class="step">
       <div class="step-title"><div class="step-num">3</div>Price &amp; Details</div>
       <div class="form-3" style="margin-bottom:16px">
@@ -173,7 +211,7 @@
             <option value="southeast">South-East (Agneya)</option>
             <option value="southwest">South-West</option>
           </select>
-          <div class="vastu-hint">🕉️ East & North-East are most preferred per Vastu Shastra</div>
+          <div class="vastu-hint">🕉️ East &amp; North-East are most preferred per Vastu Shastra</div>
         </div>
         <div class="form-group">
           <label class="form-label">🕉️ Vastu Compliance</label>
@@ -188,7 +226,7 @@
       </div>
     </div>
 
-    <!-- STEP 4 -->
+    <!-- Step 4 -->
     <div class="step">
       <div class="step-title"><div class="step-num">4</div>Furnishing &amp; Availability</div>
       <div class="form-2" style="margin-bottom:16px">
@@ -207,7 +245,7 @@
         </div>
       </div>
       <label class="form-label" style="margin-bottom:10px;display:block">Amenities</label>
-      <div class="check-grid" id="amenities-grid">
+      <div class="check-grid">
         <label class="check-item" id="ci-parking"><input type="checkbox" id="parking" onchange="tgl('parking')"/> 🚗 Parking</label>
         <label class="check-item" id="ci-gym"><input type="checkbox" id="gym" onchange="tgl('gym')"/> 🏋️ Gym</label>
         <label class="check-item" id="ci-pool"><input type="checkbox" id="pool" onchange="tgl('pool')"/> 🏊 Pool</label>
@@ -225,13 +263,13 @@
         <label class="check-item" id="ci-wifi"><input type="checkbox" id="wifi" onchange="tgl('wifi')"/> 📶 WiFi</label>
         <label class="check-item" id="ci-pet_friendly"><input type="checkbox" id="pet_friendly" onchange="tgl('pet_friendly')"/> 🐾 Pet Friendly</label>
         <label class="check-item" id="ci-gated"><input type="checkbox" id="gated" onchange="tgl('gated')"/> 🔐 Gated</label>
-        <label class="check-item" id="ci-vastu"><input type="checkbox" id="vastu" onchange="tgl('vastu')"/> 🔮 Vastu</label>
-        <label class="check-item" id="ci-water_24"><input type="checkbox" id="water_24" onchange="tgl('water_24')"/> 🚿 24/7 Water</label>
+        <label class="check-item" id="ci-vastu"><input type="checkbox" id="vastu" onchange="tgl('vastu')"/> 🕉️ Vastu</label>
+        <label class="check-item" id="ci-water_24"><input type="checkbox" id="water_24" onchange="tgl('water_24')"/> 💧 24/7 Water</label>
         <label class="check-item" id="ci-no_brokerage"><input type="checkbox" id="no_brokerage" onchange="tgl('no_brokerage')"/> ✅ Zero Brokerage</label>
       </div>
     </div>
 
-    <!-- STEP 5 -->
+    <!-- Step 5 -->
     <div class="step">
       <div class="step-title"><div class="step-num">5</div>Contact Details</div>
       <div class="form-2" style="margin-bottom:16px">
@@ -240,7 +278,7 @@
           <input type="text" class="form-input" id="contact_name" placeholder="Your name"/>
         </div>
         <div class="form-group">
-          <label class="form-label">Mobile Number * <span style="font-size:11px;color:var(--primary);font-weight:600">(required)</span></label>
+          <label class="form-label">Mobile Number <span style="font-size:11px;color:var(--primary);font-weight:600">*required</span></label>
           <input type="tel" class="form-input" id="contact_phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric"/>
         </div>
       </div>
@@ -262,7 +300,7 @@
         <div class="form-2" style="margin-bottom:16px">
           <div class="form-group">
             <label class="form-label">RERA Number <span style="font-size:11px;color:var(--muted);font-weight:400">(optional)</span></label>
-            <input type="text" class="form-input" id="rera_number" placeholder="e.g. PRM/KA/RERA/12345"/>
+            <input type="text" class="form-input" id="rera_number" placeholder="e.g. PRMKARERA12345"/>
             <div class="rera-hint">🏛️ <strong>Why add RERA?</strong> Builds instant trust. Seekers filter for RERA-registered properties.</div>
           </div>
           <div class="form-group">
@@ -288,12 +326,12 @@
       </div>
     </div>
 
-    <!-- STEP 6 -->
+    <!-- Step 6 -->
     <div class="step">
       <div class="step-title"><div class="step-num">6</div>Photos</div>
       <p class="form-hint" style="margin-bottom:12px">Add up to 10 photos. First photo will be the cover. JPG/PNG/WEBP, max 15MB each.</p>
       <div class="photos-grid" id="photos-grid">
-        <div class="photo-slot" onclick="pickPhoto()" title="Add photo">📷</div>
+        <div class="photo-slot" onclick="pickPhoto()" title="Add photo">＋</div>
       </div>
       <input type="file" id="file-inp" accept="image/*" multiple style="display:none" onchange="handleFiles(event)"/>
       <div id="upload-status" style="margin-top:8px;font-size:var(--text-xs);color:var(--muted)"></div>
@@ -304,236 +342,375 @@
 
   <div class="save-bar">
     <span class="prog" id="prog-txt"></span>
-    <button class="btn btn-secondary" onclick="history.back()">Cancel</button>
-    <button class="btn btn-primary" id="sub-btn" onclick="submit()">🏠 Submit Listing</button>
+    <button class="btn btn-secondary" onclick="window.location.href='/browse.html'">Cancel</button>
+    <button class="btn btn-primary btn-lg" id="sub-btn" onclick="submit()">Submit Listing</button>
   </div>
 </div>
+
+<!-- OTP Modal -->
+<div class="otp-overlay" id="otp-overlay">
+  <div class="otp-box">
+    <div class="otp-icon">📱</div>
+    <div class="otp-title" id="otp-title">Verify Your Mobile</div>
+    <div class="otp-sub" id="otp-sub">Required once before listing. Keeps Estate49 spam-free and builds trust with seekers. Valid for 6 months.</div>
+    <div class="otp-err" id="otp-err"></div>
+    <div id="otp-step1">
+      <input class="otp-phone-input" id="otp-phone" type="tel" placeholder="+91 98765 43210" maxlength="13" inputmode="tel"/>
+      <div id="recaptcha-container"></div>
+      <button class="btn btn-primary btn-full" id="otp-send-btn" onclick="sendOTP()">Send OTP</button>
+    </div>
+    <div id="otp-step2" style="display:none">
+      <input class="otp-code-input" id="otp-code" type="tel" placeholder="------" maxlength="6" inputmode="numeric" oninput="if(this.value.length===6)verifyOTP()"/>
+      <button class="btn btn-primary btn-full" id="otp-verify-btn" onclick="verifyOTP()">✓ Verify &amp; Continue</button>
+      <div class="otp-resend">Didn't receive it? <span onclick="resendOTP()">Resend OTP</span></div>
+    </div>
+    <button onclick="closeOTPModal()" style="font-size:var(--text-sm);color:var(--muted);background:none;border:none;cursor:pointer;margin-top:16px">Maybe later</button>
+  </div>
+</div>
+
 <div class="toast" id="toast-el"></div>
 
-<script>
-let tok=null, cu=null, ltype='rent', photos=[], editId=null;
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  const app = initializeApp({
+    apiKey:"AIzaSyDWrA5dD2ubijUUHMPw_-q-UdZ0CSGzQWk",
+    authDomain:"estate49-752b4.firebaseapp.com",
+    projectId:"estate49-752b4",
+    storageBucket:"estate49-752b4.firebasestorage.app",
+    messagingSenderId:"525259427816",
+    appId:"1:525259427816:web:7bf07725a62099a47b9e5d"
+  });
+  window._fbAuth = getAuth(app);
+  window._RecaptchaVerifier = RecaptchaVerifier;
+  window._signInWithPhoneNumber = signInWithPhoneNumber;
+</script>
 
-window.addEventListener('DOMContentLoaded', async () => {
+<script>
+let tok=null,cu=null,ltype='rent',photos=[],editId=null;
+
+/* ── Verification ── */
+const OTP_KEY='e49_phone_verified';
+const OTP_MONTHS=6;
+
+function isVerified(){
+  if(!cu) return false;
+  try{
+    const map=JSON.parse(localStorage.getItem(OTP_KEY)||'{}');
+    const exp=map[cu.email];
+    if(exp&&Date.now()<exp) return true;
+  }catch(_){}
+  return false;
+}
+function markVerified(){
+  try{
+    const map=JSON.parse(localStorage.getItem(OTP_KEY)||'{}');
+    map[cu.email]=Date.now()+(OTP_MONTHS*30*24*60*60*1000);
+    localStorage.setItem(OTP_KEY,JSON.stringify(map));
+  }catch(_){}
+}
+function updateBanner(){
+  const b=document.getElementById('verify-banner');if(!b)return;
+  if(isVerified()){
+    b.className='verify-banner done';
+    b.innerHTML=`<div class="vb-icon">✅</div><div><div class="vb-title">Mobile Verified</div><div class="vb-sub">Your mobile is verified. You're good to list properties on Estate49 for the next 6 months.</div></div>`;
+  }
+}
+
+/* ── OTP ── */
+let confirmationResult=null,appVerifier=null;
+
+function openOTPModal(){
+  document.getElementById('otp-step1').style.display='block';
+  document.getElementById('otp-step2').style.display='none';
+  document.getElementById('otp-err').textContent='';
+  document.getElementById('otp-title').textContent='Verify Your Mobile';
+  document.getElementById('otp-sub').textContent='Required once before listing. Valid for 6 months.';
+  document.getElementById('otp-overlay').classList.add('open');
+  const ph=document.getElementById('contact_phone')?.value?.trim();
+  if(ph&&/^[6-9]\d{9}$/.test(ph)) document.getElementById('otp-phone').value='+91'+ph;
+  setTimeout(initRecaptcha,200);
+}
+function closeOTPModal(){document.getElementById('otp-overlay').classList.remove('open');}
+
+function initRecaptcha(){
+  if(appVerifier) return;
+  const tryInit=()=>{
+    if(!window._RecaptchaVerifier||!window._fbAuth){setTimeout(tryInit,200);return;}
+    try{
+      appVerifier=new window._RecaptchaVerifier(window._fbAuth,'recaptcha-container',{
+        size:'normal',
+        callback:()=>{},
+        'expired-callback':()=>{appVerifier=null;initRecaptcha();}
+      });
+      appVerifier.render();
+    }catch(e){console.error('reCAPTCHA',e);}
+  };
+  tryInit();
+}
+async function sendOTP(){
+  const raw=document.getElementById('otp-phone').value.trim();
+  const errEl=document.getElementById('otp-err');errEl.textContent='';
+  let phone=raw.replace(/\s+/g,'');
+  if(/^[6-9]\d{9}$/.test(phone)) phone='+91'+phone;
+  if(!/^\+\d{10,15}$/.test(phone)){errEl.textContent='Enter a valid mobile number';return;}
+  const btn=document.getElementById('otp-send-btn');btn.disabled=true;btn.textContent='Sending…';
+  const tryFB=()=>{
+    if(!window._signInWithPhoneNumber||!window._fbAuth){setTimeout(tryFB,200);return;}
+    window._signInWithPhoneNumber(window._fbAuth,phone,appVerifier)
+      .then(res=>{
+        confirmationResult=res;
+        document.getElementById('otp-step1').style.display='none';
+        document.getElementById('otp-step2').style.display='block';
+        document.getElementById('otp-title').textContent='Enter OTP';
+        document.getElementById('otp-sub').textContent='We sent a 6-digit code to '+phone;
+        document.getElementById('otp-code').focus();
+        btn.disabled=false;btn.textContent='Send OTP';
+      })
+      .catch(err=>{
+        errEl.textContent=err.message||'Failed to send OTP.';
+        btn.disabled=false;btn.textContent='Send OTP';
+        appVerifier=null;
+        document.getElementById('recaptcha-container').innerHTML='';
+        initRecaptcha();
+      });
+  };
+  tryFB();
+}
+async function verifyOTP(){
+  const code=document.getElementById('otp-code').value.trim();
+  const errEl=document.getElementById('otp-err');errEl.textContent='';
+  if(!code||code.length<6){errEl.textContent='Enter the 6-digit OTP';return;}
+  if(!confirmationResult){errEl.textContent='Session expired — please resend OTP.';return;}
+  const btn=document.getElementById('otp-verify-btn');btn.disabled=true;btn.textContent='Verifying…';
+  try{
+    await confirmationResult.confirm(code);
+    markVerified();
+    closeOTPModal();
+    updateBanner();
+    toast('✅ Mobile verified! You can now submit your listing.');
+  }catch(err){
+    errEl.textContent='Incorrect OTP. Please try again.';
+    btn.disabled=false;btn.textContent='✓ Verify & Continue';
+  }
+}
+function resendOTP(){
+  confirmationResult=null;appVerifier=null;
+  document.getElementById('recaptcha-container').innerHTML='';
+  document.getElementById('otp-step1').style.display='block';
+  document.getElementById('otp-step2').style.display='none';
+  document.getElementById('otp-title').textContent='Verify Your Mobile';
+  document.getElementById('otp-sub').textContent='Required once before listing. Valid for 6 months.';
+  document.getElementById('otp-err').textContent='';
+    document.getElementById('otp-code').value='';
+  setTimeout(initRecaptcha,100);
+}
+
+/* ── Page Init ── */
+window.addEventListener('DOMContentLoaded',async()=>{
   const s=await getSession();
   if(!s){window.location.href='/login.html';return;}
-  cu=s.user; tok=s.access_token;
+  cu=s.user;tok=s.access_token;
   document.getElementById('al').style.display='none';
   document.getElementById('page').style.display='block';
   await initNavbar({active:'list'});
 
-  editId = new URLSearchParams(window.location.search).get('edit');
+  try{
+    const r=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${tok}`}});
+    if(r.ok){
+      const p=await r.json();
+      if(p.fullname) document.getElementById('contact_name').value=p.fullname;
+      if(p.phone){document.getElementById('contact_phone').value=p.phone;document.getElementById('whatsapp').value=p.phone;}
+    }
+  }catch(_){}
+
+  editId=new URLSearchParams(window.location.search).get('edit');
   if(editId){
     document.getElementById('page-title').textContent='Edit Listing';
-    document.getElementById('sub-btn').textContent='💾 Save Changes';
-    await loadEdit(editId);
+    document.getElementById('sub-btn').textContent='Save Changes';
+    try{
+      const r=await fetch(`/api/properties/${editId}`);
+      const p=await r.json();
+      if(p.listed_by!==cu.id){toast('Not your listing');return;}
+      setType(p.type||'rent');
+      ['title','city','locality','address','description','price','deposit','maintenance',
+       'area','carpet_area','floor','furnished','available_from','contact_name',
+       'contact_phone','contact_email','contact_role','contact_time','property_type',
+       'bhk','bathrooms','whatsapp','map_link','facing','vastu_compliance',
+       'rera_number','brokerage_applicable'].forEach(k=>{
+        const el=document.getElementById(k);if(el&&p[k]!=null)el.value=p[k];
+      });
+      ['parking','gym','pool','lift','security','cctv','clubhouse','garden','powerbackup',
+       'ac','balcony','modular_kitchen','washing_machine','fridge','wifi','pet_friendly',
+       'gated','vastu','water_24','no_brokerage'].forEach(k=>{
+        if(p[k]){const el=document.getElementById(k);if(el){el.checked=true;document.getElementById('ci-'+k)?.classList.add('checked');}}
+      });
+      photos=[...(p.photos||[])];renderPhotos();
+      onRoleChange();
+    }catch(_){toast('Failed to load listing');}
   }
+
+  updateBanner();
 });
 
-async function loadEdit(id){
-  try{
-    const r=await fetch(`/api/properties/${id}`);
-    if(!r.ok) throw new Error();
-    const p=await r.json();
-    if(p.listed_by!==cu.id){toast('Not your listing');return;}
-
-    setType(p.type||'rent');
-    ['prop_type','bhk','bathrooms','title','city','locality','address','description',
-     'price','deposit','maintenance','area','carpet_area','floor','furnished',
-     'available_from','contact_name','contact_phone','contact_email','contact_role',
-     'contact_time','whatsapp','map_link','facing','vastu_compliance',
-     'rera_number','brokerage_applicable'].forEach(k=>{
-      const el=document.getElementById(k);
-      if(el&&p[k]!=null) el.value=p[k];
-    });
-
-    onRoleChange();
-
-    ['parking','gym','pool','lift','security','cctv','clubhouse','garden',
-     'powerbackup','ac','balcony','modular_kitchen','washing_machine','fridge','wifi',
-     'pet_friendly','gated','vastu','water_24','no_brokerage'].forEach(k=>{
-      const el=document.getElementById(k);
-      if(el) el.checked=!!p[k];
-    });
-
-    if(p.brokerage_applicable){
-      const el=document.getElementById('brokerage_applicable');
-      if(el) el.value='yes';
-    }
-
-    photos=p.photos||[];
-    renderPhotos();
-  }catch(e){toast('Could not load listing');}
+/* ── Helpers ── */
+function onRoleChange(){
+  const role=document.getElementById('contact_role').value;
+  const sec=document.getElementById('rera-brokerage-section');
+  if(role==='agent'||role==='builder') sec.classList.remove('hidden');
+  else sec.classList.add('hidden');
 }
-
 function setType(t){
   ltype=t;
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('sel',b.dataset.t===t));
 }
+function tgl(k){document.getElementById('ci-'+k)?.classList.toggle('checked',!!document.getElementById(k)?.checked);}
+function pickPhoto(){document.getElementById('file-inp').click();}
 
-function onRoleChange(){
-  const role=document.getElementById('contact_role')?.value;
-  const sec=document.getElementById('rera-brokerage-section');
-  if(sec) sec.classList.toggle('hidden',role==='owner');
-}
-
-function tgl(id){
-  const el=document.getElementById(id);
-  const ci=document.getElementById('ci-'+id);
-  if(ci) ci.classList.toggle('active',el?.checked);
-}
-
-function pickPhoto(){
-  if(photos.length>=10){toast('Max 10 photos allowed');return;}
-  document.getElementById('file-inp').click();
+/* ── E49 Watermark ── */
+function stampE49(file){
+  return new Promise(resolve=>{
+    const img=new Image();
+    const objUrl=URL.createObjectURL(file);
+    img.onload=()=>{
+      const W=img.width,H=img.height;
+      const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
+      const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);
+      const r=Math.round(Math.min(W,H)*0.09);
+      const margin=Math.round(r*0.55);
+      const cx=margin+r,cy=margin+r;
+      const col='rgba(192,57,43,0.28)';
+      ctx.save();
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=Math.round(r*0.07);ctx.stroke();
+      ctx.beginPath();ctx.arc(cx,cy,r*0.72,0,Math.PI*2);ctx.strokeStyle='rgba(192,57,43,0.18)';ctx.lineWidth=Math.round(r*0.03);ctx.stroke();
+      const fs=Math.round(r*0.50);ctx.font=`900 ${fs}px Arial,Helvetica,sans-serif`;ctx.fillStyle='rgba(192,57,43,0.32)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('E49',cx,cy);
+      ctx.restore();
+      canvas.toBlob(blob=>{URL.revokeObjectURL(objUrl);resolve(new File([blob],file.name.replace(/\.[^.]+$/,'.jpg'),{type:'image/jpeg'}));},'image/jpeg',0.88);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(objUrl);resolve(file);};
+    img.src=objUrl;
+  });
 }
 
 async function handleFiles(e){
-  const files=[...e.target.files];
-  e.target.value='';
-  const remaining=10-photos.length;
-  const toProcess=files.slice(0,remaining);
-  if(files.length>remaining) toast(`Only ${remaining} more photo(s) allowed`);
-
+  const files=Array.from(e.target.files);e.target.value='';
+  const avail=10-photos.length;if(avail<=0){toast('Max 10 photos');return;}
+  const toUp=files.slice(0,avail);
   const statusEl=document.getElementById('upload-status');
-  statusEl.textContent=`Uploading ${toProcess.length} photo(s)…`;
-
-  for(const file of toProcess){
-    if(file.size>15*1024*1024){toast(`${file.name} is too large (max 15MB)`);continue;}
+  let uploaded=0;
+  for(const f of toUp){
     try{
-      const fd=new FormData(); fd.append('photo',file);
-      const r=await fetch('/api/upload/photo',{method:'POST',headers:{Authorization:`Bearer ${tok}`},body:fd});
-      if(!r.ok) throw new Error((await r.json()).error||'Upload failed');
-      const {url}=await r.json();
-      photos.push(url);
-      renderPhotos();
-    }catch(ex){toast('Upload failed: '+ex.message);}
+      statusEl.textContent=`Stamping & uploading ${uploaded+1} of ${toUp.length}…`;
+      const stamped=await stampE49(f);
+      const fd=new FormData();fd.append('file',stamped);
+      const r=await fetch('/api/upload',{method:'POST',headers:{Authorization:`Bearer ${tok}`},body:fd});
+      if(!r.ok) throw new Error(await r.text());
+      const result=await r.json();
+      const url=typeof result==='string'?result:(result.url||result.publicUrl||(Array.isArray(result.urls)?result.urls[0]:null));
+      if(!url) throw new Error('No URL returned');
+      photos.push(url);uploaded++;renderPhotos();
+    }catch(ex){console.error(ex);toast('Upload failed: '+f.name);}
   }
-  statusEl.textContent=photos.length?`${photos.length} photo(s) added`:'';
+  statusEl.textContent=photos.length?`${photos.length} photo${photos.length>1?'s':''} ready`:'';
 }
 
 function renderPhotos(){
-  const grid=document.getElementById('photos-grid');
-  grid.innerHTML='';
-  photos.forEach((url,i)=>{
-    const slot=document.createElement('div');
-    slot.className='photo-slot';
-    slot.innerHTML=`<img src="${url}" alt="Photo ${i+1}"/><div class="photo-rm" onclick="rmPhoto(${i})">✕</div>`;
-    grid.appendChild(slot);
-  });
-  if(photos.length<10){
-    const add=document.createElement('div');
-    add.className='photo-slot';
-    add.innerHTML='📷';
-    add.onclick=pickPhoto;
-    grid.appendChild(add);
-  }
+  const g=document.getElementById('photos-grid');
+  g.innerHTML=photos.map((url,i)=>`
+    <div class="photo-slot">
+      <img src="${url}" alt="photo ${i+1}" loading="lazy"/>
+      ${i===0?`<div style="position:absolute;bottom:4px;left:4px;background:var(--primary);color:#fff;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:700">COVER</div>`:''}
+      <div class="photo-rm" onclick="rmPhoto(${i})">✕</div>
+    </div>`).join('');
+  if(photos.length<10) g.insertAdjacentHTML('beforeend','<div class="photo-slot" onclick="pickPhoto()">＋</div>');
 }
+function rmPhoto(i){photos.splice(i,1);renderPhotos();}
 
-function rmPhoto(i){
-  photos.splice(i,1);
-  renderPhotos();
-  const statusEl=document.getElementById('upload-status');
-  statusEl.textContent=photos.length?`${photos.length} photo(s) added`:'';
-}
-
-function generateAdId() {
-  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let id = 'E49-';
-  for (let i=0;i<6;i++) id += c[Math.floor(Math.random()*c.length)];
+function generateAdId(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let id='E49-';
+  for(let i=0;i<6;i++) id+=c[Math.floor(Math.random()*c.length)];
   return id;
 }
 
-async function submit() {
-  const V = id => document.getElementById(id)?.value?.trim()||'';
-  if (!V('title')||!V('price')||!V('city')||!V('locality')||!V('contact_name')) {
-    toast('Fill in all required fields'); return;
+/* ── Submit ── */
+async function submit(){
+  if(!isVerified()){
+    toast('⚠️ Please verify your mobile first');
+    openOTPModal();
+    return;
   }
-  if (!V('contact_phone')) {
-    const ph = document.getElementById('contact_phone');
-    ph.classList.add('required-highlight'); ph.focus();
+  const V=id=>document.getElementById(id)?.value?.trim();
+  if(!V('title')||!V('price')||!V('city')||!V('locality')||!V('contact_name')){
+    toast('Fill in all required fields');return;
+  }
+  if(!V('contact_phone')){
+    const ph=document.getElementById('contact_phone');
+    ph.classList.add('required-highlight');ph.focus();
     toast('Mobile number is required to publish your listing');
-    setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
+    setTimeout(()=>ph.classList.remove('required-highlight'),3000);return;
   }
-  if (!/^[6-9]\d{9}$/.test(V('contact_phone'))) {
-    const ph = document.getElementById('contact_phone');
-    ph.classList.add('required-highlight'); ph.focus();
-    toast('Enter a valid 10-digit Indian mobile number (starts with 6-9)');
-    setTimeout(()=>ph.classList.remove('required-highlight'),3000); return;
+  if(!/^[6-9]\d{9}$/.test(V('contact_phone'))){
+    const ph=document.getElementById('contact_phone');
+    ph.classList.add('required-highlight');ph.focus();
+    toast('Enter a valid 10-digit Indian mobile number (starts with 6–9)');
+    setTimeout(()=>ph.classList.remove('required-highlight'),3000);return;
   }
-  if (V('whatsapp')&&!/^[6-9]\d{9}$/.test(V('whatsapp'))) {
-    toast('Enter a valid 10-digit WhatsApp number (starts with 6-9)'); return;
-  }
+  if(V('whatsapp')&&!/^[6-9]\d{9}$/.test(V('whatsapp'))){toast('Enter a valid 10-digit WhatsApp number');return;}
 
-  const btn = document.getElementById('sub-btn');
-  btn.disabled=true; btn.textContent='Submitting…';
-
-  const role = V('contact_role');
-  const isAB = role==='agent'||role==='builder';
-  const bools = ['parking','gym','pool','lift','security','cctv','clubhouse','garden',
+  const btn=document.getElementById('sub-btn');btn.disabled=true;btn.textContent='Submitting…';
+  const role=V('contact_role');
+  const isAB=role==='agent'||role==='builder';
+  const bools=['parking','gym','pool','lift','security','cctv','clubhouse','garden',
     'powerbackup','ac','balcony','modular_kitchen','washing_machine','fridge','wifi',
     'pet_friendly','gated','vastu','water_24','no_brokerage'];
-
-  const payload = {
-    type: ltype, property_type: V('prop_type'),
-    bhk: V('bhk')?parseInt(V('bhk')):null,
-    bathrooms: V('bathrooms')?parseInt(V('bathrooms')):null,
-    title: V('title'), city: V('city'), locality: V('locality'),
-    address: V('address'), description: V('description'),
-    price: parseFloat(V('price')),
-    deposit: V('deposit')?parseFloat(V('deposit')):null,
-    maintenance: V('maintenance')?parseFloat(V('maintenance')):null,
-    area: V('area')?parseInt(V('area')):null,
-    carpet_area: V('carpet_area')?parseInt(V('carpet_area')):null,
-    floor: V('floor'), furnished: V('furnished'),
-    available_from: V('available_from'),
-    contact_name: V('contact_name'), contact_phone: V('contact_phone'),
-    contact_email: V('contact_email'), contact_role: role,
-    contact_time: V('contact_time'),
-    whatsapp: V('whatsapp')||null, map_link: V('map_link')||null,
-    facing: V('facing')||null, vastu_compliance: V('vastu_compliance')||null,
-    rera_number: isAB?(V('rera_number')||null):null,
-    brokerage_applicable: isAB?(V('brokerage_applicable')==='yes'):false,
+  const payload={
+    type:ltype,property_type:V('property_type'),
+    bhk:V('bhk')?parseInt(V('bhk')):null,
+    bathrooms:V('bathrooms')?parseInt(V('bathrooms')):null,
+    title:V('title'),city:V('city'),locality:V('locality'),address:V('address'),description:V('description'),
+    price:parseFloat(V('price')),
+    deposit:V('deposit')?parseFloat(V('deposit')):null,
+    maintenance:V('maintenance')?parseFloat(V('maintenance')):null,
+    area:V('area')?parseInt(V('area')):null,
+    carpet_area:V('carpet_area')?parseInt(V('carpet_area')):null,
+    floor:V('floor'),furnished:V('furnished'),available_from:V('available_from'),
+    contact_name:V('contact_name'),contact_phone:V('contact_phone'),
+    contact_email:V('contact_email'),contact_role:role,contact_time:V('contact_time'),
+    whatsapp:V('whatsapp')||null,map_link:V('map_link')||null,
+    facing:V('facing')||null,vastu_compliance:V('vastu_compliance')||null,
+    rera_number:isAB?V('rera_number'):null,
+    brokerage_applicable:isAB?(V('brokerage_applicable')==='yes'):false,
     photos,
   };
-  if (!editId) payload.ad_id = generateAdId();
-  bools.forEach(k => payload[k] = !!document.getElementById(k)?.checked);
+  if(!editId) payload.ad_id=generateAdId();
+  bools.forEach(k=>{payload[k]=!!document.getElementById(k)?.checked;});
 
-  try {
-    const url    = editId?`/api/properties/${editId}`:'/api/properties';
-    const method = editId?'PATCH':'POST';
-    const r = await fetch(url,{
-      method,
-      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
-      body:JSON.stringify(payload)
-    });
-    if (!r.ok){const e=await r.json();throw new Error(e.error||'Failed');}
-    const d = await r.json();
-    if (editId) {
-      toast('✅ Listing updated!');
-      setTimeout(()=>window.location.href=`/property.html?id=${d.id}`,1200);
-    } else {
-      showSubmitSuccess(d.ad_id||payload.ad_id, d.id);
-    }
-  } catch(e) {
-    toast('Error: '+e.message);
-    btn.disabled=false;
-    btn.textContent=editId?'💾 Save Changes':'🏠 Submit Listing';
-  }
+  try{
+    const url=editId?`/api/properties/${editId}`:'/api/properties';
+    const method=editId?'PATCH':'POST';
+    const r=await fetch(url,{method,headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(payload)});
+    if(!r.ok){const e=await r.json();throw new Error(e.error||'Failed');}
+    const d=await r.json();
+    if(editId){toast('✅ Listing updated!');setTimeout(()=>window.location.href=`/property.html?id=${d.id}`,1200);}
+    else showSubmitSuccess(d.ad_id||payload.ad_id,d.id);
+  }catch(e){toast('Error: '+e.message);btn.disabled=false;btn.textContent=editId?'Save Changes':'Submit Listing';}
 }
 
-function showSubmitSuccess(adId, propId) {
+function showSubmitSuccess(adId,propId){
   document.querySelector('.lw').innerHTML=`
-    <div style="text-align:center;padding:60px 20px;">
+    <div style="text-align:center;padding:60px 20px">
       <div style="font-size:64px;margin-bottom:16px">🎉</div>
       <h2 style="font-size:var(--text-2xl);font-weight:800;margin-bottom:10px;color:var(--text)">Ad Submitted Successfully!</h2>
       <p style="font-size:var(--text-base);color:var(--muted);margin-bottom:8px">Your property is now <strong>under verification</strong> by our team.</p>
       <p style="font-size:var(--text-sm);color:var(--muted);margin-bottom:24px">Please check after <strong>24 hours</strong>. You'll be notified once it's live.</p>
-      <div style="display:inline-block;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 28px;margin-bottom:32px;">
+      <div style="display:inline-block;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 28px;margin-bottom:32px">
         <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px">YOUR AD ID</div>
         <div style="font-size:var(--text-xl);font-weight:900;color:var(--primary);letter-spacing:2px">${adId}</div>
         <div style="font-size:11px;color:var(--muted);margin-top:4px">Save this ID for support queries</div>
       </div>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
         <a href="/property.html?id=${propId}" class="btn btn-secondary">View My Listing</a>
         <a href="/browse.html" class="btn btn-primary">Browse Properties</a>
       </div>
@@ -541,11 +718,7 @@ function showSubmitSuccess(adId, propId) {
   document.querySelector('.save-bar').style.display='none';
 }
 
-function toast(m) {
-  const el = document.getElementById('toast-el');
-  el.textContent=m; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),3000);
-}
+function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),3000);}
 </script>
 </body>
 </html>
