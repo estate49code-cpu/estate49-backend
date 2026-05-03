@@ -13,41 +13,10 @@
     .back-btn:hover{color:var(--primary);}
 
     /* ── Photo Swipe Gallery ── */
-    .pgal{
-      border-radius:var(--radius-xl);
-      overflow:hidden;
-      background:var(--surface-3);
-      margin-bottom:28px;
-      position:relative;
-      touch-action:pan-y;
-      user-select:none;
-      -webkit-user-select:none;
-    }
-    .pgal-track{
-      display:flex;
-      transform:translate3d(0,0,0);
-      transition:transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94);
-      will-change:transform;
-      flex-wrap:nowrap;
-    }
-    .pgal-slide{
-      min-width:100%;
-      width:100%;
-      height:420px;
-      flex-shrink:0;
-      flex-grow:0;
-      position:relative;
-      overflow:hidden;
-    }
-    .pgal-slide img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      cursor:zoom-in;
-      pointer-events:none;
-      -webkit-user-drag:none;
-    }
+    .pgal{border-radius:var(--radius-xl);overflow:hidden;background:var(--surface-3);margin-bottom:28px;position:relative;touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+    .pgal-track{display:flex;transform:translate3d(0,0,0);transition:transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94);will-change:transform;flex-wrap:nowrap;}
+    .pgal-slide{min-width:100%;width:100%;height:420px;flex-shrink:0;flex-grow:0;position:relative;overflow:hidden;}
+    .pgal-slide img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;pointer-events:none;-webkit-user-drag:none;}
     .pgal-slide{cursor:zoom-in;}
     .pgal-ph{width:100%;height:420px;display:flex;align-items:center;justify-content:center;font-size:80px;background:var(--surface-3);}
     .pgal-prev,.pgal-next{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);border:none;font-size:22px;cursor:pointer;z-index:10;box-shadow:0 2px 10px rgba(0,0,0,0.18);transition:all 0.2s;display:flex;align-items:center;justify-content:center;}
@@ -92,14 +61,14 @@
     .contact-avatar{width:46px;height:46px;border-radius:50%;background:var(--primary);color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
     .contact-name{font-size:var(--text-sm);font-weight:700;}
     .contact-role{font-size:var(--text-xs);color:var(--muted);}
-    /* ── NEW: Verification badges ── */
+    /* ── Verification badges ── */
     .cv-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
     .cv-badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:10px;}
     .cv-b-phone{background:#e8f5e9;color:#2e7d32;}
     .cv-b-rera{background:#f3e5f5;color:#6a1b9a;}
     .cv-b-agent{background:#fff3e0;color:#e65100;}
     .cv-b-builder{background:#e3f2fd;color:#1565c0;}
-    /* ── NEW: Mobile CTA verify strip ── */
+    /* ── Mobile CTA verify strip ── */
     .mcta-verify-strip{display:flex;gap:5px;flex-wrap:wrap;}
     .mcta-vbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:3px;}
     .mcta-vb-phone{background:#e8f5e9;color:#2e7d32;}
@@ -122,6 +91,8 @@
     .psec{margin-bottom:32px;}
     .phone-gate{color:var(--primary);font-style:italic;cursor:pointer;}
     .phone-gate:hover{text-decoration:underline;}
+    /* ── Login gate blurred contact ── */
+    .contact-blurred{filter:blur(4px);pointer-events:none;user-select:none;}
 
     /* ── Mobile sticky CTA ── */
     .mobile-cta{
@@ -237,7 +208,6 @@ async function checkFav(){
   if(!tok) return;
   try{
     const r=await fetch('/api/favorites',{headers:{Authorization:`Bearer ${tok}`}});
-    // FIX: guard against null/undefined + handle both snake_case and camelCase
     if(r.ok){const d=await r.json();isFav=(d||[]).some(f=>String(f.property_id??f.propertyId??'')===String(pid));}
   }catch(e){}
 }
@@ -284,16 +254,27 @@ function render(){
   ].filter(([v])=>v);
 
   const ownerIni=(p.contact_name||'O').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+
+  // ── Phone: gated behind login ──
   const phoneHtml=p.contact_phone
     ?(cu
       ?`<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><a href="tel:${x(p.contact_phone)}" style="color:inherit">${x(p.contact_phone)}</a></span></div>`
-      :`<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><span class="phone-gate" onclick="showLoginPrompt('Sign in to view contact number')">Sign in to view</span></span></div>`)
+      :`<div class="info-row"><span class="info-key">Phone</span><span class="info-val"><span class="phone-gate" onclick="showLoginPrompt('Sign in to view contact number')">🔒 Sign in to view</span></span></div>`)
     :'';
+
   const waMsg=encodeURIComponent(`Hi, I saw your property listing on Estate49 — "${p.title}" in ${p.locality||''}, ${p.city||''}. Is it still available?`);
+
+  // ── WhatsApp button: gated behind login ──
   const waBtnHtml=p.whatsapp
-    ?`<a class="btn-whatsapp" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
-        Chat on WhatsApp</a>`:'';
+    ?(cu
+      ?`<a class="btn-whatsapp" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+          Chat on WhatsApp</a>`
+      :`<button class="btn-whatsapp" onclick="showLoginPrompt('Sign in to contact the owner on WhatsApp')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>
+          🔒 Sign in for WhatsApp</button>`)
+    :'';
+
   const mapBtnHtml=p.map_link
     ?`<a class="btn-maps" href="${x(p.map_link)}" target="_blank" rel="noopener">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
@@ -304,13 +285,20 @@ function render(){
   const facingHtml=p.facing?`<div class="info-row"><span class="info-key">🧭 Facing</span><span class="info-val">${facingMap[p.facing]||p.facing}</span></div>`:'';
   const vastuHtml=p.vastu_compliance?`<div class="info-row"><span class="info-key">🕉️ Vastu</span><span class="info-val">${vastuMap[p.vastu_compliance]||p.vastu_compliance}</span></div>`:'';
 
-  // ── NEW: Verification badges for sidebar ──
+  // ── Verification badges ──
   const cvBadges=[];
   if(p.phone_verified) cvBadges.push(`<span class="cv-badge cv-b-phone">✓ Phone Verified</span>`);
   if(p.rera_number)    cvBadges.push(`<span class="cv-badge cv-b-rera">🏛 RERA</span>`);
   if(p.contact_role==='agent')   cvBadges.push(`<span class="cv-badge cv-b-agent">🤝 Agent</span>`);
   if(p.contact_role==='builder') cvBadges.push(`<span class="cv-badge cv-b-builder">🏗️ Builder</span>`);
   const cvBadgeHtml=cvBadges.length?`<div class="cv-badges">${cvBadges.join('')}</div>`:'';
+
+  // ── Message button: gated behind login ──
+  const msgBtnHtml=!isOwn
+    ?(cu
+      ?`<button class="btn btn-primary btn-full btn-lg" onclick="msgOwner()">💬 Send Message</button>`
+      :`<button class="btn btn-primary btn-full btn-lg" onclick="showLoginPrompt('Sign in to message the owner')">🔒 Sign in to Message</button>`)
+    :'';
 
   const sidebarHtml=`
     <div class="ccard">
@@ -322,7 +310,7 @@ function render(){
       </div>
       ${cvBadgeHtml}
       <div class="ccard-btns">
-        ${!isOwn?`<button class="btn btn-primary btn-full btn-lg" onclick="msgOwner()">💬 Send Message</button>`:''}
+        ${msgBtnHtml}
         ${waBtnHtml}
         ${mapBtnHtml}
         <button class="fav-btn ${isFav?'saved':''}" id="fav-btn" onclick="toggleFav()">${isFav?'❤️ Saved':'🤍 Save Property'}</button>
@@ -330,9 +318,9 @@ function render(){
       </div>
       <div class="info-rows">
         ${phoneHtml}
-        ${p.contact_email?`<div class="info-row"><span class="info-key">Email</span><span class="info-val">${x(p.contact_email)}</span></div>`:''}
+        ${p.contact_email?`<div class="info-row"><span class="info-key">Email</span><span class="info-val">${cu?x(p.contact_email):`<span class="phone-gate" onclick="showLoginPrompt('Sign in to view email')">🔒 Sign in to view</span>`}</span></div>`:''}
         ${p.contact_time?`<div class="info-row"><span class="info-key">Best time</span><span class="info-val">${x(p.contact_time)}</span></div>`:''}
-        ${p.whatsapp?`<div class="info-row"><span class="info-key">WhatsApp</span><span class="info-val">+91 ${x(p.whatsapp)}</span></div>`:''}
+        ${p.whatsapp?`<div class="info-row"><span class="info-key">WhatsApp</span><span class="info-val">${cu?`+91 ${x(p.whatsapp)}`:`<span class="phone-gate" onclick="showLoginPrompt('Sign in to view WhatsApp number')">🔒 Sign in to view</span>`}</span></div>`:''}
         ${p.property_type?`<div class="info-row"><span class="info-key">Type</span><span class="info-val">${x(cp(p.property_type))}</span></div>`:''}
         ${p.carpet_area?`<div class="info-row"><span class="info-key">Carpet area</span><span class="info-val">${p.carpet_area} ft²</span></div>`:''}
         ${facingHtml}
@@ -463,22 +451,32 @@ function renderMobileCTA(pr,rent,isOwn,p){
   if(!cta) return;
   const waMsg=encodeURIComponent(`Hi, I saw your property listing on Estate49 — "${p.title}" in ${p.locality||''}, ${p.city||''}. Is it still available?`);
 
-  // ── NEW: Verification strip for mobile CTA ──
+  // ── Verification strip ──
   const mctaVbadges=[];
-  if(p.phone_verified)             mctaVbadges.push(`<span class="mcta-vbadge mcta-vb-phone">✓ Verified</span>`);
-  if(p.rera_number)                mctaVbadges.push(`<span class="mcta-vbadge mcta-vb-rera">🏛 RERA</span>`);
-  if(p.contact_role==='agent')     mctaVbadges.push(`<span class="mcta-vbadge mcta-vb-agent">🤝 Agent</span>`);
-  if(p.contact_role==='builder')   mctaVbadges.push(`<span class="mcta-vbadge mcta-vb-builder">🏗️ Builder</span>`);
+  if(p.phone_verified)           mctaVbadges.push(`<span class="mcta-vbadge mcta-vb-phone">✓ Verified</span>`);
+  if(p.rera_number)              mctaVbadges.push(`<span class="mcta-vbadge mcta-vb-rera">🏛 RERA</span>`);
+  if(p.contact_role==='agent')   mctaVbadges.push(`<span class="mcta-vbadge mcta-vb-agent">🤝 Agent</span>`);
+  if(p.contact_role==='builder') mctaVbadges.push(`<span class="mcta-vbadge mcta-vb-builder">🏗️ Builder</span>`);
   const verifyStripHtml=mctaVbadges.length?`<div class="mcta-verify-strip">${mctaVbadges.join('')}</div>`:'';
 
   const btns=[];
-  if(!isOwn) btns.push(`<button class="mcta-btn mcta-btn-msg" onclick="msgOwner()">💬 Message</button>`);
-  if(p.whatsapp) btns.push(`<a class="mcta-btn mcta-btn-wa" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg> WhatsApp</a>`);
-  if(p.contact_phone) btns.push(cu
-    ?`<a class="mcta-btn mcta-btn-call" href="tel:${x(p.contact_phone)}">📞 Call</a>`
-    :`<button class="mcta-btn mcta-btn-call" onclick="showLoginPrompt('Sign in to call the owner')">📞 Call</button>`);
+  if(!isOwn){
+    // Message — gated
+    btns.push(cu
+      ?`<button class="mcta-btn mcta-btn-msg" onclick="msgOwner()">💬 Message</button>`
+      :`<button class="mcta-btn mcta-btn-msg" onclick="showLoginPrompt('Sign in to message the owner')">🔒 Message</button>`);
+    // WhatsApp — gated
+    if(p.whatsapp) btns.push(cu
+      ?`<a class="mcta-btn mcta-btn-wa" href="https://wa.me/91${x(p.whatsapp)}?text=${waMsg}" target="_blank" rel="noopener">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.108.549 4.089 1.512 5.814L.057 23.428a.75.75 0 0 0 .921.921l5.63-1.457A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.726 9.726 0 0 1-4.952-1.355l-.355-.212-3.68.952.976-3.563-.232-.368A9.712 9.712 0 0 1 2.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg> WhatsApp</a>`
+      :`<button class="mcta-btn mcta-btn-wa" onclick="showLoginPrompt('Sign in to contact on WhatsApp')">🔒 WhatsApp</button>`);
+    // Call — gated
+    if(p.contact_phone) btns.push(cu
+      ?`<a class="mcta-btn mcta-btn-call" href="tel:${x(p.contact_phone)}">📞 Call</a>`
+      :`<button class="mcta-btn mcta-btn-call" onclick="showLoginPrompt('Sign in to call the owner')">🔒 Call</button>`);
+  }
   if(isOwn) btns.push(`<a class="mcta-btn mcta-btn-edit" href="/list-property.html?edit=${p.id}">✏️ Edit</a>`);
+
   cta.innerHTML=`
     <div class="mcta-top">
       <div>
@@ -498,13 +496,8 @@ function msgOwner(){
 }
 
 async function toggleFav(){
-  // FIX: get fresh session so token is never stale
   let freshCu=cu, freshTok=tok;
-  try{
-    const s=await getSession();
-    freshCu=s?.user||cu;
-    freshTok=s?.access_token||tok;
-  }catch(_){}
+  try{const s=await getSession();freshCu=s?.user||cu;freshTok=s?.access_token||tok;}catch(_){}
   if(!freshCu){showLoginPrompt('Sign in to save this property');return;}
   try{
     if(isFav){

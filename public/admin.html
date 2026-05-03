@@ -14,25 +14,43 @@
     .topbar-logo{font-size:20px;font-weight:800;display:flex;align-items:center;gap:10px;}
     .topbar-right{display:flex;align-items:center;gap:16px;font-size:14px;}
     .admin-badge{background:#e74c3c;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-    .wrap{max-width:1280px;margin:0 auto;padding:32px 24px;}
-    .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:32px;}
-    .stat{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:20px;text-align:center;}
-    .stat-num{font-size:32px;font-weight:800;margin-bottom:4px;}
-    .stat-label{font-size:12px;color:#888;font-weight:500;}
+    .wrap{max-width:1400px;margin:0 auto;padding:32px 24px;}
+
+    /* ── Stats ── */
+    .stats{display:grid;grid-template-columns:repeat(7,1fr);gap:14px;margin-bottom:28px;}
+    .stat{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all .18s;}
+    .stat:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+    .stat-num{font-size:28px;font-weight:800;margin-bottom:4px;}
+    .stat-label{font-size:11px;color:#888;font-weight:500;}
+    .stat.total .stat-num{color:#2980b9;}
     .stat.pending .stat-num{color:#f39c12;}
     .stat.approved .stat-num{color:#27ae60;}
     .stat.rejected .stat-num{color:#e74c3c;}
-    .stat.total .stat-num{color:#2980b9;}
     .stat.users .stat-num{color:#8e44ad;}
-    .tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:4px;width:fit-content;}
+    .stat.verified .stat-num{color:#16a085;}
+    .stat.rera .stat-num{color:#1565c0;}
+
+    /* ── Section tabs ── */
+    .section-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+    .stab{padding:9px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid transparent;background:#fff;color:#666;transition:all .18s;}
+    .stab.active-listings{background:#1a1a2e;color:#fff;border-color:#1a1a2e;}
+    .stab.active-users{background:#8e44ad;color:#fff;border-color:#8e44ad;}
+    .stab.active-rera{background:#1565c0;color:#fff;border-color:#1565c0;}
+
+    /* ── Filter tabs (listings) ── */
+    .tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:4px;width:fit-content;flex-wrap:wrap;}
     .tab{padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:#666;transition:all 0.15s;}
     .tab.active{background:#1a1a2e;color:#fff;}
     .tab.pend{color:#f39c12;} .tab.pend.active{background:#f39c12;color:#fff;}
     .tab.appr{color:#27ae60;} .tab.appr.active{background:#27ae60;color:#fff;}
     .tab.rejt{color:#e74c3c;} .tab.rejt.active{background:#e74c3c;color:#fff;}
-    .search-bar{margin-bottom:20px;}
-    .search-bar input{width:100%;padding:10px 16px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:14px;outline:none;}
+
+    /* ── Search ── */
+    .search-bar{margin-bottom:20px;display:flex;gap:10px;}
+    .search-bar input{flex:1;padding:10px 16px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:14px;outline:none;font-family:inherit;}
     .search-bar input:focus{border-color:#1a1a2e;}
+
+    /* ── Tables ── */
     .table-wrap{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;overflow-x:auto;}
     table{width:100%;border-collapse:collapse;min-width:980px;}
     th{background:#f8f8f8;padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e5e5e5;}
@@ -42,41 +60,86 @@
     .prop-img{width:60px;height:45px;object-fit:cover;border-radius:6px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
     .prop-title{font-weight:600;font-size:13px;margin-bottom:2px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .prop-sub{font-size:11px;color:#888;}
-    /* ✅ Ad ID chip */
     .ad-id-chip{display:inline-block;font-family:monospace;font-size:10px;font-weight:700;background:#f0f4ff;color:#1a1a2e;border:1px solid #c8d4f0;border-radius:5px;padding:2px 7px;margin-top:3px;letter-spacing:0.5px;}
+
+    /* ── Badges ── */
     .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;}
     .badge.pending{background:#fff3cd;color:#856404;}
     .badge.approved{background:#d4edda;color:#155724;}
     .badge.rejected{background:#f8d7da;color:#721c24;}
+    .vbadge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;margin:2px 2px 0 0;}
+    .vb-yes{background:#d4edda;color:#155724;}
+    .vb-no{background:#f0f0f0;color:#aaa;}
+    .vb-pending{background:#fff3cd;color:#856404;}
+    .vb-rera{background:#e3f2fd;color:#1565c0;}
+    .vb-agent{background:#fff3e0;color:#e65100;}
+    .vb-builder{background:#f3e5f5;color:#6a1b9a;}
+    .vb-owner{background:#f1f8e9;color:#33691e;}
+
     .note-chip{display:inline-flex;align-items:center;gap:4px;margin-top:5px;background:#fff3cd;border:1px solid #f0c040;border-radius:6px;padding:3px 8px;font-size:11px;color:#856404;max-width:160px;cursor:pointer;}
     .note-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
-    .actions{display:flex;gap:6px;flex-wrap:wrap;}
-    .btn-approve{padding:6px 12px;background:#27ae60;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+
+    /* ── Action buttons ── */
+    .actions{display:flex;gap:5px;flex-wrap:wrap;}
+    .btn-approve{padding:6px 12px;background:#27ae60;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
     .btn-approve:hover{background:#219a52;}
-    .btn-reject{padding:6px 12px;background:#e74c3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .btn-reject{padding:6px 12px;background:#e74c3c;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
     .btn-reject:hover{background:#c0392b;}
-    .btn-pending{padding:6px 12px;background:#f39c12;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
-    .btn-delete{padding:6px 10px;background:#fff;color:#e74c3c;border:1px solid #e74c3c;border-radius:6px;font-size:12px;cursor:pointer;transition:all 0.15s;}
+    .btn-pending{padding:6px 12px;background:#f39c12;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+    .btn-delete{padding:6px 10px;background:#fff;color:#e74c3c;border:1px solid #e74c3c;border-radius:6px;font-size:12px;cursor:pointer;transition:all .15s;}
     .btn-delete:hover{background:#e74c3c;color:#fff;}
-    .btn-view{padding:6px 10px;background:#fff;color:#2980b9;border:1px solid #2980b9;border-radius:6px;font-size:12px;cursor:pointer;transition:all 0.15s;}
+    .btn-view{padding:6px 10px;background:#fff;color:#2980b9;border:1px solid #2980b9;border-radius:6px;font-size:12px;cursor:pointer;transition:all .15s;}
     .btn-view:hover{background:#2980b9;color:#fff;}
-    .empty-row td{text-align:center;padding:48px;color:#888;}
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;}
+    .btn-sm{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+    .btn-verify-phone{background:#16a085;color:#fff;}
+    .btn-verify-phone:hover{background:#138d75;}
+    .btn-verify-rera{background:#1565c0;color:#fff;}
+    .btn-verify-rera:hover{background:#0d47a1;}
+    .btn-unverify{background:#f0f0f0;color:#666;border:1px solid #ddd;}
+    .btn-profile{background:#8e44ad;color:#fff;}
+    .btn-profile:hover{background:#7d3c98;}
+
+    /* ── User table ── */
+    .user-avatar{width:36px;height:36px;border-radius:50%;background:#1a1a2e;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+    /* ── RERA Review table ── */
+    .rera-num{font-family:monospace;font-size:12px;font-weight:700;color:#1565c0;letter-spacing:1px;}
+
+    /* ── User Detail Modal ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
     .modal-overlay.open{display:flex;}
-    .modal{background:#fff;border-radius:16px;padding:28px;width:460px;max-width:92vw;}
+    .modal{background:#fff;border-radius:16px;padding:28px;width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;}
     .modal h3{font-size:18px;font-weight:700;margin-bottom:8px;}
     .modal p{font-size:13px;color:#666;margin-bottom:12px;}
     .modal textarea{width:100%;padding:10px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:13px;resize:vertical;min-height:90px;outline:none;font-family:inherit;}
     .modal textarea:focus{border-color:#e74c3c;}
-    .modal-btns{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;}
+    .modal-btns{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;}
     .prev-note-box{background:#fff8e1;border:1px solid #f0c040;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#856404;display:none;}
-    .prev-note-box strong{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;}
+    .prev-note-box strong{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+    .udetail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+    .udetail-row:last-child{border-bottom:none;}
+    .udetail-key{color:#888;font-weight:500;}
+    .udetail-val{font-weight:600;text-align:right;max-width:260px;word-break:break-word;}
+
+    .empty-row td{text-align:center;padding:48px;color:#888;}
     .loading{text-align:center;padding:48px;color:#888;font-size:14px;}
-    .signout-btn{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:6px 16px;border-radius:8px;font-size:13px;cursor:pointer;transition:all 0.15s;}
-    .signout-btn:hover{background:rgba(255,255,255,0.2);}
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:all 0.3s;z-index:9999;pointer-events:none;}
+    .signout-btn{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 16px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .15s;}
+    .signout-btn:hover{background:rgba(255,255,255,.2);}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-    @media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr);}.wrap{padding:16px;}.topbar{padding:12px 16px;}}
+
+    /* ── Sections ── */
+    .section{display:none;}
+    .section.active{display:block;}
+
+    @media(max-width:900px){
+      .stats{grid-template-columns:repeat(3,1fr);}
+      .wrap{padding:16px;}
+      .topbar{padding:12px 16px;}
+    }
+    @media(max-width:600px){
+      .stats{grid-template-columns:repeat(2,1fr);}
+    }
   </style>
 </head>
 <body>
@@ -84,64 +147,165 @@
 <div class="topbar">
   <div class="topbar-logo">🏠 Estate49 <span class="admin-badge">ADMIN</span></div>
   <div class="topbar-right">
-    <span id="admin-email"></span>
+    <span id="admin-email" style="font-size:13px;opacity:.8"></span>
     <button class="signout-btn" onclick="signOut()">Sign Out</button>
   </div>
 </div>
 
 <div class="wrap">
+
+  <!-- ── Stats Row ── -->
   <div class="stats">
-    <div class="stat total"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total Listings</div></div>
-    <div class="stat pending"><div class="stat-num" id="s-pending">—</div><div class="stat-label">Pending</div></div>
-    <div class="stat approved"><div class="stat-num" id="s-approved">—</div><div class="stat-label">Approved</div></div>
-    <div class="stat rejected"><div class="stat-num" id="s-rejected">—</div><div class="stat-label">Rejected</div></div>
-    <div class="stat users"><div class="stat-num" id="s-users">—</div><div class="stat-label">Total Users</div></div>
+    <div class="stat total"   onclick="goSection('listings')"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total Listings</div></div>
+    <div class="stat pending" onclick="goSection('listings');setTab('pending')"><div class="stat-num" id="s-pending">—</div><div class="stat-label">Pending</div></div>
+    <div class="stat approved"onclick="goSection('listings');setTab('approved')"><div class="stat-num" id="s-approved">—</div><div class="stat-label">Approved</div></div>
+    <div class="stat rejected"onclick="goSection('listings');setTab('rejected')"><div class="stat-num" id="s-rejected">—</div><div class="stat-label">Rejected</div></div>
+    <div class="stat users"   onclick="goSection('users')"><div class="stat-num" id="s-users">—</div><div class="stat-label">Total Users</div></div>
+    <div class="stat verified"onclick="goSection('users')"><div class="stat-num" id="s-verified">—</div><div class="stat-label">Phone Verified</div></div>
+    <div class="stat rera"    onclick="goSection('rera')"><div class="stat-num" id="s-rera">—</div><div class="stat-label">RERA Pending</div></div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="setTab('')">All</button>
-    <button class="tab pend" onclick="setTab('pending')">⏳ Pending</button>
-    <button class="tab appr" onclick="setTab('approved')">✅ Approved</button>
-    <button class="tab rejt" onclick="setTab('rejected')">❌ Rejected</button>
+  <!-- ── Section Switcher ── -->
+  <div class="section-tabs">
+    <button class="stab active-listings" id="stab-listings" onclick="goSection('listings')">🏠 Listings</button>
+    <button class="stab" id="stab-users"    onclick="goSection('users')">👥 Users &amp; Verification</button>
+    <button class="stab" id="stab-rera"     onclick="goSection('rera')">🏛️ RERA Review</button>
   </div>
 
-  <div class="search-bar">
-    <input type="text" id="search" placeholder="Search by title, city, locality, owner, Ad ID…" oninput="filterTable()"/>
+  <!-- ════════════════════════════════════════ -->
+  <!-- SECTION 1 — LISTINGS                    -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="section active" id="sec-listings">
+    <div class="tabs">
+      <button class="tab active" onclick="setTab('')">All</button>
+      <button class="tab pend"   onclick="setTab('pending')">⏳ Pending</button>
+      <button class="tab appr"   onclick="setTab('approved')">✅ Approved</button>
+      <button class="tab rejt"   onclick="setTab('rejected')">❌ Rejected</button>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="search-listings" placeholder="Search by title, city, locality, owner, Ad ID…" oninput="filterListings()"/>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Property / Ad ID</th>
+            <th>Owner &amp; Contact</th>
+            <th>Verification</th>
+            <th>Price</th>
+            <th>Location</th>
+            <th>Status &amp; Note</th>
+            <th>Posted</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-listings">
+          <tr><td colspan="8" class="loading">Loading properties…</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Property / Ad ID</th>
-          <th>Owner</th>
-          <th>Price</th>
-          <th>Location</th>
-          <th>Status & Note</th>
-          <th>Posted</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="7" class="loading">Loading properties…</td></tr>
-      </tbody>
-    </table>
+  <!-- ════════════════════════════════════════ -->
+  <!-- SECTION 2 — USERS                       -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="section" id="sec-users">
+    <div class="search-bar">
+      <input type="text" id="search-users" placeholder="Search by name, email, phone, role…" oninput="filterUsers()"/>
+      <select id="filter-role" onchange="filterUsers()" style="padding:10px 14px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;">
+        <option value="">All Roles</option>
+        <option value="owner">Owner</option>
+        <option value="agent">Agent</option>
+        <option value="builder">Builder</option>
+      </select>
+      <select id="filter-verified" onchange="filterUsers()" style="padding:10px 14px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;">
+        <option value="">All Verification</option>
+        <option value="phone_verified">Phone Verified</option>
+        <option value="not_phone">Phone Not Verified</option>
+        <option value="rera_verified">RERA Verified</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Phone</th>
+            <th>RERA Number</th>
+            <th>Verification Status</th>
+            <th>Joined</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-users">
+          <tr><td colspan="7" class="loading">Loading users…</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
 
-<!-- Reject Modal -->
+  <!-- ════════════════════════════════════════ -->
+  <!-- SECTION 3 — RERA REVIEW                 -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="section" id="sec-rera">
+    <div class="search-bar">
+      <input type="text" id="search-rera" placeholder="Search by name, email, RERA number…" oninput="filterRera()"/>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>RERA Number</th>
+            <th>Agency Name</th>
+            <th>Phone</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-rera">
+          <tr><td colspan="7" class="loading">Loading RERA requests…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- end .wrap -->
+
+<!-- ── Reject Modal ── -->
 <div class="modal-overlay" id="reject-modal">
   <div class="modal">
     <h3>❌ Reject Listing</h3>
-    <p>Provide a reason for rejection. The owner will see this note on their listing.</p>
+    <p>Provide a reason. The owner will see this note on their listing.</p>
     <div class="prev-note-box" id="prev-note-box">
       <strong>📝 Previous note sent to owner:</strong>
       <span id="prev-note-text"></span>
     </div>
-    <textarea id="reject-note" placeholder="e.g. Incomplete information, duplicate listing, inappropriate content, incorrect price…"></textarea>
+    <textarea id="reject-note" placeholder="e.g. Incomplete information, duplicate listing, inappropriate content…"></textarea>
     <div class="modal-btns">
-      <button style="padding:8px 18px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px" onclick="closeModal()">Cancel</button>
+      <button style="padding:8px 18px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px" onclick="closeModal('reject-modal')">Cancel</button>
       <button class="btn-reject" onclick="confirmReject()">❌ Reject Listing</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── User Detail Modal ── -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+      <div class="user-avatar" id="um-avatar" style="width:52px;height:52px;font-size:18px">?</div>
+      <div>
+        <div style="font-size:17px;font-weight:800" id="um-name">—</div>
+        <div style="font-size:12px;color:#888" id="um-email">—</div>
+      </div>
+    </div>
+    <div id="um-body"></div>
+    <div class="modal-btns">
+      <button style="padding:8px 18px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px" onclick="closeModal('user-modal')">Close</button>
+      <button class="btn-sm btn-verify-phone" id="um-btn-phone" style="display:none" onclick="adminVerifyPhone()">✅ Mark Phone Verified</button>
+      <button class="btn-sm btn-verify-rera"  id="um-btn-rera"  style="display:none" onclick="adminVerifyRera()">🏛️ Approve RERA</button>
     </div>
   </div>
 </div>
@@ -149,208 +313,403 @@
 <div class="toast" id="toast-el"></div>
 
 <script>
-let tok = null, allData = [], curTab = '', rejectId = null;
+let tok=null, allListings=[], allUsers=[], allRera=[];
+let curTab='', rejectId=null, activeUserId=null;
 
 window.addEventListener('DOMContentLoaded', async () => {
-  const s = await getSession();
-  if (!s) { window.location.href = '/login.html'; return; }
-  tok = s.access_token;
-  document.getElementById('admin-email').textContent = s.user.email;
+  const s=await getSession();
+  if(!s){window.location.href='/login.html';return;}
+  tok=s.access_token;
+  document.getElementById('admin-email').textContent=s.user.email;
 
-  const test = await fetch('/api/properties/admin/stats', { headers: { Authorization: `Bearer ${tok}` } });
-  if (!test.ok) {
-    document.body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:Inter,sans-serif">
+  // Access check
+  const test=await fetch('/api/properties/admin/stats',{headers:{Authorization:`Bearer ${tok}`}});
+  if(!test.ok){
+    document.body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:Inter,sans-serif">
       <div style="font-size:48px">🚫</div><h2>Access Denied</h2>
       <p style="color:#888">You don't have admin privileges.</p>
-      <a href="/browse.html" style="color:#2980b9">← Go to Browse</a>
-    </div>`;
+      <a href="/browse.html" style="color:#2980b9">← Go to Browse</a></div>`;
     return;
   }
-
-  const stats = await test.json();
-  document.getElementById('s-total').textContent = stats.total;
-  document.getElementById('s-pending').textContent = stats.pending;
-  document.getElementById('s-approved').textContent = stats.approved;
-  document.getElementById('s-rejected').textContent = stats.rejected;
-  document.getElementById('s-users').textContent = stats.users;
-
-  await loadProperties();
+  await Promise.all([loadStats(), loadListings(), loadUsers()]);
 });
 
-async function loadProperties() {
-  try {
-    const url = curTab ? `/api/properties/admin/all?status=${curTab}` : '/api/properties/admin/all';
-    const r = await fetch(url, { headers: { Authorization: `Bearer ${tok}` } });
-    allData = await r.json();
-    filterTable();
-  } catch (e) {
-    document.getElementById('tbody').innerHTML = '<tr><td colspan="7" class="loading">Failed to load properties.</td></tr>';
-  }
-}
-
-function setTab(t) {
-  curTab = t;
-  document.querySelectorAll('.tab').forEach((el, i) => {
-    el.classList.toggle('active', ['', 'pending', 'approved', 'rejected'][i] === t);
+// ── Section switching ──
+function goSection(name){
+  ['listings','users','rera'].forEach(s=>{
+    document.getElementById('sec-'+s).classList.toggle('active',s===name);
+    const stab=document.getElementById('stab-'+s);
+    if(stab){
+      stab.className='stab';
+      if(s===name) stab.className='stab active-'+name;
+    }
   });
-  loadProperties();
+  if(name==='rera') renderRera();
 }
 
-function filterTable() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const filtered = allData.filter(p =>
-    !q || [p.title, p.city, p.locality, p.contact_name, p.contact_phone, p.ad_id].filter(Boolean).join(' ').toLowerCase().includes(q)
-  );
-  renderTable(filtered);
+// ════════════════════════════════════════════
+// STATS
+// ════════════════════════════════════════════
+async function loadStats(){
+  try{
+    const r=await fetch('/api/properties/admin/stats',{headers:{Authorization:`Bearer ${tok}`}});
+    if(!r.ok) return;
+    const s=await r.json();
+    document.getElementById('s-total').textContent   = s.total    ?? '—';
+    document.getElementById('s-pending').textContent = s.pending  ?? '—';
+    document.getElementById('s-approved').textContent=s.approved  ?? '—';
+    document.getElementById('s-rejected').textContent=s.rejected  ?? '—';
+    document.getElementById('s-users').textContent   = s.users    ?? '—';
+    document.getElementById('s-verified').textContent= s.phone_verified ?? '—';
+    document.getElementById('s-rera').textContent    = s.rera_pending   ?? '—';
+  }catch(e){}
 }
 
-function renderTable(data) {
-  const tbody = document.getElementById('tbody');
-  if (!data.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No properties found</td></tr>';
-    return;
+// ════════════════════════════════════════════
+// LISTINGS SECTION
+// ════════════════════════════════════════════
+async function loadListings(){
+  try{
+    const url=curTab?`/api/properties/admin/all?status=${curTab}`:'/api/properties/admin/all';
+    const r=await fetch(url,{headers:{Authorization:`Bearer ${tok}`}});
+    allListings=await r.json();
+    filterListings();
+  }catch(e){
+    document.getElementById('tbody-listings').innerHTML='<tr><td colspan="8" class="loading">Failed to load.</td></tr>';
   }
-  tbody.innerHTML = data.map(p => {
-    const img = p.photos?.[0];
-    const price = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '') : '—';
-    const posted = p.posted_at ? new Date(p.posted_at).toLocaleDateString('en-IN') : '—';
-    const statusBadge = `<span class="badge ${p.status || 'pending'}">${(p.status || 'pending').toUpperCase()}</span>`;
-    const noteHtml = p.admin_note
-      ? `<div class="note-chip" onclick="openReject(${p.id})" title="Click to edit note">
-           📝 <span>${p.admin_note}</span>
-         </div>`
-      : '';
-    // ✅ Ad ID chip shown under property title
-    const adIdHtml = p.ad_id ? `<div class="ad-id-chip">🪪 ${p.ad_id}</div>` : '';
+}
+
+function setTab(t){
+  curTab=t;
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',['','pending','approved','rejected'][i]===t);
+  });
+  loadListings();
+}
+
+function filterListings(){
+  const q=document.getElementById('search-listings').value.toLowerCase();
+  const filtered=allListings.filter(p=>
+    !q||[p.title,p.city,p.locality,p.contact_name,p.contact_phone,p.ad_id].filter(Boolean).join(' ').toLowerCase().includes(q)
+  );
+  renderListings(filtered);
+}
+
+function renderListings(data){
+  const tbody=document.getElementById('tbody-listings');
+  if(!data.length){tbody.innerHTML='<tr class="empty-row"><td colspan="8">No properties found</td></tr>';return;}
+  tbody.innerHTML=data.map(p=>{
+    const img=p.photos?.[0];
+    const price=p.price?'₹'+Number(p.price).toLocaleString('en-IN')+(p.type==='rent'?'/mo':''):'—';
+    const posted=p.posted_at?new Date(p.posted_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const statusBadge=`<span class="badge ${p.status||'pending'}">${(p.status||'pending').toUpperCase()}</span>`;
+    const noteHtml=p.admin_note?`<div class="note-chip" onclick="openReject(${p.id})" title="Edit note">📝 <span>${p.admin_note}</span></div>`:'';
+    const adIdHtml=p.ad_id?`<div class="ad-id-chip">🪪 ${p.ad_id}</div>`:'';
+
+    // Verification badges for this listing's owner
+    const vbadges=[];
+    if(p.phone_verified)           vbadges.push(`<span class="vbadge vb-yes">✓ Phone</span>`);
+    else                           vbadges.push(`<span class="vbadge vb-no">✗ Phone</span>`);
+    if(p.rera_verified)            vbadges.push(`<span class="vbadge vb-rera">🏛 RERA</span>`);
+    else if(p.rera_number)         vbadges.push(`<span class="vbadge vb-pending">⏳ RERA</span>`);
+
+    const roleColor={'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[p.contact_role]||'vb-owner';
+    if(p.contact_role) vbadges.push(`<span class="vbadge ${roleColor}">${p.contact_role}</span>`);
+
     return `<tr id="row-${p.id}">
       <td>
         <div style="display:flex;align-items:center;gap:10px">
-          ${img ? `<img src="${img}" class="prop-img" loading="lazy"/>` : `<div class="prop-img">🏠</div>`}
+          ${img?`<img src="${img}" class="prop-img" loading="lazy"/>`:`<div class="prop-img">🏠</div>`}
           <div>
-            <div class="prop-title" title="${p.title || ''}">${p.title || 'Untitled'}</div>
-            <div class="prop-sub">${(p.type || '').toUpperCase()} · ${p.property_type || ''} ${p.bhk ? '· ' + p.bhk + 'BHK' : ''}</div>
+            <div class="prop-title" title="${p.title||''}">${p.title||'Untitled'}</div>
+            <div class="prop-sub">${(p.type||'').toUpperCase()} · ${p.property_type||''} ${p.bhk?'· '+p.bhk+'BHK':''}</div>
             ${adIdHtml}
           </div>
         </div>
       </td>
       <td>
-        <div style="font-size:12px;font-weight:600">${p.contact_name || '—'}</div>
-        <div style="font-size:11px;color:#888">${p.contact_phone || ''}</div>
-        <div style="font-size:11px;color:#aaa">${p.contact_role || ''}</div>
+        <div style="font-size:12px;font-weight:600">${p.contact_name||'—'}</div>
+        <div style="font-size:11px;color:#888">${p.contact_phone||''}</div>
+        <div style="font-size:11px;color:#aaa">${p.contact_email||''}</div>
       </td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:2px;max-width:130px">${vbadges.join('')}</div></td>
       <td style="font-weight:700;color:#27ae60">${price}</td>
       <td>
-        <div style="font-size:12px">${p.locality || '—'}</div>
-        <div style="font-size:11px;color:#888">${p.city || ''}</div>
+        <div style="font-size:12px">${p.locality||'—'}</div>
+        <div style="font-size:11px;color:#888">${p.city||''}</div>
       </td>
-      <td>
-        ${statusBadge}
-        ${noteHtml}
-      </td>
+      <td>${statusBadge}${noteHtml}</td>
       <td style="font-size:12px;color:#888">${posted}</td>
-      <td><div class="actions">${buildActions(p)}</div></td>
+      <td><div class="actions">${buildListingActions(p)}</div></td>
     </tr>`;
   }).join('');
 }
 
-function buildActions(p) {
-  let btns = `<button class="btn-view" onclick="window.open('/property.html?id=${p.id}','_blank')">View</button>`;
-  if (p.status !== 'approved') btns += `<button class="btn-approve" onclick="updateStatus(${p.id},'approved')">✅</button>`;
-  if (p.status !== 'rejected') btns += `<button class="btn-reject" onclick="openReject(${p.id})">❌</button>`;
-  if (p.status !== 'pending')  btns += `<button class="btn-pending" onclick="updateStatus(${p.id},'pending')">⏳</button>`;
-  btns += `<button class="btn-delete" onclick="deleteProp(${p.id})">🗑</button>`;
-  return btns;
+function buildListingActions(p){
+  let b=`<button class="btn-view" onclick="window.open('/property.html?id=${p.id}','_blank')">View</button>`;
+  if(p.status!=='approved') b+=`<button class="btn-approve" onclick="updateListingStatus(${p.id},'approved')">✅</button>`;
+  if(p.status!=='rejected') b+=`<button class="btn-reject"  onclick="openReject(${p.id})">❌</button>`;
+  if(p.status!=='pending')  b+=`<button class="btn-pending" onclick="updateListingStatus(${p.id},'pending')">⏳</button>`;
+  b+=`<button class="btn-delete" onclick="deleteProp(${p.id})">🗑</button>`;
+  return b;
 }
 
-async function updateStatus(id, status, note = null) {
-  try {
-    const body = { status };
-    if (note !== null) body.admin_note = note;
-    const r = await fetch(`/api/properties/admin/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
-      body: JSON.stringify(body)
-    });
-    const result = await r.json();
-    if (!r.ok) throw new Error(result.error || 'Failed');
-    const idx = allData.findIndex(p => String(p.id) === String(id));
-    if (idx !== -1) {
-      allData[idx].status = status;
-      if (note !== null) allData[idx].admin_note = note;
-    }
-    filterTable();
-    refreshStats();
-    const msg = status === 'approved' ? '✅ Approved!' : status === 'rejected' ? '❌ Rejected!' : '⏳ Set to Pending';
-    toast(msg);
-  } catch (e) {
-    toast('❌ Error: ' + e.message);
-  }
+async function updateListingStatus(id,status,note=null){
+  try{
+    const body={status};
+    if(note!==null) body.admin_note=note;
+    const r=await fetch(`/api/properties/admin/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(body)});
+    const result=await r.json();
+    if(!r.ok) throw new Error(result.error||'Failed');
+    const idx=allListings.findIndex(p=>String(p.id)===String(id));
+    if(idx!==-1){allListings[idx].status=status;if(note!==null)allListings[idx].admin_note=note;}
+    filterListings();
+    loadStats();
+    toast(status==='approved'?'✅ Approved!':status==='rejected'?'❌ Rejected!':'⏳ Set to Pending');
+  }catch(e){toast('❌ Error: '+e.message);}
 }
 
-async function refreshStats() {
-  const r = await fetch('/api/properties/admin/stats', { headers: { Authorization: `Bearer ${tok}` } });
-  if (r.ok) {
-    const s = await r.json();
-    document.getElementById('s-total').textContent = s.total;
-    document.getElementById('s-pending').textContent = s.pending;
-    document.getElementById('s-approved').textContent = s.approved;
-    document.getElementById('s-rejected').textContent = s.rejected;
-  }
-}
-
-async function deleteProp(id) {
-  if (!confirm('Delete this property permanently? This cannot be undone.')) return;
-  try {
-    const r = await fetch(`/api/properties/admin/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${tok}` }
-    });
-    if (!r.ok) throw new Error();
-    allData = allData.filter(p => String(p.id) !== String(id));
-    filterTable();
-    refreshStats();
+async function deleteProp(id){
+  if(!confirm('Delete this property permanently? This cannot be undone.')) return;
+  try{
+    const r=await fetch(`/api/properties/admin/${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});
+    if(!r.ok) throw new Error();
+    allListings=allListings.filter(p=>String(p.id)!==String(id));
+    filterListings();
+    loadStats();
     toast('🗑 Property deleted');
-  } catch (e) { toast('❌ Failed to delete'); }
+  }catch(e){toast('❌ Failed to delete');}
 }
 
-function openReject(id) {
-  rejectId = Number(id);
-  const prop = allData.find(p => String(p.id) === String(id));
-  const prevBox = document.getElementById('prev-note-box');
-  const prevText = document.getElementById('prev-note-text');
-  if (prop?.admin_note) {
-    prevText.textContent = prop.admin_note;
-    prevBox.style.display = 'block';
-    document.getElementById('reject-note').value = prop.admin_note;
-  } else {
-    prevBox.style.display = 'none';
-    document.getElementById('reject-note').value = '';
+function openReject(id){
+  rejectId=Number(id);
+  const prop=allListings.find(p=>String(p.id)===String(id));
+  const prevBox=document.getElementById('prev-note-box');
+  if(prop?.admin_note){
+    document.getElementById('prev-note-text').textContent=prop.admin_note;
+    prevBox.style.display='block';
+    document.getElementById('reject-note').value=prop.admin_note;
+  }else{
+    prevBox.style.display='none';
+    document.getElementById('reject-note').value='';
   }
   document.getElementById('reject-modal').classList.add('open');
 }
 
-function closeModal() {
-  document.getElementById('reject-modal').classList.remove('open');
-  rejectId = null;
+function confirmReject(){
+  if(!rejectId){toast('❌ No property selected');return;}
+  const note=document.getElementById('reject-note').value.trim();
+  const id=rejectId;
+  closeModal('reject-modal');
+  updateListingStatus(id,'rejected',note||null);
 }
 
-function confirmReject() {
-  if (!rejectId) { toast('❌ No property selected'); return; }
-  const note = document.getElementById('reject-note').value.trim();
-  const idToReject = rejectId;
-  closeModal();
-  updateStatus(idToReject, 'rejected', note || null);
+// ════════════════════════════════════════════
+// USERS SECTION
+// ════════════════════════════════════════════
+async function loadUsers(){
+  try{
+    const r=await fetch('/api/profiles/admin/all',{headers:{Authorization:`Bearer ${tok}`}});
+    if(!r.ok) throw new Error();
+    allUsers=await r.json();
+    filterUsers();
+    renderRera(); // prep RERA list
+  }catch(e){
+    document.getElementById('tbody-users').innerHTML='<tr><td colspan="7" class="loading">Failed to load users. Make sure /api/profiles/admin/all endpoint exists.</td></tr>';
+  }
 }
 
-document.getElementById('reject-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
+function filterUsers(){
+  const q=document.getElementById('search-users').value.toLowerCase();
+  const role=document.getElementById('filter-role').value;
+  const verif=document.getElementById('filter-verified').value;
+  const filtered=allUsers.filter(u=>{
+    const matchQ=!q||[u.fullname,u.email,u.phone,u.role,u.agency_name].filter(Boolean).join(' ').toLowerCase().includes(q);
+    const matchRole=!role||u.role===role;
+    const matchVerif=!verif||
+      (verif==='phone_verified'&&u.phone_verified)||
+      (verif==='not_phone'&&!u.phone_verified)||
+      (verif==='rera_verified'&&u.rera_verified);
+    return matchQ&&matchRole&&matchVerif;
+  });
+  renderUsers(filtered);
+}
+
+function renderUsers(data){
+  const tbody=document.getElementById('tbody-users');
+  if(!data.length){tbody.innerHTML='<tr class="empty-row"><td colspan="7">No users found</td></tr>';return;}
+  tbody.innerHTML=data.map(u=>{
+    const ini=(u.fullname||u.email||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const joined=u.created_at?new Date(u.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
+    const roleColor={'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[u.role]||'vb-owner';
+
+    const vbadges=[];
+    if(u.phone_verified)  vbadges.push(`<span class="vbadge vb-yes">✓ Phone</span>`);
+    else                  vbadges.push(`<span class="vbadge vb-no">✗ Phone</span>`);
+    if(u.rera_verified)   vbadges.push(`<span class="vbadge vb-rera">✓ RERA</span>`);
+    else if(u.rera_number)vbadges.push(`<span class="vbadge vb-pending">⏳ RERA</span>`);
+
+    return`<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="user-avatar">${ini}</div>
+          <div>
+            <div style="font-weight:700;font-size:13px">${u.fullname||'—'}</div>
+            <div style="font-size:11px;color:#888">${u.email||''}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="vbadge ${roleColor}" style="font-size:12px;padding:4px 10px">${u.role||'owner'}</span></td>
+      <td style="font-size:12px">${u.phone?`+91 ${u.phone}`:'<span style="color:#aaa">Not added</span>'}</td>
+      <td class="rera-num">${u.rera_number||'<span style="color:#aaa;font-family:inherit;font-weight:400">—</span>'}</td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:3px">${vbadges.join('')}</div></td>
+      <td style="font-size:12px;color:#888">${joined}</td>
+      <td>
+        <div class="actions">
+          <button class="btn-sm btn-profile" onclick="openUserModal('${u.id}')">👁 View</button>
+          ${!u.phone_verified&&u.phone?`<button class="btn-sm btn-verify-phone" onclick="adminVerifyPhoneDirect('${u.id}')">✅ Phone</button>`:''}
+          ${u.rera_number&&!u.rera_verified?`<button class="btn-sm btn-verify-rera" onclick="adminVerifyReraDirect('${u.id}')">🏛️ RERA</button>`:''}
+          ${u.phone_verified?`<button class="btn-sm btn-unverify" onclick="adminUnverify('${u.id}','phone')">✗ Phone</button>`:''}
+          ${u.rera_verified?`<button class="btn-sm btn-unverify" onclick="adminUnverify('${u.id}','rera')">✗ RERA</button>`:''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── User Detail Modal ──
+function openUserModal(uid){
+  activeUserId=uid;
+  const u=allUsers.find(u=>String(u.id)===String(uid));
+  if(!u) return;
+  const ini=(u.fullname||u.email||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('um-avatar').textContent=ini;
+  document.getElementById('um-name').textContent=u.fullname||'—';
+  document.getElementById('um-email').textContent=u.email||'—';
+
+  const rows=[
+    ['📱 Phone',        u.phone?`+91 ${u.phone}`:'Not added'],
+    ['🏷️ Role',         u.role||'owner'],
+    ['🏢 Agency',       u.agency_name||'—'],
+    ['🏛️ RERA Number',  u.rera_number||'—'],
+    ['📧 Email Verified',u.email_verified?'✅ Yes':'❌ No'],
+    ['📱 Phone Verified',u.phone_verified?'✅ Yes':'❌ No'],
+    ['🏛️ RERA Verified', u.rera_verified?'✅ Yes':(u.rera_number?'⏳ Pending Admin Review':'—')],
+    ['📅 Joined',        u.created_at?new Date(u.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'—'],
+    ['💬 Bio',           u.bio||'—'],
+  ];
+
+  document.getElementById('um-body').innerHTML=rows.map(([k,v])=>`
+    <div class="udetail-row">
+      <span class="udetail-key">${k}</span>
+      <span class="udetail-val">${v}</span>
+    </div>`).join('');
+
+  // Show/hide action buttons
+  document.getElementById('um-btn-phone').style.display=(!u.phone_verified&&u.phone)?'inline-flex':'none';
+  document.getElementById('um-btn-rera').style.display=(u.rera_number&&!u.rera_verified)?'inline-flex':'none';
+
+  document.getElementById('user-modal').classList.add('open');
+}
+
+async function adminVerifyPhone(){
+  if(!activeUserId) return;
+  await patchUserVerification(activeUserId,{phone_verified:true});
+  closeModal('user-modal');
+}
+async function adminVerifyRera(){
+  if(!activeUserId) return;
+  await patchUserVerification(activeUserId,{rera_verified:true});
+  closeModal('user-modal');
+}
+async function adminVerifyPhoneDirect(uid){
+  await patchUserVerification(uid,{phone_verified:true});
+}
+async function adminVerifyReraDirect(uid){
+  await patchUserVerification(uid,{rera_verified:true});
+}
+async function adminUnverify(uid,type){
+  const field=type==='phone'?{phone_verified:false}:{rera_verified:false};
+  await patchUserVerification(uid,field);
+}
+
+async function patchUserVerification(uid,payload){
+  try{
+    const r=await fetch(`/api/profiles/admin/${uid}`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
+      body:JSON.stringify(payload)
+    });
+    if(!r.ok) throw new Error((await r.json()).error||'Failed');
+    // Update local cache
+    const idx=allUsers.findIndex(u=>String(u.id)===String(uid));
+    if(idx!==-1) Object.assign(allUsers[idx],payload);
+    filterUsers();
+    renderRera();
+    loadStats();
+    const key=Object.keys(payload)[0];
+    const val=Object.values(payload)[0];
+    toast(val?`✅ ${key==='phone_verified'?'Phone':'RERA'} verified!`:`✗ Verification removed`);
+  }catch(e){toast('Error: '+e.message);}
+}
+
+// ════════════════════════════════════════════
+// RERA REVIEW SECTION
+// ════════════════════════════════════════════
+function renderRera(){
+  const q=(document.getElementById('search-rera')?.value||'').toLowerCase();
+  const data=allUsers.filter(u=>u.rera_number&&!u.rera_verified&&(
+    !q||[u.fullname,u.email,u.rera_number,u.agency_name].filter(Boolean).join(' ').toLowerCase().includes(q)
+  ));
+  const tbody=document.getElementById('tbody-rera');
+  if(!data.length){
+    tbody.innerHTML='<tr class="empty-row"><td colspan="7">🎉 No pending RERA requests</td></tr>';
+    return;
+  }
+  tbody.innerHTML=data.map(u=>{
+    const ini=(u.fullname||u.email||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const joined=u.created_at?new Date(u.created_at).toLocaleDateString('en-IN'):'—';
+    const roleColor={'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[u.role]||'vb-owner';
+    return`<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="user-avatar">${ini}</div>
+          <div>
+            <div style="font-weight:700;font-size:13px">${u.fullname||'—'}</div>
+            <div style="font-size:11px;color:#888">${u.email||''}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="vbadge ${roleColor}" style="font-size:12px;padding:4px 10px">${u.role||'owner'}</span></td>
+      <td><span class="rera-num">${u.rera_number}</span></td>
+      <td style="font-size:12px">${u.agency_name||'—'}</td>
+      <td style="font-size:12px">${u.phone?`+91 ${u.phone}`:'—'}</td>
+      <td><span class="vbadge vb-pending">⏳ Pending Review</span></td>
+      <td>
+        <div class="actions">
+          <button class="btn-sm btn-verify-rera" onclick="adminVerifyReraDirect('${u.id}')">🏛️ Approve RERA</button>
+          <button class="btn-sm btn-profile" onclick="openUserModal('${u.id}')">👁 View Profile</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function filterRera(){renderRera();}
+
+// ── Modals ──
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  if(id==='user-modal') activeUserId=null;
+  if(id==='reject-modal') rejectId=null;
+}
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click',function(e){if(e.target===this) closeModal(this.id);});
 });
 
-function toast(m) {
-  const el = document.getElementById('toast-el');
-  el.textContent = m;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
+function toast(m){
+  const el=document.getElementById('toast-el');
+  el.textContent=m;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3000);
 }
 </script>
 </body>
