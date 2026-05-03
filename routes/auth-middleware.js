@@ -8,8 +8,8 @@ const _adminClient = createClient(
   process.env.SUPABASE_SERVICE_KEY,
   {
     auth: {
-      persistSession: false,
-      autoRefreshToken: false,
+      persistSession:     false,
+      autoRefreshToken:   false,
       detectSessionInUrl: false
     }
   }
@@ -29,7 +29,6 @@ async function authMiddleware(req, res, next) {
     }
 
     // ✅ Use getUser(token) — validates token + returns full user object
-    // No manual JWT decode needed; Supabase handles expiry + signature check
     const { data, error } = await _adminClient.auth.getUser(token);
 
     if (error || !data?.user) {
@@ -37,8 +36,8 @@ async function authMiddleware(req, res, next) {
       return res.status(401).json({ error: 'Unauthorized – invalid or expired token' });
     }
 
-    req.user  = data.user;   // ✅ Full user: id, email, user_metadata, app_metadata
-    req.token = token;       // ✅ Available downstream if needed
+    req.user  = data.user;  // full user: id, email, user_metadata, app_metadata
+    req.token = token;
     next();
 
   } catch (e) {

@@ -1,13 +1,11 @@
 // routes/profiles.js
 'use strict';
 
-const express        = require('express');
-const router         = express.Router();
-const db             = require('../db');
-const { createClient } = require('@supabase/supabase-js');
-
-// ─── FIX: auth-middleware exports a plain function, not { authMiddleware } ────
-const authMiddleware = require('./auth-middleware');
+const express            = require('express');
+const router             = express.Router();
+const db                 = require('../db');
+const { authMiddleware } = require('./auth-middleware');  // ← named export, matches above
+const { createClient }   = require('@supabase/supabase-js');
 
 
 // ─── Lazy admin client ────────────────────────────────────────────────────────
@@ -66,10 +64,10 @@ async function requireAdmin(req, res, next) {
 
 
 // ════════════════════════════════════════════════════
-// DEBUG ROUTES (keep until confirmed working)
+// DEBUG ROUTES
 // ════════════════════════════════════════════════════
 
-// Public — check env vars are loaded
+// Public — verify env vars are loaded
 router.get('/debug/env', (req, res) => {
   const key = process.env.SUPABASE_SERVICE_KEY;
   const url = process.env.SUPABASE_URL;
@@ -84,7 +82,7 @@ router.get('/debug/env', (req, res) => {
   });
 });
 
-// Auth-protected — confirm token is valid and user row exists
+// Auth-protected — confirm token resolves to a user + check admin row
 router.get('/debug/me-admin', authMiddleware, async (req, res) => {
   try {
     const dbAdmin = getDbAdmin();
@@ -122,7 +120,7 @@ router.get('/me', authMiddleware, async (req, res) => {
       .eq('id', req.user.id)
       .single();
 
-    // Auto-create profile row if it doesn't exist yet
+    // Auto-create profile row on first login
     if (error?.code === 'PGRST116' || !data) {
       const { data: created, error: ce } = await dbAdmin
         .from('profiles')
@@ -149,7 +147,7 @@ router.patch('/me', authMiddleware, async (req, res) => {
   try {
     const dbAdmin = getDbAdmin();
 
-    // Strip fields users must never be allowed to set themselves
+    // Strip fields the user must never set directly
     const {
       is_admin, rera_verified, phone_verified,
       email_verified, id, created_at,
@@ -172,7 +170,7 @@ router.patch('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// PATCH /api/profiles/push-token  (mobile app convenience)
+// PATCH /api/profiles/push-token  (mobile app push notification token)
 router.patch('/push-token', authMiddleware, async (req, res) => {
   try {
     const dbAdmin = getDbAdmin();
@@ -246,7 +244,7 @@ router.get('/admin/stats', authMiddleware, requireAdmin, async (req, res) => {
   }
 });
 
-// PATCH /api/profiles/admin/:id  (update any user's profile as admin)
+// PATCH /api/profiles/admin/:id
 router.patch('/admin/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
     const dbAdmin = getDbAdmin();
