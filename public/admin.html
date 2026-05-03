@@ -16,7 +16,6 @@
     .admin-badge{background:#e74c3c;color:#fff;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
     .wrap{max-width:1400px;margin:0 auto;padding:32px 24px;}
 
-    /* ── Stats ── */
     .stats{display:grid;grid-template-columns:repeat(7,1fr);gap:14px;margin-bottom:28px;}
     .stat{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all .18s;}
     .stat:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,0.08);}
@@ -30,14 +29,12 @@
     .stat.verified .stat-num{color:#16a085;}
     .stat.rera .stat-num{color:#1565c0;}
 
-    /* ── Section tabs ── */
     .section-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
     .stab{padding:9px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:2px solid transparent;background:#fff;color:#666;transition:all .18s;}
     .stab.active-listings{background:#1a1a2e;color:#fff;border-color:#1a1a2e;}
     .stab.active-users{background:#8e44ad;color:#fff;border-color:#8e44ad;}
     .stab.active-rera{background:#1565c0;color:#fff;border-color:#1565c0;}
 
-    /* ── Filter tabs (listings) ── */
     .tabs{display:flex;gap:4px;margin-bottom:20px;background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:4px;width:fit-content;flex-wrap:wrap;}
     .tab{padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:#666;transition:all 0.15s;}
     .tab.active{background:#1a1a2e;color:#fff;}
@@ -45,14 +42,13 @@
     .tab.appr{color:#27ae60;} .tab.appr.active{background:#27ae60;color:#fff;}
     .tab.rejt{color:#e74c3c;} .tab.rejt.active{background:#e74c3c;color:#fff;}
 
-    /* ── Search ── */
-    .search-bar{margin-bottom:20px;display:flex;gap:10px;}
-    .search-bar input{flex:1;padding:10px 16px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:14px;outline:none;font-family:inherit;}
+    .search-bar{margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap;}
+    .search-bar input{flex:1;min-width:200px;padding:10px 16px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:14px;outline:none;font-family:inherit;}
     .search-bar input:focus{border-color:#1a1a2e;}
+    .search-bar select{padding:10px 14px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;cursor:pointer;}
 
-    /* ── Tables ── */
     .table-wrap{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;overflow-x:auto;}
-    table{width:100%;border-collapse:collapse;min-width:980px;}
+    table{width:100%;border-collapse:collapse;min-width:900px;}
     th{background:#f8f8f8;padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #e5e5e5;}
     td{padding:14px 16px;font-size:13px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
     tr:last-child td{border-bottom:none;}
@@ -62,7 +58,6 @@
     .prop-sub{font-size:11px;color:#888;}
     .ad-id-chip{display:inline-block;font-family:monospace;font-size:10px;font-weight:700;background:#f0f4ff;color:#1a1a2e;border:1px solid #c8d4f0;border-radius:5px;padding:2px 7px;margin-top:3px;letter-spacing:0.5px;}
 
-    /* ── Badges ── */
     .badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-block;}
     .badge.pending{background:#fff3cd;color:#856404;}
     .badge.approved{background:#d4edda;color:#155724;}
@@ -79,7 +74,6 @@
     .note-chip{display:inline-flex;align-items:center;gap:4px;margin-top:5px;background:#fff3cd;border:1px solid #f0c040;border-radius:6px;padding:3px 8px;font-size:11px;color:#856404;max-width:160px;cursor:pointer;}
     .note-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
 
-    /* ── Action buttons ── */
     .actions{display:flex;gap:5px;flex-wrap:wrap;}
     .btn-approve{padding:6px 12px;background:#27ae60;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
     .btn-approve:hover{background:#219a52;}
@@ -95,17 +89,13 @@
     .btn-verify-phone:hover{background:#138d75;}
     .btn-verify-rera{background:#1565c0;color:#fff;}
     .btn-verify-rera:hover{background:#0d47a1;}
-    .btn-unverify{background:#f0f0f0;color:#666;border:1px solid #ddd;}
+    .btn-unverify{background:#f0f0f0;color:#666;border:1px solid #ddd !important;}
     .btn-profile{background:#8e44ad;color:#fff;}
     .btn-profile:hover{background:#7d3c98;}
 
-    /* ── User table ── */
     .user-avatar{width:36px;height:36px;border-radius:50%;background:#1a1a2e;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-
-    /* ── RERA Review table ── */
     .rera-num{font-family:monospace;font-size:12px;font-weight:700;color:#1565c0;letter-spacing:1px;}
 
-    /* ── User Detail Modal ── */
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px;}
     .modal-overlay.open{display:flex;}
     .modal{background:#fff;border-radius:16px;padding:28px;width:520px;max-width:96vw;max-height:88vh;overflow-y:auto;}
@@ -116,21 +106,24 @@
     .modal-btns{display:flex;gap:10px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;}
     .prev-note-box{background:#fff8e1;border:1px solid #f0c040;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#856404;display:none;}
     .prev-note-box strong{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
-    .udetail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
+    .udetail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:13px;gap:12px;}
     .udetail-row:last-child{border-bottom:none;}
-    .udetail-key{color:#888;font-weight:500;}
-    .udetail-val{font-weight:600;text-align:right;max-width:260px;word-break:break-word;}
+    .udetail-key{color:#888;font-weight:500;flex-shrink:0;}
+    .udetail-val{font-weight:600;text-align:right;max-width:280px;word-break:break-word;}
 
     .empty-row td{text-align:center;padding:48px;color:#888;}
     .loading{text-align:center;padding:48px;color:#888;font-size:14px;}
+    .error-state{text-align:center;padding:48px;color:#e74c3c;font-size:13px;}
     .signout-btn{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 16px;border-radius:8px;font-size:13px;cursor:pointer;transition:all .15s;}
     .signout-btn:hover{background:rgba(255,255,255,.2);}
     .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:#fff;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-    /* ── Sections ── */
     .section{display:none;}
     .section.active{display:block;}
+
+    /* Listing + user profile join indicator */
+    .linked-user{font-size:10px;color:#8e44ad;font-weight:600;margin-top:2px;}
 
     @media(max-width:900px){
       .stats{grid-template-columns:repeat(3,1fr);}
@@ -154,27 +147,25 @@
 
 <div class="wrap">
 
-  <!-- ── Stats Row ── -->
+  <!-- Stats -->
   <div class="stats">
-    <div class="stat total"   onclick="goSection('listings')"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total Listings</div></div>
-    <div class="stat pending" onclick="goSection('listings');setTab('pending')"><div class="stat-num" id="s-pending">—</div><div class="stat-label">Pending</div></div>
-    <div class="stat approved"onclick="goSection('listings');setTab('approved')"><div class="stat-num" id="s-approved">—</div><div class="stat-label">Approved</div></div>
-    <div class="stat rejected"onclick="goSection('listings');setTab('rejected')"><div class="stat-num" id="s-rejected">—</div><div class="stat-label">Rejected</div></div>
-    <div class="stat users"   onclick="goSection('users')"><div class="stat-num" id="s-users">—</div><div class="stat-label">Total Users</div></div>
-    <div class="stat verified"onclick="goSection('users')"><div class="stat-num" id="s-verified">—</div><div class="stat-label">Phone Verified</div></div>
-    <div class="stat rera"    onclick="goSection('rera')"><div class="stat-num" id="s-rera">—</div><div class="stat-label">RERA Pending</div></div>
+    <div class="stat total"    onclick="goSection('listings')"><div class="stat-num" id="s-total">—</div><div class="stat-label">Total Listings</div></div>
+    <div class="stat pending"  onclick="goSection('listings');setTab('pending')"><div class="stat-num" id="s-pending">—</div><div class="stat-label">Pending</div></div>
+    <div class="stat approved" onclick="goSection('listings');setTab('approved')"><div class="stat-num" id="s-approved">—</div><div class="stat-label">Approved</div></div>
+    <div class="stat rejected" onclick="goSection('listings');setTab('rejected')"><div class="stat-num" id="s-rejected">—</div><div class="stat-label">Rejected</div></div>
+    <div class="stat users"    onclick="goSection('users')"><div class="stat-num" id="s-users">—</div><div class="stat-label">Total Users</div></div>
+    <div class="stat verified" onclick="goSection('users')"><div class="stat-num" id="s-verified">—</div><div class="stat-label">Phone Verified</div></div>
+    <div class="stat rera"     onclick="goSection('rera')"><div class="stat-num" id="s-rera">—</div><div class="stat-label">RERA Pending</div></div>
   </div>
 
-  <!-- ── Section Switcher ── -->
+  <!-- Section Switcher -->
   <div class="section-tabs">
     <button class="stab active-listings" id="stab-listings" onclick="goSection('listings')">🏠 Listings</button>
-    <button class="stab" id="stab-users"    onclick="goSection('users')">👥 Users &amp; Verification</button>
-    <button class="stab" id="stab-rera"     onclick="goSection('rera')">🏛️ RERA Review</button>
+    <button class="stab" id="stab-users"  onclick="goSection('users')">👥 Users &amp; Verification</button>
+    <button class="stab" id="stab-rera"   onclick="goSection('rera')">🏛️ RERA Review</button>
   </div>
 
-  <!-- ════════════════════════════════════════ -->
-  <!-- SECTION 1 — LISTINGS                    -->
-  <!-- ════════════════════════════════════════ -->
+  <!-- ══ SECTION 1 — LISTINGS ══ -->
   <div class="section active" id="sec-listings">
     <div class="tabs">
       <button class="tab active" onclick="setTab('')">All</button>
@@ -206,19 +197,17 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════ -->
-  <!-- SECTION 2 — USERS                       -->
-  <!-- ════════════════════════════════════════ -->
+  <!-- ══ SECTION 2 — USERS ══ -->
   <div class="section" id="sec-users">
     <div class="search-bar">
       <input type="text" id="search-users" placeholder="Search by name, email, phone, role…" oninput="filterUsers()"/>
-      <select id="filter-role" onchange="filterUsers()" style="padding:10px 14px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;">
+      <select id="filter-role" onchange="filterUsers()">
         <option value="">All Roles</option>
         <option value="owner">Owner</option>
         <option value="agent">Agent</option>
         <option value="builder">Builder</option>
       </select>
-      <select id="filter-verified" onchange="filterUsers()" style="padding:10px 14px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;">
+      <select id="filter-verified" onchange="filterUsers()">
         <option value="">All Verification</option>
         <option value="phone_verified">Phone Verified</option>
         <option value="not_phone">Phone Not Verified</option>
@@ -245,9 +234,7 @@
     </div>
   </div>
 
-  <!-- ════════════════════════════════════════ -->
-  <!-- SECTION 3 — RERA REVIEW                 -->
-  <!-- ════════════════════════════════════════ -->
+  <!-- ══ SECTION 3 — RERA REVIEW ══ -->
   <div class="section" id="sec-rera">
     <div class="search-bar">
       <input type="text" id="search-rera" placeholder="Search by name, email, RERA number…" oninput="filterRera()"/>
@@ -272,9 +259,9 @@
     </div>
   </div>
 
-</div><!-- end .wrap -->
+</div>
 
-<!-- ── Reject Modal ── -->
+<!-- Reject Modal -->
 <div class="modal-overlay" id="reject-modal">
   <div class="modal">
     <h3>❌ Reject Listing</h3>
@@ -291,7 +278,7 @@
   </div>
 </div>
 
-<!-- ── User Detail Modal ── -->
+<!-- User Detail Modal -->
 <div class="modal-overlay" id="user-modal">
   <div class="modal">
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
@@ -299,6 +286,7 @@
       <div>
         <div style="font-size:17px;font-weight:800" id="um-name">—</div>
         <div style="font-size:12px;color:#888" id="um-email">—</div>
+        <div style="font-size:11px;margin-top:3px" id="um-role-badge"></div>
       </div>
     </div>
     <div id="um-body"></div>
@@ -313,130 +301,195 @@
 <div class="toast" id="toast-el"></div>
 
 <script>
-let tok=null, allListings=[], allUsers=[], allRera=[];
-let curTab='', rejectId=null, activeUserId=null;
+let tok=null, allListings=[], allUsers=[], curTab='', rejectId=null, activeUserId=null;
 
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
-  const s=await getSession();
-  if(!s){window.location.href='/login.html';return;}
-  tok=s.access_token;
-  document.getElementById('admin-email').textContent=s.user.email;
+  const s = await getSession();
+  if (!s) { window.location.href = '/login.html'; return; }
+  tok = s.access_token;
+  document.getElementById('admin-email').textContent = s.user.email;
 
-  // Access check
-  const test=await fetch('/api/properties/admin/stats',{headers:{Authorization:`Bearer ${tok}`}});
-  if(!test.ok){
-    document.body.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:Inter,sans-serif">
-      <div style="font-size:48px">🚫</div><h2>Access Denied</h2>
-      <p style="color:#888">You don't have admin privileges.</p>
-      <a href="/browse.html" style="color:#2980b9">← Go to Browse</a></div>`;
+  // Admin access check via properties stats endpoint
+  const check = await fetch('/api/properties/admin/stats', {
+    headers: { Authorization: `Bearer ${tok}` }
+  });
+  if (!check.ok) {
+    document.body.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px;font-family:Inter,sans-serif">
+        <div style="font-size:48px">🚫</div>
+        <h2>Access Denied</h2>
+        <p style="color:#888">You don't have admin privileges.</p>
+        <a href="/browse.html" style="color:#2980b9">← Go to Browse</a>
+      </div>`;
     return;
   }
+
+  // Load everything in parallel
   await Promise.all([loadStats(), loadListings(), loadUsers()]);
 });
 
-// ── Section switching ──
-function goSection(name){
-  ['listings','users','rera'].forEach(s=>{
-    document.getElementById('sec-'+s).classList.toggle('active',s===name);
-    const stab=document.getElementById('stab-'+s);
-    if(stab){
-      stab.className='stab';
-      if(s===name) stab.className='stab active-'+name;
+// ══════════════════════════════════════════════════
+// SECTION SWITCHING
+// ══════════════════════════════════════════════════
+function goSection(name) {
+  ['listings','users','rera'].forEach(s => {
+    document.getElementById('sec-'+s).classList.toggle('active', s === name);
+    const stab = document.getElementById('stab-'+s);
+    if (stab) {
+      stab.className = 'stab';
+      if (s === name) stab.classList.add('active-'+name);
     }
   });
-  if(name==='rera') renderRera();
+  if (name === 'rera') renderRera();
 }
 
-// ════════════════════════════════════════════
-// STATS
-// ════════════════════════════════════════════
-async function loadStats(){
-  try{
-    const r=await fetch('/api/properties/admin/stats',{headers:{Authorization:`Bearer ${tok}`}});
-    if(!r.ok) return;
-    const s=await r.json();
-    document.getElementById('s-total').textContent   = s.total    ?? '—';
-    document.getElementById('s-pending').textContent = s.pending  ?? '—';
-    document.getElementById('s-approved').textContent=s.approved  ?? '—';
-    document.getElementById('s-rejected').textContent=s.rejected  ?? '—';
-    document.getElementById('s-users').textContent   = s.users    ?? '—';
-    document.getElementById('s-verified').textContent= s.phone_verified ?? '—';
-    document.getElementById('s-rera').textContent    = s.rera_pending   ?? '—';
-  }catch(e){}
+// ══════════════════════════════════════════════════
+// STATS — uses profiles/admin/stats for full data
+// ══════════════════════════════════════════════════
+async function loadStats() {
+  try {
+    // Try the combined profiles stats first (has user + listing counts)
+    const r = await fetch('/api/profiles/admin/stats', {
+      headers: { Authorization: `Bearer ${tok}` }
+    });
+    if (!r.ok) {
+      // Fallback to properties-only stats
+      const r2 = await fetch('/api/properties/admin/stats', {
+        headers: { Authorization: `Bearer ${tok}` }
+      });
+      if (!r2.ok) return;
+      const s = await r2.json();
+      document.getElementById('s-total').textContent    = s.total    ?? '—';
+      document.getElementById('s-pending').textContent  = s.pending  ?? '—';
+      document.getElementById('s-approved').textContent = s.approved ?? '—';
+      document.getElementById('s-rejected').textContent = s.rejected ?? '—';
+      document.getElementById('s-users').textContent    = s.users    ?? '—';
+      document.getElementById('s-verified').textContent = s.phone_verified ?? '—';
+      document.getElementById('s-rera').textContent     = s.rera_pending   ?? '—';
+      return;
+    }
+    const s = await r.json();
+    document.getElementById('s-total').textContent    = s.total    ?? '—';
+    document.getElementById('s-pending').textContent  = s.pending  ?? '—';
+    document.getElementById('s-approved').textContent = s.approved ?? '—';
+    document.getElementById('s-rejected').textContent = s.rejected ?? '—';
+    document.getElementById('s-users').textContent    = s.users    ?? '—';
+    document.getElementById('s-verified').textContent = s.phone_verified ?? '—';
+    document.getElementById('s-rera').textContent     = s.rera_pending   ?? '—';
+  } catch(e) { console.error('Stats error:', e); }
 }
 
-// ════════════════════════════════════════════
-// LISTINGS SECTION
-// ════════════════════════════════════════════
-async function loadListings(){
-  try{
-    const url=curTab?`/api/properties/admin/all?status=${curTab}`:'/api/properties/admin/all';
-    const r=await fetch(url,{headers:{Authorization:`Bearer ${tok}`}});
-    allListings=await r.json();
+// ══════════════════════════════════════════════════
+// LISTINGS
+// ══════════════════════════════════════════════════
+async function loadListings() {
+  try {
+    const url = curTab
+      ? `/api/properties/admin/all?status=${curTab}`
+      : '/api/properties/admin/all';
+    const r = await fetch(url, { headers: { Authorization: `Bearer ${tok}` } });
+    if (!r.ok) throw new Error('Failed');
+    allListings = await r.json();
     filterListings();
-  }catch(e){
-    document.getElementById('tbody-listings').innerHTML='<tr><td colspan="8" class="loading">Failed to load.</td></tr>';
+  } catch(e) {
+    document.getElementById('tbody-listings').innerHTML =
+      '<tr><td colspan="8" class="error-state">❌ Failed to load listings.</td></tr>';
   }
 }
 
-function setTab(t){
-  curTab=t;
-  document.querySelectorAll('.tab').forEach((el,i)=>{
-    el.classList.toggle('active',['','pending','approved','rejected'][i]===t);
+function setTab(t) {
+  curTab = t;
+  document.querySelectorAll('.tab').forEach((el, i) => {
+    el.classList.toggle('active', ['','pending','approved','rejected'][i] === t);
   });
   loadListings();
 }
 
-function filterListings(){
-  const q=document.getElementById('search-listings').value.toLowerCase();
-  const filtered=allListings.filter(p=>
-    !q||[p.title,p.city,p.locality,p.contact_name,p.contact_phone,p.ad_id].filter(Boolean).join(' ').toLowerCase().includes(q)
+function filterListings() {
+  const q = document.getElementById('search-listings').value.toLowerCase();
+  const filtered = allListings.filter(p =>
+    !q || [p.title, p.city, p.locality, p.contact_name, p.contact_phone, p.ad_id]
+      .filter(Boolean).join(' ').toLowerCase().includes(q)
   );
   renderListings(filtered);
 }
 
-function renderListings(data){
-  const tbody=document.getElementById('tbody-listings');
-  if(!data.length){tbody.innerHTML='<tr class="empty-row"><td colspan="8">No properties found</td></tr>';return;}
-  tbody.innerHTML=data.map(p=>{
-    const img=p.photos?.[0];
-    const price=p.price?'₹'+Number(p.price).toLocaleString('en-IN')+(p.type==='rent'?'/mo':''):'—';
-    const posted=p.posted_at?new Date(p.posted_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
-    const statusBadge=`<span class="badge ${p.status||'pending'}">${(p.status||'pending').toUpperCase()}</span>`;
-    const noteHtml=p.admin_note?`<div class="note-chip" onclick="openReject(${p.id})" title="Edit note">📝 <span>${p.admin_note}</span></div>`:'';
-    const adIdHtml=p.ad_id?`<div class="ad-id-chip">🪪 ${p.ad_id}</div>`:'';
+function renderListings(data) {
+  const tbody = document.getElementById('tbody-listings');
+  if (!data.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No properties found</td></tr>';
+    return;
+  }
 
-    // Verification badges for this listing's owner
-    const vbadges=[];
-    if(p.phone_verified)           vbadges.push(`<span class="vbadge vb-yes">✓ Phone</span>`);
-    else                           vbadges.push(`<span class="vbadge vb-no">✗ Phone</span>`);
-    if(p.rera_verified)            vbadges.push(`<span class="vbadge vb-rera">🏛 RERA</span>`);
-    else if(p.rera_number)         vbadges.push(`<span class="vbadge vb-pending">⏳ RERA</span>`);
+  // Build a user map for quick lookup by email/phone
+  const userByPhone = {};
+  const userByEmail = {};
+  allUsers.forEach(u => {
+    if (u.phone) userByPhone[u.phone] = u;
+    if (u.email) userByEmail[u.email.toLowerCase()] = u;
+  });
 
-    const roleColor={'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[p.contact_role]||'vb-owner';
-    if(p.contact_role) vbadges.push(`<span class="vbadge ${roleColor}">${p.contact_role}</span>`);
+  tbody.innerHTML = data.map(p => {
+    const img    = p.photos?.[0];
+    const price  = p.price
+      ? '₹' + Number(p.price).toLocaleString('en-IN') + (p.type === 'rent' ? '/mo' : '')
+      : '—';
+    const posted = p.posted_at
+      ? new Date(p.posted_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})
+      : '—';
+    const statusBadge = `<span class="badge ${p.status||'pending'}">${(p.status||'pending').toUpperCase()}</span>`;
+    const noteHtml = p.admin_note
+      ? `<div class="note-chip" onclick="openReject(${p.id})" title="Edit note">📝 <span>${esc(p.admin_note)}</span></div>`
+      : '';
+    const adIdHtml = p.ad_id ? `<div class="ad-id-chip">🪪 ${esc(p.ad_id)}</div>` : '';
+
+    // Match listing owner to a profile for enriched verification data
+    const matchedUser = (p.contact_phone && userByPhone[p.contact_phone])
+      || (p.contact_email && userByEmail[p.contact_email?.toLowerCase()])
+      || null;
+
+    const phoneVer  = matchedUser?.phone_verified  ?? p.phone_verified  ?? false;
+    const reraVer   = matchedUser?.rera_verified   ?? p.rera_verified   ?? false;
+    const reraNum   = matchedUser?.rera_number     ?? p.rera_number     ?? null;
+    const ownerRole = matchedUser?.role            ?? p.contact_role    ?? null;
+
+    const vbadges = [];
+    if (phoneVer)       vbadges.push(`<span class="vbadge vb-yes">✓ Phone</span>`);
+    else                vbadges.push(`<span class="vbadge vb-no">✗ Phone</span>`);
+    if (reraVer)        vbadges.push(`<span class="vbadge vb-rera">🏛 RERA</span>`);
+    else if (reraNum)   vbadges.push(`<span class="vbadge vb-pending">⏳ RERA</span>`);
+
+    const roleColor = {'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[ownerRole] || 'vb-owner';
+    if (ownerRole)      vbadges.push(`<span class="vbadge ${roleColor}">${ownerRole}</span>`);
+
+    const linkedHtml = matchedUser
+      ? `<div class="linked-user">🔗 Profile linked</div>` : '';
 
     return `<tr id="row-${p.id}">
       <td>
         <div style="display:flex;align-items:center;gap:10px">
-          ${img?`<img src="${img}" class="prop-img" loading="lazy"/>`:`<div class="prop-img">🏠</div>`}
+          ${img ? `<img src="${img}" class="prop-img" loading="lazy"/>` : `<div class="prop-img">🏠</div>`}
           <div>
-            <div class="prop-title" title="${p.title||''}">${p.title||'Untitled'}</div>
-            <div class="prop-sub">${(p.type||'').toUpperCase()} · ${p.property_type||''} ${p.bhk?'· '+p.bhk+'BHK':''}</div>
+            <div class="prop-title" title="${esc(p.title||'')}">${esc(p.title||'Untitled')}</div>
+            <div class="prop-sub">${esc((p.type||'').toUpperCase())} · ${esc(p.property_type||'')} ${p.bhk?'· '+p.bhk+'BHK':''}</div>
             ${adIdHtml}
           </div>
         </div>
       </td>
       <td>
-        <div style="font-size:12px;font-weight:600">${p.contact_name||'—'}</div>
-        <div style="font-size:11px;color:#888">${p.contact_phone||''}</div>
-        <div style="font-size:11px;color:#aaa">${p.contact_email||''}</div>
+        <div style="font-size:12px;font-weight:600">${esc(p.contact_name||'—')}</div>
+        <div style="font-size:11px;color:#888">${esc(p.contact_phone||'')}</div>
+        <div style="font-size:11px;color:#aaa">${esc(p.contact_email||'')}</div>
+        ${linkedHtml}
       </td>
       <td><div style="display:flex;flex-wrap:wrap;gap:2px;max-width:130px">${vbadges.join('')}</div></td>
       <td style="font-weight:700;color:#27ae60">${price}</td>
       <td>
-        <div style="font-size:12px">${p.locality||'—'}</div>
-        <div style="font-size:11px;color:#888">${p.city||''}</div>
+        <div style="font-size:12px">${esc(p.locality||'—')}</div>
+        <div style="font-size:11px;color:#888">${esc(p.city||'')}</div>
       </td>
       <td>${statusBadge}${noteHtml}</td>
       <td style="font-size:12px;color:#888">${posted}</td>
@@ -445,132 +498,155 @@ function renderListings(data){
   }).join('');
 }
 
-function buildListingActions(p){
-  let b=`<button class="btn-view" onclick="window.open('/property.html?id=${p.id}','_blank')">View</button>`;
-  if(p.status!=='approved') b+=`<button class="btn-approve" onclick="updateListingStatus(${p.id},'approved')">✅</button>`;
-  if(p.status!=='rejected') b+=`<button class="btn-reject"  onclick="openReject(${p.id})">❌</button>`;
-  if(p.status!=='pending')  b+=`<button class="btn-pending" onclick="updateListingStatus(${p.id},'pending')">⏳</button>`;
-  b+=`<button class="btn-delete" onclick="deleteProp(${p.id})">🗑</button>`;
+function buildListingActions(p) {
+  let b = `<button class="btn-view" onclick="window.open('/property.html?id=${p.id}','_blank')">View</button>`;
+  if (p.status !== 'approved') b += `<button class="btn-approve" onclick="updateListingStatus(${p.id},'approved')">✅</button>`;
+  if (p.status !== 'rejected') b += `<button class="btn-reject"  onclick="openReject(${p.id})">❌</button>`;
+  if (p.status !== 'pending')  b += `<button class="btn-pending" onclick="updateListingStatus(${p.id},'pending')">⏳</button>`;
+  b += `<button class="btn-delete" onclick="deleteProp(${p.id})">🗑</button>`;
   return b;
 }
 
-async function updateListingStatus(id,status,note=null){
-  try{
-    const body={status};
-    if(note!==null) body.admin_note=note;
-    const r=await fetch(`/api/properties/admin/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(body)});
-    const result=await r.json();
-    if(!r.ok) throw new Error(result.error||'Failed');
-    const idx=allListings.findIndex(p=>String(p.id)===String(id));
-    if(idx!==-1){allListings[idx].status=status;if(note!==null)allListings[idx].admin_note=note;}
+async function updateListingStatus(id, status, note = null) {
+  try {
+    const body = { status };
+    if (note !== null) body.admin_note = note;
+    const r = await fetch(`/api/properties/admin/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
+      body: JSON.stringify(body)
+    });
+    const result = await r.json();
+    if (!r.ok) throw new Error(result.error || 'Failed');
+    const idx = allListings.findIndex(p => String(p.id) === String(id));
+    if (idx !== -1) {
+      allListings[idx].status = status;
+      if (note !== null) allListings[idx].admin_note = note;
+    }
     filterListings();
     loadStats();
-    toast(status==='approved'?'✅ Approved!':status==='rejected'?'❌ Rejected!':'⏳ Set to Pending');
-  }catch(e){toast('❌ Error: '+e.message);}
+    toast(status==='approved' ? '✅ Approved!' : status==='rejected' ? '❌ Rejected!' : '⏳ Set to Pending');
+  } catch(e) { toast('❌ Error: ' + e.message); }
 }
 
-async function deleteProp(id){
-  if(!confirm('Delete this property permanently? This cannot be undone.')) return;
-  try{
-    const r=await fetch(`/api/properties/admin/${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});
-    if(!r.ok) throw new Error();
-    allListings=allListings.filter(p=>String(p.id)!==String(id));
+async function deleteProp(id) {
+  if (!confirm('Delete this property permanently? This cannot be undone.')) return;
+  try {
+    const r = await fetch(`/api/properties/admin/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${tok}` }
+    });
+    if (!r.ok) throw new Error();
+    allListings = allListings.filter(p => String(p.id) !== String(id));
     filterListings();
     loadStats();
     toast('🗑 Property deleted');
-  }catch(e){toast('❌ Failed to delete');}
+  } catch(e) { toast('❌ Failed to delete'); }
 }
 
-function openReject(id){
-  rejectId=Number(id);
-  const prop=allListings.find(p=>String(p.id)===String(id));
-  const prevBox=document.getElementById('prev-note-box');
-  if(prop?.admin_note){
-    document.getElementById('prev-note-text').textContent=prop.admin_note;
-    prevBox.style.display='block';
-    document.getElementById('reject-note').value=prop.admin_note;
-  }else{
-    prevBox.style.display='none';
-    document.getElementById('reject-note').value='';
+function openReject(id) {
+  rejectId = Number(id);
+  const prop = allListings.find(p => String(p.id) === String(id));
+  const prevBox = document.getElementById('prev-note-box');
+  if (prop?.admin_note) {
+    document.getElementById('prev-note-text').textContent = prop.admin_note;
+    prevBox.style.display = 'block';
+    document.getElementById('reject-note').value = prop.admin_note;
+  } else {
+    prevBox.style.display = 'none';
+    document.getElementById('reject-note').value = '';
   }
   document.getElementById('reject-modal').classList.add('open');
 }
 
-function confirmReject(){
-  if(!rejectId){toast('❌ No property selected');return;}
-  const note=document.getElementById('reject-note').value.trim();
-  const id=rejectId;
+function confirmReject() {
+  if (!rejectId) { toast('❌ No property selected'); return; }
+  const note = document.getElementById('reject-note').value.trim();
+  const id = rejectId;
   closeModal('reject-modal');
-  updateListingStatus(id,'rejected',note||null);
+  updateListingStatus(id, 'rejected', note || null);
 }
 
-// ════════════════════════════════════════════
-// USERS SECTION
-// ════════════════════════════════════════════
-async function loadUsers(){
-  try{
-    const r=await fetch('/api/profiles/admin/all',{headers:{Authorization:`Bearer ${tok}`}});
-    if(!r.ok) throw new Error();
-    allUsers=await r.json();
+// ══════════════════════════════════════════════════
+// USERS
+// ══════════════════════════════════════════════════
+async function loadUsers() {
+  try {
+    const r = await fetch('/api/profiles/admin/all', {
+      headers: { Authorization: `Bearer ${tok}` }
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    allUsers = await r.json();
     filterUsers();
-    renderRera(); // prep RERA list
-  }catch(e){
-    document.getElementById('tbody-users').innerHTML='<tr><td colspan="7" class="loading">Failed to load users. Make sure /api/profiles/admin/all endpoint exists.</td></tr>';
+    renderRera();
+    // Re-render listings now that user data is available (for verification badges)
+    if (allListings.length) filterListings();
+  } catch(e) {
+    document.getElementById('tbody-users').innerHTML =
+      `<tr><td colspan="7" class="error-state">❌ Failed to load users: ${esc(e.message)}</td></tr>`;
+    document.getElementById('tbody-rera').innerHTML =
+      `<tr><td colspan="7" class="error-state">❌ Failed to load users.</td></tr>`;
   }
 }
 
-function filterUsers(){
-  const q=document.getElementById('search-users').value.toLowerCase();
-  const role=document.getElementById('filter-role').value;
-  const verif=document.getElementById('filter-verified').value;
-  const filtered=allUsers.filter(u=>{
-    const matchQ=!q||[u.fullname,u.email,u.phone,u.role,u.agency_name].filter(Boolean).join(' ').toLowerCase().includes(q);
-    const matchRole=!role||u.role===role;
-    const matchVerif=!verif||
-      (verif==='phone_verified'&&u.phone_verified)||
-      (verif==='not_phone'&&!u.phone_verified)||
-      (verif==='rera_verified'&&u.rera_verified);
-    return matchQ&&matchRole&&matchVerif;
+function filterUsers() {
+  const q      = document.getElementById('search-users').value.toLowerCase();
+  const role   = document.getElementById('filter-role').value;
+  const verif  = document.getElementById('filter-verified').value;
+  const filtered = allUsers.filter(u => {
+    const matchQ = !q || [u.fullname, u.email, u.phone, u.role, u.agency_name]
+      .filter(Boolean).join(' ').toLowerCase().includes(q);
+    const matchRole  = !role  || u.role === role;
+    const matchVerif = !verif
+      || (verif === 'phone_verified' && u.phone_verified)
+      || (verif === 'not_phone'      && !u.phone_verified)
+      || (verif === 'rera_verified'  && u.rera_verified);
+    return matchQ && matchRole && matchVerif;
   });
   renderUsers(filtered);
 }
 
-function renderUsers(data){
-  const tbody=document.getElementById('tbody-users');
-  if(!data.length){tbody.innerHTML='<tr class="empty-row"><td colspan="7">No users found</td></tr>';return;}
-  tbody.innerHTML=data.map(u=>{
-    const ini=(u.fullname||u.email||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-    const joined=u.created_at?new Date(u.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}):'—';
-    const roleColor={'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[u.role]||'vb-owner';
+function renderUsers(data) {
+  const tbody = document.getElementById('tbody-users');
+  if (!data.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No users found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(u => {
+    const ini    = (u.fullname || u.email || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+    const joined = u.created_at
+      ? new Date(u.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})
+      : '—';
+    const roleColor = {'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[u.role] || 'vb-owner';
 
-    const vbadges=[];
-    if(u.phone_verified)  vbadges.push(`<span class="vbadge vb-yes">✓ Phone</span>`);
-    else                  vbadges.push(`<span class="vbadge vb-no">✗ Phone</span>`);
-    if(u.rera_verified)   vbadges.push(`<span class="vbadge vb-rera">✓ RERA</span>`);
-    else if(u.rera_number)vbadges.push(`<span class="vbadge vb-pending">⏳ RERA</span>`);
+    const vbadges = [];
+    if (u.phone_verified)   vbadges.push(`<span class="vbadge vb-yes">✓ Phone</span>`);
+    else                    vbadges.push(`<span class="vbadge vb-no">✗ Phone</span>`);
+    if (u.rera_verified)    vbadges.push(`<span class="vbadge vb-rera">✓ RERA</span>`);
+    else if (u.rera_number) vbadges.push(`<span class="vbadge vb-pending">⏳ RERA</span>`);
 
-    return`<tr>
+    return `<tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px">
           <div class="user-avatar">${ini}</div>
           <div>
-            <div style="font-weight:700;font-size:13px">${u.fullname||'—'}</div>
-            <div style="font-size:11px;color:#888">${u.email||''}</div>
+            <div style="font-weight:700;font-size:13px">${esc(u.fullname||'—')}</div>
+            <div style="font-size:11px;color:#888">${esc(u.email||'')}</div>
           </div>
         </div>
       </td>
-      <td><span class="vbadge ${roleColor}" style="font-size:12px;padding:4px 10px">${u.role||'owner'}</span></td>
-      <td style="font-size:12px">${u.phone?`+91 ${u.phone}`:'<span style="color:#aaa">Not added</span>'}</td>
-      <td class="rera-num">${u.rera_number||'<span style="color:#aaa;font-family:inherit;font-weight:400">—</span>'}</td>
+      <td><span class="vbadge ${roleColor}" style="font-size:12px;padding:4px 10px">${esc(u.role||'owner')}</span></td>
+      <td style="font-size:12px">${u.phone ? `+91 ${esc(u.phone)}` : '<span style="color:#aaa">Not added</span>'}</td>
+      <td class="rera-num">${u.rera_number ? esc(u.rera_number) : '<span style="color:#aaa;font-family:inherit;font-weight:400">—</span>'}</td>
       <td><div style="display:flex;flex-wrap:wrap;gap:3px">${vbadges.join('')}</div></td>
       <td style="font-size:12px;color:#888">${joined}</td>
       <td>
         <div class="actions">
           <button class="btn-sm btn-profile" onclick="openUserModal('${u.id}')">👁 View</button>
-          ${!u.phone_verified&&u.phone?`<button class="btn-sm btn-verify-phone" onclick="adminVerifyPhoneDirect('${u.id}')">✅ Phone</button>`:''}
-          ${u.rera_number&&!u.rera_verified?`<button class="btn-sm btn-verify-rera" onclick="adminVerifyReraDirect('${u.id}')">🏛️ RERA</button>`:''}
-          ${u.phone_verified?`<button class="btn-sm btn-unverify" onclick="adminUnverify('${u.id}','phone')">✗ Phone</button>`:''}
-          ${u.rera_verified?`<button class="btn-sm btn-unverify" onclick="adminUnverify('${u.id}','rera')">✗ RERA</button>`:''}
+          ${!u.phone_verified && u.phone ? `<button class="btn-sm btn-verify-phone" onclick="adminVerifyPhoneDirect('${u.id}')">✅ Phone</button>` : ''}
+          ${u.rera_number && !u.rera_verified ? `<button class="btn-sm btn-verify-rera" onclick="adminVerifyReraDirect('${u.id}')">🏛️ RERA</button>` : ''}
+          ${u.phone_verified ? `<button class="btn-sm btn-unverify" onclick="adminUnverify('${u.id}','phone')" title="Remove phone verification">✗ Phone</button>` : ''}
+          ${u.rera_verified  ? `<button class="btn-sm btn-unverify" onclick="adminUnverify('${u.id}','rera')" title="Remove RERA verification">✗ RERA</button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -578,138 +654,150 @@ function renderUsers(data){
 }
 
 // ── User Detail Modal ──
-function openUserModal(uid){
-  activeUserId=uid;
-  const u=allUsers.find(u=>String(u.id)===String(uid));
-  if(!u) return;
-  const ini=(u.fullname||u.email||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('um-avatar').textContent=ini;
-  document.getElementById('um-name').textContent=u.fullname||'—';
-  document.getElementById('um-email').textContent=u.email||'—';
+function openUserModal(uid) {
+  activeUserId = uid;
+  const u = allUsers.find(u => String(u.id) === String(uid));
+  if (!u) return;
+  const ini = (u.fullname || u.email || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('um-avatar').textContent = ini;
+  document.getElementById('um-name').textContent   = u.fullname || '—';
+  document.getElementById('um-email').textContent  = u.email || '—';
 
-  const rows=[
-    ['📱 Phone',        u.phone?`+91 ${u.phone}`:'Not added'],
-    ['🏷️ Role',         u.role||'owner'],
-    ['🏢 Agency',       u.agency_name||'—'],
-    ['🏛️ RERA Number',  u.rera_number||'—'],
-    ['📧 Email Verified',u.email_verified?'✅ Yes':'❌ No'],
-    ['📱 Phone Verified',u.phone_verified?'✅ Yes':'❌ No'],
-    ['🏛️ RERA Verified', u.rera_verified?'✅ Yes':(u.rera_number?'⏳ Pending Admin Review':'—')],
-    ['📅 Joined',        u.created_at?new Date(u.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}):'—'],
-    ['💬 Bio',           u.bio||'—'],
+  const roleColor = {'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[u.role] || 'vb-owner';
+  document.getElementById('um-role-badge').innerHTML =
+    `<span class="vbadge ${roleColor}" style="font-size:11px;padding:3px 9px">${u.role||'owner'}</span>`;
+
+  // Count listings by this user
+  const userListings = allListings.filter(p =>
+    (u.phone && p.contact_phone === u.phone) ||
+    (u.email && p.contact_email?.toLowerCase() === u.email.toLowerCase())
+  );
+  const lCounts = { total: userListings.length, approved: 0, pending: 0, rejected: 0 };
+  userListings.forEach(p => { if (lCounts[p.status] !== undefined) lCounts[p.status]++; });
+
+  const rows = [
+    ['📱 Phone',         u.phone ? `+91 ${u.phone}` : 'Not added'],
+    ['🏢 Agency',        u.agency_name || '—'],
+    ['🏛️ RERA Number',   u.rera_number || '—'],
+    ['📧 Email Verified', u.email_verified ? '✅ Yes' : '❌ No'],
+    ['📱 Phone Verified', u.phone_verified ? '✅ Verified' : '❌ Not Verified'],
+    ['🏛️ RERA Verified',  u.rera_verified ? '✅ Verified' : (u.rera_number ? '⏳ Pending Review' : '—')],
+    ['🏠 Total Listings', `${lCounts.total} (✅${lCounts.approved} ⏳${lCounts.pending} ❌${lCounts.rejected})`],
+    ['💬 Bio',           u.bio || '—'],
+    ['📅 Joined',        u.created_at ? new Date(u.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : '—'],
   ];
 
-  document.getElementById('um-body').innerHTML=rows.map(([k,v])=>`
+  document.getElementById('um-body').innerHTML = rows.map(([k, v]) => `
     <div class="udetail-row">
       <span class="udetail-key">${k}</span>
-      <span class="udetail-val">${v}</span>
+      <span class="udetail-val">${esc(String(v))}</span>
     </div>`).join('');
 
-  // Show/hide action buttons
-  document.getElementById('um-btn-phone').style.display=(!u.phone_verified&&u.phone)?'inline-flex':'none';
-  document.getElementById('um-btn-rera').style.display=(u.rera_number&&!u.rera_verified)?'inline-flex':'none';
+  document.getElementById('um-btn-phone').style.display = (!u.phone_verified && u.phone) ? 'inline-flex' : 'none';
+  document.getElementById('um-btn-rera').style.display  = (u.rera_number && !u.rera_verified) ? 'inline-flex' : 'none';
 
   document.getElementById('user-modal').classList.add('open');
 }
 
-async function adminVerifyPhone(){
-  if(!activeUserId) return;
-  await patchUserVerification(activeUserId,{phone_verified:true});
-  closeModal('user-modal');
-}
-async function adminVerifyRera(){
-  if(!activeUserId) return;
-  await patchUserVerification(activeUserId,{rera_verified:true});
-  closeModal('user-modal');
-}
-async function adminVerifyPhoneDirect(uid){
-  await patchUserVerification(uid,{phone_verified:true});
-}
-async function adminVerifyReraDirect(uid){
-  await patchUserVerification(uid,{rera_verified:true});
-}
-async function adminUnverify(uid,type){
-  const field=type==='phone'?{phone_verified:false}:{rera_verified:false};
-  await patchUserVerification(uid,field);
+async function adminVerifyPhone()       { if (!activeUserId) return; await patchUser(activeUserId, {phone_verified:true}); closeModal('user-modal'); }
+async function adminVerifyRera()        { if (!activeUserId) return; await patchUser(activeUserId, {rera_verified:true});  closeModal('user-modal'); }
+async function adminVerifyPhoneDirect(uid) { await patchUser(uid, {phone_verified:true}); }
+async function adminVerifyReraDirect(uid)  { await patchUser(uid, {rera_verified:true});  }
+async function adminUnverify(uid, type) {
+  await patchUser(uid, type === 'phone' ? {phone_verified:false} : {rera_verified:false});
 }
 
-async function patchUserVerification(uid,payload){
-  try{
-    const r=await fetch(`/api/profiles/admin/${uid}`,{
-      method:'PATCH',
-      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
-      body:JSON.stringify(payload)
+async function patchUser(uid, payload) {
+  try {
+    const r = await fetch(`/api/profiles/admin/${uid}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${tok}` },
+      body: JSON.stringify(payload)
     });
-    if(!r.ok) throw new Error((await r.json()).error||'Failed');
-    // Update local cache
-    const idx=allUsers.findIndex(u=>String(u.id)===String(uid));
-    if(idx!==-1) Object.assign(allUsers[idx],payload);
+    if (!r.ok) throw new Error((await r.json()).error || 'Failed');
+    const idx = allUsers.findIndex(u => String(u.id) === String(uid));
+    if (idx !== -1) Object.assign(allUsers[idx], payload);
     filterUsers();
     renderRera();
     loadStats();
-    const key=Object.keys(payload)[0];
-    const val=Object.values(payload)[0];
-    toast(val?`✅ ${key==='phone_verified'?'Phone':'RERA'} verified!`:`✗ Verification removed`);
-  }catch(e){toast('Error: '+e.message);}
+    const key = Object.keys(payload)[0];
+    const val = Object.values(payload)[0];
+    toast(val
+      ? `✅ ${key === 'phone_verified' ? 'Phone' : 'RERA'} verified!`
+      : `✗ Verification removed`);
+  } catch(e) { toast('Error: ' + e.message); }
 }
 
-// ════════════════════════════════════════════
-// RERA REVIEW SECTION
-// ════════════════════════════════════════════
-function renderRera(){
-  const q=(document.getElementById('search-rera')?.value||'').toLowerCase();
-  const data=allUsers.filter(u=>u.rera_number&&!u.rera_verified&&(
-    !q||[u.fullname,u.email,u.rera_number,u.agency_name].filter(Boolean).join(' ').toLowerCase().includes(q)
-  ));
-  const tbody=document.getElementById('tbody-rera');
-  if(!data.length){
-    tbody.innerHTML='<tr class="empty-row"><td colspan="7">🎉 No pending RERA requests</td></tr>';
+// ══════════════════════════════════════════════════
+// RERA REVIEW
+// ══════════════════════════════════════════════════
+function renderRera() {
+  const q = (document.getElementById('search-rera')?.value || '').toLowerCase();
+  const data = allUsers.filter(u =>
+    u.rera_number && !u.rera_verified && (
+      !q || [u.fullname, u.email, u.rera_number, u.agency_name]
+        .filter(Boolean).join(' ').toLowerCase().includes(q)
+    )
+  );
+  const tbody = document.getElementById('tbody-rera');
+  if (!data.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">🎉 No pending RERA requests</td></tr>';
     return;
   }
-  tbody.innerHTML=data.map(u=>{
-    const ini=(u.fullname||u.email||'U').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-    const joined=u.created_at?new Date(u.created_at).toLocaleDateString('en-IN'):'—';
-    const roleColor={'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[u.role]||'vb-owner';
-    return`<tr>
+  tbody.innerHTML = data.map(u => {
+    const ini = (u.fullname || u.email || 'U').split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+    const roleColor = {'agent':'vb-agent','builder':'vb-builder','owner':'vb-owner'}[u.role] || 'vb-owner';
+    return `<tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px">
           <div class="user-avatar">${ini}</div>
           <div>
-            <div style="font-weight:700;font-size:13px">${u.fullname||'—'}</div>
-            <div style="font-size:11px;color:#888">${u.email||''}</div>
+            <div style="font-weight:700;font-size:13px">${esc(u.fullname||'—')}</div>
+            <div style="font-size:11px;color:#888">${esc(u.email||'')}</div>
           </div>
         </div>
       </td>
-      <td><span class="vbadge ${roleColor}" style="font-size:12px;padding:4px 10px">${u.role||'owner'}</span></td>
-      <td><span class="rera-num">${u.rera_number}</span></td>
-      <td style="font-size:12px">${u.agency_name||'—'}</td>
-      <td style="font-size:12px">${u.phone?`+91 ${u.phone}`:'—'}</td>
+      <td><span class="vbadge ${roleColor}" style="font-size:12px;padding:4px 10px">${esc(u.role||'owner')}</span></td>
+      <td><span class="rera-num">${esc(u.rera_number)}</span></td>
+      <td style="font-size:12px">${esc(u.agency_name||'—')}</td>
+      <td style="font-size:12px">${u.phone ? `+91 ${esc(u.phone)}` : '—'}</td>
       <td><span class="vbadge vb-pending">⏳ Pending Review</span></td>
       <td>
         <div class="actions">
           <button class="btn-sm btn-verify-rera" onclick="adminVerifyReraDirect('${u.id}')">🏛️ Approve RERA</button>
-          <button class="btn-sm btn-profile" onclick="openUserModal('${u.id}')">👁 View Profile</button>
+          <button class="btn-sm btn-profile"     onclick="openUserModal('${u.id}')">👁 View Profile</button>
         </div>
       </td>
     </tr>`;
   }).join('');
 }
-function filterRera(){renderRera();}
+function filterRera() { renderRera(); }
 
-// ── Modals ──
-function closeModal(id){
+// ══════════════════════════════════════════════════
+// MODALS + UTILITIES
+// ══════════════════════════════════════════════════
+function closeModal(id) {
   document.getElementById(id).classList.remove('open');
-  if(id==='user-modal') activeUserId=null;
-  if(id==='reject-modal') rejectId=null;
+  if (id === 'user-modal')   activeUserId = null;
+  if (id === 'reject-modal') rejectId     = null;
 }
-document.querySelectorAll('.modal-overlay').forEach(el=>{
-  el.addEventListener('click',function(e){if(e.target===this) closeModal(this.id);});
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', function(e) { if (e.target === this) closeModal(this.id); });
 });
 
-function toast(m){
-  const el=document.getElementById('toast-el');
-  el.textContent=m;el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),3000);
+function toast(m) {
+  const el = document.getElementById('toast-el');
+  el.textContent = m;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function esc(t) {
+  return String(t||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
 }
 </script>
 </body>
