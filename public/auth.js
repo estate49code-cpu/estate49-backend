@@ -7,7 +7,8 @@ const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    storage: window.localStorage   // ✅ ADDED: persist across browser close/reopen until manual logout
   }
 });
 
@@ -102,5 +103,6 @@ async function signInEmail(email, password) {
 async function signOut() {
   _sessionCache = null;
   await _sb.auth.signOut();
+  localStorage.clear();            // ✅ ADDED: wipe stored session from this browser completely
   window.location.href = '/login.html';
 }
