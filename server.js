@@ -31,10 +31,9 @@ app.use('/api/favorites',     require('./routes/favorites'));
 app.use('/api/messages',      require('./routes/messages'));
 app.use('/api/profiles',      require('./routes/profiles'));
 app.use('/api/notifications', require('./routes/notifications'));
-app.use('/api/upload',        require('./routes/upload'));
+app.use('/api/upload',        uploadRouter);
 app.use('/api/support',       require('./routes/support'));
-app.use('/api/upload', uploadRouter);
-app.use('/api/admin',         require('./routes/adminAlerts'));  // ← NEW
+app.use('/api/admin',         require('./routes/adminAlerts'));
 
 // ─── AI REST endpoint ─────────────────────────────────────────────────────────
 app.post('/api/chat', async (req, res) => {
@@ -64,8 +63,7 @@ app.get('/auth/callback', (req, res) =>
 const pages = [
   'login', 'browse', 'property', 'list-property', 'messages',
   'profile', 'favorites', 'notifications', 'chat', 'admin',
-  'support', 'admin-support',
-  'admin-alerts',   // ← NEW — serves admin-alerts.html
+  'support', 'admin-support', 'admin-alerts',
 ];
 pages.forEach(p => {
   app.get(`/${p}`,      (req, res) => res.sendFile(path.join(__dirname, 'public', `${p}.html`)));
@@ -85,8 +83,10 @@ app.get('*', (req, res) => {
 
 // ─── Socket.io AI Chat ────────────────────────────────────────────────────────
 const sessions = new Map();
-const LISTER_KW = ['list','listing','sell','rent out','add property','post property',
-                   'my property','i own','want to sell','want to rent my','owner'];
+const LISTER_KW = [
+  'list','listing','sell','rent out','add property','post property',
+  'my property','i own','want to sell','want to rent my','owner'
+];
 
 io.on('connection', socket => {
   sessions.set(socket.id, { mode: null, history: [] });
@@ -106,10 +106,12 @@ io.on('connection', socket => {
       if (!sess.mode) {
         sess.mode = LISTER_KW.some(k => text.toLowerCase().includes(k)) ? 'lister' : 'client';
       }
-      if (text.toLowerCase().includes('i want to list') || text.toLowerCase().includes('list my property')) {
+      if (text.toLowerCase().includes('i want to list') ||
+          text.toLowerCase().includes('list my property')) {
         sess.mode = 'lister';
       }
-      if (text.toLowerCase().includes('i want to find') || text.toLowerCase().includes('looking for a property')) {
+      if (text.toLowerCase().includes('i want to find') ||
+          text.toLowerCase().includes('looking for a property')) {
         sess.mode = 'client';
       }
 
@@ -131,9 +133,9 @@ io.on('connection', socket => {
       console.error('Socket chat error:', e.message);
       socket.emit('typing', false);
       socket.emit('botReply', {
-        message: 'I had trouble with that. Please try again.',
+        message:     'I had trouble with that. Please try again.',
         listingData: null,
-        timestamp: new Date()
+        timestamp:   new Date()
       });
     }
   });
@@ -145,5 +147,6 @@ io.on('connection', socket => {
 db.from('properties').select('id').limit(1).then(({ error }) =>
   console.log(error ? '⚠️  DB: ' + error.message : '✅ Supabase connected')
 );
+
 const PORT = process.env.PORT || 5002;
 server.listen(PORT, () => console.log(`🏠 Estate49 → http://localhost:${PORT}`));

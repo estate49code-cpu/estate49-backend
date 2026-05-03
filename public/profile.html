@@ -14,20 +14,18 @@
     .ptab.active{color:var(--primary);border-bottom-color:var(--primary);}
     .psec{display:none;}.psec.active{display:block;}
     .pcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;margin-bottom:20px;}
-    .pcard-title{font-size:var(--text-base);font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
     .avatar-row{display:flex;align-items:center;gap:20px;margin-bottom:28px;}
     .p-avatar{width:80px;height:80px;border-radius:50%;background:var(--primary);color:#fff;font-size:28px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
     .p-avatar img{width:100%;height:100%;object-fit:cover;}
     .p-name{font-size:var(--text-xl);font-weight:800;}
     .p-email{font-size:var(--text-sm);color:var(--muted);}
     .form-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    /* ── Agent/Builder fields ── */
     .agent-fields{display:none;}
     .agent-fields.show{display:contents;}
+
     /* ── Trust & Verification Card ── */
     .vcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;margin-bottom:20px;}
-    .vcard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
-    .vcard-title{font-size:var(--text-base);font-weight:700;display:flex;align-items:center;gap:8px;}
+    .vcard-title{font-size:var(--text-base);font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:6px;}
     .vcard-sub{font-size:var(--text-xs);color:var(--muted);margin-bottom:20px;line-height:1.6;}
     .vrow{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--divider);gap:12px;}
     .vrow:last-child{border-bottom:none;padding-bottom:0;}
@@ -36,11 +34,13 @@
     .vrow-info{min-width:0;}
     .vrow-label{font-size:var(--text-sm);font-weight:700;margin-bottom:2px;}
     .vrow-desc{font-size:var(--text-xs);color:var(--muted);line-height:1.5;}
+
     /* Status badges */
     .vbadge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;}
     .vbadge-verified{background:#d4edda;color:#155724;}
     .vbadge-pending{background:#fff3cd;color:#856404;}
     .vbadge-unverified{background:var(--surface-2);color:var(--muted);border:1px solid var(--border);}
+
     /* Verify buttons */
     .vbtn{padding:7px 16px;border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:700;cursor:pointer;border:none;font-family:inherit;transition:all .18s;white-space:nowrap;}
     .vbtn-primary{background:var(--primary);color:#fff;}
@@ -48,13 +48,21 @@
     .vbtn-secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
     .vbtn-secondary:hover{border-color:var(--primary);color:var(--primary);}
     .vbtn:disabled{opacity:.5;cursor:not-allowed;}
+
     /* Trust score bar */
     .trust-bar-wrap{margin-bottom:20px;}
     .trust-bar-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
     .trust-score-label{font-size:var(--text-xs);color:var(--muted);font-weight:600;}
     .trust-score-val{font-size:var(--text-sm);font-weight:800;color:var(--primary);}
     .trust-bar-bg{height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;}
-    .trust-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--primary),#e67e22);transition:width .6s ease;}
+    .trust-bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+
+    /* Owner profile completeness row */
+    .vrow-owner-info{background:var(--surface-2);border-radius:var(--radius-lg);padding:12px 14px;}
+    .vrow-owner-name{font-size:var(--text-sm);font-weight:700;margin-bottom:2px;}
+    .vrow-owner-bio{font-size:var(--text-xs);color:var(--muted);line-height:1.5;font-style:italic;}
+    .vrow-owner-empty{font-size:var(--text-xs);color:var(--muted);font-style:italic;}
+
     /* OTP Modal */
     .otp-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;}
     .otp-modal{background:var(--surface);border-radius:var(--radius-xl);padding:32px 28px;max-width:380px;width:100%;box-shadow:var(--shadow-lg);text-align:center;}
@@ -65,6 +73,7 @@
     .otp-box:focus{outline:none;border-color:var(--primary);}
     .otp-resend{font-size:var(--text-xs);color:var(--muted);margin-top:10px;}
     .otp-resend a{color:var(--primary);cursor:pointer;font-weight:600;}
+
     /* Listings */
     .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
     .lcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:all var(--transition);}
@@ -83,6 +92,7 @@
     .sbadge.rejected{background:#f8d7da;color:#721c24;}
     .admin-note{font-size:11px;color:#721c24;padding:6px 12px;background:#fff5f5;border-top:1px solid #f8d7da;display:flex;gap:6px;align-items:flex-start;}
     .lc-acts{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--divider);}
+
     @media(max-width:768px){
       .pw{padding:14px 14px 80px;}
       .pcard,.vcard{padding:18px 14px;}
@@ -128,7 +138,6 @@
             <label class="form-label">Bio</label>
             <textarea class="form-textarea" id="bio" rows="3" placeholder="Tell others a bit about yourself…"></textarea>
           </div>
-          <!-- Role -->
           <div class="form-group" style="margin-bottom:16px">
             <label class="form-label">I am a</label>
             <select class="form-select" id="role" onchange="onRoleChange(this.value)">
@@ -137,7 +146,7 @@
               <option value="builder">Builder</option>
             </select>
           </div>
-          <!-- Agent/Builder only fields -->
+          <!-- Agent/Builder only -->
           <div class="agent-fields" id="agent-fields">
             <div class="form-2" style="margin-bottom:16px">
               <div class="form-group">
@@ -156,10 +165,8 @@
 
       <!-- ── Trust & Verification Card ── -->
       <div class="vcard">
-        <div class="vcard-head">
-          <div class="vcard-title">🛡️ Trust &amp; Verification</div>
-        </div>
-        <div class="vcard-sub">Verified profiles get more inquiries. Buyers and renters trust verified owners, agents, and builders more. Complete all steps to get the <strong>Trusted Seller</strong> badge on your listings.</div>
+        <div class="vcard-title">🛡️ Trust &amp; Verification</div>
+        <div class="vcard-sub" id="vcard-sub">Verified profiles get more inquiries. Complete all steps to get the <strong>Trusted Seller</strong> badge on your listings.</div>
 
         <!-- Trust Score Bar -->
         <div class="trust-bar-wrap">
@@ -171,7 +178,7 @@
         </div>
 
         <!-- Row 1: Email -->
-        <div class="vrow" id="vrow-email">
+        <div class="vrow">
           <div class="vrow-left">
             <div class="vrow-icon">📧</div>
             <div class="vrow-info">
@@ -184,7 +191,7 @@
         </div>
 
         <!-- Row 2: Phone -->
-        <div class="vrow" id="vrow-phone">
+        <div class="vrow">
           <div class="vrow-left">
             <div class="vrow-icon">📱</div>
             <div class="vrow-info">
@@ -196,17 +203,9 @@
           <div id="vaction-phone"><button class="vbtn vbtn-primary" onclick="startPhoneVerify()">Verify Phone</button></div>
         </div>
 
-        <!-- Row 3: RERA (shown for all, relevant for agent/builder) -->
-        <div class="vrow" id="vrow-rera">
-          <div class="vrow-left">
-            <div class="vrow-icon">🏛️</div>
-            <div class="vrow-info">
-              <div class="vrow-label">RERA Registration</div>
-              <div class="vrow-desc" id="vdesc-rera">Agents &amp; Builders — submit your RERA number for verification</div>
-            </div>
-          </div>
-          <div id="vstatus-rera"><span class="vbadge vbadge-unverified">Not Submitted</span></div>
-          <div id="vaction-rera"><button class="vbtn vbtn-secondary" onclick="submitRera()">Submit RERA</button></div>
+        <!-- Row 3: Dynamic — RERA for Agent/Builder, Profile Completeness for Owner -->
+        <div class="vrow" id="vrow-third">
+          <!-- Filled dynamically by renderVerification() -->
         </div>
 
       </div><!-- end .vcard -->
@@ -238,7 +237,7 @@
     <div style="font-size:40px;margin-bottom:10px">📱</div>
     <h3>Verify Phone Number</h3>
     <p id="otp-modal-desc">Enter the 6-digit OTP sent to your number.</p>
-    <div class="otp-boxes" id="otp-boxes">
+    <div class="otp-boxes">
       <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" id="otp0"/>
       <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" id="otp1"/>
       <input class="otp-box" maxlength="1" inputmode="numeric" pattern="[0-9]" id="otp2"/>
@@ -271,7 +270,7 @@
 
 <script>
 let tok=null, cu=null, profileData=null;
-let otpPhone='', otpResendTimer=null;
+let otpPhone='';
 
 window.addEventListener('DOMContentLoaded', async () => {
   const s=await getSession(); if(!s){window.location.href='/login.html';return;}
@@ -283,11 +282,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   if(new URLSearchParams(window.location.search).get('tab')==='listings') sw('listings');
 });
 
-// ── Role show/hide ──
+// ── Role show/hide (form fields + verification card) ──
 function onRoleChange(val){
   const af=document.getElementById('agent-fields');
   if(val==='agent'||val==='builder') af.classList.add('show');
   else af.classList.remove('show');
+  // Re-render the third verification row live when role changes
+  if(profileData) renderVerification({...profileData, role: val});
 }
 
 // ── Load Profile ──
@@ -299,41 +300,71 @@ async function loadProfile(){
     profileData=p;
     const name=p.fullname||cu.email||'User';
     const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-    document.getElementById('pav').innerHTML=p.avatar_url?`<img src="${p.avatar_url}" alt="avatar"/>`:`<span>${ini}</span>`;
+    document.getElementById('pav').innerHTML=p.avatar_url
+      ?`<img src="${p.avatar_url}" alt="avatar"/>`
+      :`<span>${ini}</span>`;
     document.getElementById('p-name').textContent=name;
     document.getElementById('p-email').textContent=cu.email||'';
-    ['fullname','phone','bio','role','agency_name','rera_number'].forEach(k=>{const el=document.getElementById(k);if(el&&p[k])el.value=p[k];});
+    ['fullname','phone','bio','role','agency_name','rera_number'].forEach(k=>{
+      const el=document.getElementById(k);
+      if(el&&p[k]) el.value=p[k];
+    });
     onRoleChange(p.role||'owner');
     renderVerification(p);
-  }catch(e){document.getElementById('p-name').textContent=cu.email||'User';}
+  }catch(e){
+    document.getElementById('p-name').textContent=cu.email||'User';
+  }
 }
 
 // ── Save Profile ──
 async function saveProfile(e){
   e.preventDefault();
-  const btn=document.getElementById('save-btn'); btn.disabled=true; btn.textContent='Saving…';
+  const btn=document.getElementById('save-btn');
+  btn.disabled=true; btn.textContent='Saving…';
   const payload={};
-  ['fullname','phone','bio','role','agency_name','rera_number'].forEach(k=>{const v=document.getElementById(k)?.value?.trim();if(v)payload[k]=v;});
+  ['fullname','phone','bio','role','agency_name','rera_number'].forEach(k=>{
+    const v=document.getElementById(k)?.value?.trim();
+    if(v) payload[k]=v;
+  });
   try{
-    const r=await fetch('/api/profiles/me',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(payload)});
+    const r=await fetch('/api/profiles/me',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
+      body:JSON.stringify(payload)
+    });
     if(!r.ok) throw new Error((await r.json()).error||'Failed');
     toast('✅ Profile saved!');
     if(payload.fullname) document.getElementById('p-name').textContent=payload.fullname;
-    // Refresh verification after save (phone number may have been added)
     await loadProfile();
   }catch(ex){toast('Error: '+ex.message);}
-  finally{btn.disabled=false;btn.textContent='💾 Save Profile';}
+  finally{btn.disabled=false; btn.textContent='💾 Save Profile';}
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// ── TRUST & VERIFICATION ──
-// ──────────────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════
+// TRUST & VERIFICATION
+// ══════════════════════════════════════════════════
 
 function renderVerification(p){
-  let score=0;
+  // Read current role from dropdown (may differ from saved if user just changed it)
+  const role = document.getElementById('role')?.value || p?.role || 'owner';
+  const isAgentOrBuilder = role==='agent' || role==='builder';
 
-  // 1. Email
-  const emailVerified = cu?.email_confirmed_at || p?.email_verified;
+  // Max score depends on role:
+  // Owner   → Email + Phone + Profile Complete = 3
+  // Agent/Builder → Email + Phone + RERA = 3
+  let score=0;
+  const maxScore=3;
+
+  // ── Update subtitle based on role ──
+  const sub=document.getElementById('vcard-sub');
+  if(isAgentOrBuilder){
+    sub.innerHTML=`Verified profiles get more inquiries. Submit your RERA number to get the <strong>Trusted ${role==='agent'?'Agent':'Builder'}</strong> badge on your listings.`;
+  }else{
+    sub.innerHTML=`Verified profiles get more inquiries. Complete your name and bio to build trust with buyers and renters.`;
+  }
+
+  // ── Row 1: Email ──
+  const emailVerified=cu?.email_confirmed_at||p?.email_verified;
   if(emailVerified){
     score++;
     document.getElementById('vstatus-email').innerHTML='<span class="vbadge vbadge-verified">✅ Verified</span>';
@@ -342,11 +373,12 @@ function renderVerification(p){
   }else{
     document.getElementById('vstatus-email').innerHTML='<span class="vbadge vbadge-unverified">Not Verified</span>';
     document.getElementById('vaction-email').innerHTML='<button class="vbtn vbtn-primary" onclick="verifyEmail()">Verify Email</button>';
+    document.getElementById('vdesc-email').textContent='Verify your email to confirm your identity';
   }
 
-  // 2. Phone
-  const phoneVerified = p?.phone_verified;
-  const hasPhone = p?.phone || document.getElementById('phone')?.value?.trim();
+  // ── Row 2: Phone ──
+  const phoneVerified=p?.phone_verified;
+  const hasPhone=p?.phone||document.getElementById('phone')?.value?.trim();
   if(phoneVerified){
     score++;
     document.getElementById('vstatus-phone').innerHTML='<span class="vbadge vbadge-verified">✅ Verified</span>';
@@ -362,31 +394,94 @@ function renderVerification(p){
     document.getElementById('vdesc-phone').textContent='Add your phone number first, then verify';
   }
 
-  // 3. RERA
-  const reraVerified  = p?.rera_verified;
-  const reraPending   = p?.rera_number && !p?.rera_verified;
-  if(reraVerified){
-    score++;
-    document.getElementById('vstatus-rera').innerHTML='<span class="vbadge vbadge-verified">✅ Verified</span>';
-    document.getElementById('vaction-rera').innerHTML='';
-    document.getElementById('vdesc-rera').textContent=`RERA ${p.rera_number} — Verified`;
-  }else if(reraPending){
-    document.getElementById('vstatus-rera').innerHTML='<span class="vbadge vbadge-pending">⏳ Under Review</span>';
-    document.getElementById('vaction-rera').innerHTML='<button class="vbtn vbtn-secondary" disabled>Submitted</button>';
-    document.getElementById('vdesc-rera').textContent=`${p.rera_number} — Admin reviewing (24–48 hrs)`;
+  // ── Row 3: RERA (Agent/Builder) OR Profile Completeness (Owner) ──
+  const thirdRow=document.getElementById('vrow-third');
+
+  if(isAgentOrBuilder){
+    // ── RERA row ──
+    const reraVerified=p?.rera_verified;
+    const reraPending=p?.rera_number&&!p?.rera_verified;
+    let reraStatus='', reraAction='', reraDesc='';
+
+    if(reraVerified){
+      score++;
+      reraStatus='<span class="vbadge vbadge-verified">✅ Verified</span>';
+      reraAction='';
+      reraDesc=`RERA ${p.rera_number} — Verified by Estate49`;
+    }else if(reraPending){
+      reraStatus='<span class="vbadge vbadge-pending">⏳ Under Review</span>';
+      reraAction='<button class="vbtn vbtn-secondary" disabled>Submitted</button>';
+      reraDesc=`${p.rera_number} — Admin reviewing (24–48 hrs)`;
+    }else{
+      reraStatus='<span class="vbadge vbadge-unverified">Not Submitted</span>';
+      reraAction='<button class="vbtn vbtn-secondary" onclick="submitRera()">Submit RERA</button>';
+      reraDesc=`${role==='agent'?'Agents':'Builders'} must submit RERA number for verification`;
+    }
+
+    thirdRow.innerHTML=`
+      <div class="vrow-left">
+        <div class="vrow-icon">🏛️</div>
+        <div class="vrow-info">
+          <div class="vrow-label">RERA Registration</div>
+          <div class="vrow-desc">${reraDesc}</div>
+        </div>
+      </div>
+      <div>${reraStatus}</div>
+      <div>${reraAction}</div>`;
+
   }else{
-    document.getElementById('vstatus-rera').innerHTML='<span class="vbadge vbadge-unverified">Not Submitted</span>';
-    document.getElementById('vaction-rera').innerHTML='<button class="vbtn vbtn-secondary" onclick="submitRera()">Submit RERA</button>';
+    // ── Owner: Profile Completeness row ──
+    const name=document.getElementById('fullname')?.value?.trim()||p?.fullname||'';
+    const bio=document.getElementById('bio')?.value?.trim()||p?.bio||'';
+    const isComplete=!!(name&&bio);
+
+    if(isComplete) score++;
+
+    const statusHtml=isComplete
+      ?'<span class="vbadge vbadge-verified">✅ Complete</span>'
+      :'<span class="vbadge vbadge-unverified">Incomplete</span>';
+
+    const actionHtml=isComplete
+      ?''
+      :`<button class="vbtn vbtn-secondary" onclick="focusProfile()">Complete</button>`;
+
+    const previewHtml=isComplete
+      ?`<div class="vrow-owner-info" style="margin-top:6px;width:100%">
+          <div class="vrow-owner-name">${x(name)}</div>
+          <div class="vrow-owner-bio">${x(bio.length>80?bio.slice(0,80)+'…':bio)}</div>
+        </div>`
+      :`<div class="vrow-owner-empty" style="margin-top:4px;width:100%">
+          Add your full name and bio so buyers can trust you
+        </div>`;
+
+    thirdRow.innerHTML=`
+      <div class="vrow-left" style="flex-wrap:wrap">
+        <div class="vrow-icon">👤</div>
+        <div class="vrow-info" style="flex:1">
+          <div class="vrow-label">Profile Completeness</div>
+          ${previewHtml}
+        </div>
+      </div>
+      <div>${statusHtml}</div>
+      <div>${actionHtml}</div>`;
   }
 
-  // Trust score bar
-  const pct=Math.round((score/3)*100);
-  document.getElementById('trust-score-val').textContent=`${score} / 3`;
+  // ── Trust score bar ──
+  const pct=Math.round((score/maxScore)*100);
+  document.getElementById('trust-score-val').textContent=`${score} / ${maxScore}`;
   document.getElementById('trust-bar-fill').style.width=`${pct}%`;
   document.getElementById('trust-bar-fill').style.background=
     score===3?'linear-gradient(90deg,#2e7d32,#43a047)':
     score===2?'linear-gradient(90deg,#e65100,#fb8c00)':
-    'linear-gradient(90deg,var(--primary),#e67e22)';
+              'linear-gradient(90deg,var(--primary),#e67e22)';
+}
+
+// ── Focus profile form for owner ──
+function focusProfile(){
+  const target=document.getElementById('fullname');
+  target.scrollIntoView({behavior:'smooth',block:'center'});
+  target.focus();
+  toast('👆 Fill in your name and bio above, then save');
 }
 
 // ── Email Verification ──
@@ -394,7 +489,10 @@ async function verifyEmail(){
   const btn=document.querySelector('#vaction-email .vbtn');
   if(btn){btn.disabled=true;btn.textContent='Sending…';}
   try{
-    const {error}=await _sb.auth.resend({type:'signup',email:cu.email,options:{emailRedirectTo:window.location.origin+'/auth/callback'}});
+    const {error}=await _sb.auth.resend({
+      type:'signup',email:cu.email,
+      options:{emailRedirectTo:window.location.origin+'/auth/callback'}
+    });
     if(error) throw error;
     document.getElementById('vstatus-email').innerHTML='<span class="vbadge vbadge-pending">⏳ Email Sent</span>';
     document.getElementById('vaction-email').innerHTML='<button class="vbtn vbtn-secondary" onclick="verifyEmail()">Resend</button>';
@@ -407,8 +505,8 @@ async function verifyEmail(){
 
 // ── Phone Verification ──
 function promptAddPhone(){
-  document.getElementById('phone').focus();
   document.getElementById('phone').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('phone').focus();
   toast('👆 Add your phone number above, then save profile first');
 }
 
@@ -428,7 +526,6 @@ async function startPhoneVerify(){
     openOtpModal(phone);
     toast('📱 OTP sent to +91 '+phone);
   }catch(e){
-    // Fallback: if no OTP API, use Supabase phone OTP
     try{
       const {error}=await _sb.auth.signInWithOtp({phone:'+91'+phone});
       if(error) throw error;
@@ -444,19 +541,20 @@ async function startPhoneVerify(){
 
 function openOtpModal(phone){
   document.getElementById('otp-modal-desc').textContent=`Enter the 6-digit OTP sent to +91 ${phone}`;
-  // Clear boxes
   for(let i=0;i<6;i++) document.getElementById('otp'+i).value='';
   document.getElementById('otp-modal').style.display='flex';
   document.getElementById('otp0').focus();
-  // Auto-advance between boxes
   for(let i=0;i<6;i++){
     const box=document.getElementById('otp'+i);
-    box.addEventListener('input',()=>{
-      if(box.value.length===1&&i<5) document.getElementById('otp'+(i+1)).focus();
-      if(box.value.length===1&&i===5) document.getElementById('otp-submit-btn').focus();
+    // Clone to remove old listeners
+    const fresh=box.cloneNode(true);
+    box.parentNode.replaceChild(fresh,box);
+    fresh.addEventListener('input',()=>{
+      if(fresh.value.length===1&&i<5) document.getElementById('otp'+(i+1)).focus();
+      if(fresh.value.length===1&&i===5) document.getElementById('otp-submit-btn').focus();
     });
-    box.addEventListener('keydown',e=>{
-      if(e.key==='Backspace'&&!box.value&&i>0) document.getElementById('otp'+(i-1)).focus();
+    fresh.addEventListener('keydown',e=>{
+      if(e.key==='Backspace'&&!fresh.value&&i>0) document.getElementById('otp'+(i-1)).focus();
     });
   }
 }
@@ -469,7 +567,6 @@ async function submitOtp(){
   const btn=document.getElementById('otp-submit-btn');
   btn.disabled=true;btn.textContent='Verifying…';
   try{
-    // Try custom endpoint first
     let verified=false;
     try{
       const r=await fetch('/api/verify/phone/confirm',{
@@ -480,17 +577,18 @@ async function submitOtp(){
       if(r.ok) verified=true;
       else throw new Error((await r.json()).error||'Wrong OTP');
     }catch(e){
-      // Fallback: Supabase phone OTP verify
       const {error}=await _sb.auth.verifyOtp({phone:'+91'+otpPhone,token:otp,type:'sms'});
       if(error) throw error;
       verified=true;
     }
     if(verified){
-      // Mark phone_verified in profile
-      await fetch('/api/profiles/me',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify({phone_verified:true,phone:otpPhone})});
+      await fetch('/api/profiles/me',{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
+        body:JSON.stringify({phone_verified:true,phone:otpPhone})
+      });
       closeOtpModal();
       toast('✅ Phone number verified!');
-      // Update UI
       if(profileData) profileData.phone_verified=true;
       renderVerification({...profileData,phone_verified:true,phone:otpPhone});
     }
@@ -500,17 +598,14 @@ async function submitOtp(){
   }
 }
 
-async function resendOtp(){
-  closeOtpModal();
-  await startPhoneVerify();
-}
+async function resendOtp(){closeOtpModal();await startPhoneVerify();}
 
-// ── RERA Verification ──
+// ── RERA ──
 function submitRera(){
   const existing=document.getElementById('rera_number')?.value?.trim()||profileData?.rera_number||'';
   document.getElementById('rera-modal-input').value=existing;
   document.getElementById('rera-modal').style.display='flex';
-  document.getElementById('rera-modal-input').focus();
+  setTimeout(()=>document.getElementById('rera-modal-input').focus(),100);
 }
 function closeReraModal(){document.getElementById('rera-modal').style.display='none';}
 
@@ -520,9 +615,12 @@ async function submitReraConfirm(){
   const btn=document.querySelector('#rera-modal .btn-primary');
   btn.disabled=true;btn.textContent='Submitting…';
   try{
-    const r=await fetch('/api/profiles/me',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify({rera_number:rera,rera_verified:false})});
+    const r=await fetch('/api/profiles/me',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},
+      body:JSON.stringify({rera_number:rera,rera_verified:false})
+    });
     if(!r.ok) throw new Error((await r.json()).error||'Failed');
-    // Also update the profile form field
     const reraEl=document.getElementById('rera_number');
     if(reraEl) reraEl.value=rera;
     closeReraModal();
@@ -593,7 +691,9 @@ function sw(tab){
   document.querySelectorAll('.psec').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.ptab').forEach(el=>el.classList.remove('active'));
   document.getElementById('sec-'+tab).classList.add('active');
-  document.querySelectorAll('.ptab').forEach((el,i)=>{if((i===0&&tab==='profile')||(i===1&&tab==='listings'))el.classList.add('active');});
+  document.querySelectorAll('.ptab').forEach((el,i)=>{
+    if((i===0&&tab==='profile')||(i===1&&tab==='listings')) el.classList.add('active');
+  });
   if(tab==='listings') loadListings();
 }
 
