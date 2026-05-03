@@ -2,38 +2,106 @@ const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
 const { authMiddleware } = require('./auth-middleware');
+const { createClient }   = require('@supabase/supabase-js');
 
-const { createClient } = require('@supabase/supabase-js');
-const dbAdmin = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+// ── Lazy admin client — avoids crash if env var missing at boot ───────────────
+let _dbAdmin = null;
+function getDbAdmin() {
+  if (_dbAdmin) return _dbAdmin;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) {
+    console.error('[profiles] ❌ SUPABASE_URL or SUPABASE_SERVICE_KEY is missing!');
+    throw new Error('Server misconfiguration: missing Supabase admin credentials');
+  }
+  _dbAdmin = createClient(url, key);
+  console.log('[profiles] ✅ dbAdmin client created, key length:', key.length);
+  return _dbAdmin;
+}
 
+// ── requireAdmin middleware ───────────────────────────────────────────────────
 async function requireAdmin(req, res, next) {
   try {
-    const { data: profile } = await dbAdmin
+    const dbAdmin = getDbAdmin();
+    console.log('[requireAdmin] checking user:', req.user?.email, '| id:', req.user?.id);
+
+    const { data: profile, error } = await dbAdmin
       .from('profiles')
       .select('is_admin')
       .eq('id', req.user.id)
       .single();
-    const isAdmin =
-      profile?.is_admin === true ||
+
+    console.log('[requireAdmin] profile row:', profile, '| db error:', error?.message || null);
+
+    const metaAdmin =
       req.user.user_metadata?.is_admin === true ||
-      req.user.app_metadata?.role === 'admin';
-    if (!isAdmin) return res.status(403).json({ error: 'Forbidden — admin only' });
+      req.user.app_metadata?.role      === 'admin';
+
+    const isAdmin = profile?.is_admin === true || metaAdmin;
+    console.log('[requireAdmin] isAdmin:', isAdmin, '| metaAdmin:', metaAdmin);
+
+    if (!isAdmin) {
+      return res.status(403).json({
+        error:    'Forbidden — admin only',
+        userId:   req.user?.id,
+        dbAdmin:  profile?.is_admin ?? null,
+        metaAdmin
+      });
+    }
     next();
   } catch (e) {
-    res.status(403).json({ error: 'Admin check failed' });
+    console.error('[requireAdmin] threw:', e.message);
+    res.status(403).json({ error: 'Admin check failed: ' + e.message });
   }
 }
 
-// ══════════════════════════════════════════════════════
-// ✅ SPECIFIC routes MUST come before /:id wildcard
-// ══════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// 🔍 DEBUG — remove after confirming it works
+// ════════════════════════════════════════════════════
+router.get('/debug/env', async (req, res) => {
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  const url = process.env.SUPABASE_URL;
+  res.json({
+    has_url:         !!url,
+    url_prefix:      url?.slice(0, 30) || null,
+    has_service_key: !!key,
+    service_key_len: key?.length || 0,
+    service_key_prefix: key?.slice(0, 20) || null,
+    has_anon_key:    !!process.env.SUPABASE_ANON_KEY,
+    node_env:        process.env.NODE_ENV,
+  });
+});
+
+// DEBUG — check admin status for current user (auth required)
+router.get('/debug/me-admin', authMiddleware, async (req, res) => {
+  try {
+    const dbAdmin = getDbAdmin();
+    const { data: profile, error } = await dbAdmin
+      .from('profiles')
+      .select('id, email, is_admin, role')
+      .eq('id', req.user.id)
+      .single();
+    res.json({
+      auth_user_id:    req.user.id,
+      auth_user_email: req.user.email,
+      profile_row:     profile,
+      db_error:        error?.message || null,
+      user_metadata:   req.user.user_metadata,
+      app_metadata:    req.user.app_metadata,
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ════════════════════════════════════════════════════
+// PUBLIC + AUTH ROUTES (before /:id wildcard)
+// ════════════════════════════════════════════════════
 
 // GET /api/profiles/me
 router.get('/me', authMiddleware, async (req, res) => {
   try {
+    const dbAdmin = getDbAdmin();
     const { data, error } = await dbAdmin
       .from('profiles')
       .select('*')
@@ -62,6 +130,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 // PATCH /api/profiles/me
 router.patch('/me', authMiddleware, async (req, res) => {
   try {
+    const dbAdmin = getDbAdmin();
     const {
       rera_verified, phone_verified, is_admin,
       email_verified, id, created_at,
@@ -83,9 +152,14 @@ router.patch('/me', authMiddleware, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ════════════════════════════════════════════════════
+// ADMIN ROUTES
+// ════════════════════════════════════════════════════
+
 // GET /api/profiles/admin/all
 router.get('/admin/all', authMiddleware, requireAdmin, async (req, res) => {
   try {
+    const dbAdmin = getDbAdmin();
     const { data, error } = await dbAdmin
       .from('profiles')
       .select(`
@@ -104,6 +178,7 @@ router.get('/admin/all', authMiddleware, requireAdmin, async (req, res) => {
 // PATCH /api/profiles/admin/:id
 router.patch('/admin/:id', authMiddleware, requireAdmin, async (req, res) => {
   try {
+    const dbAdmin = getDbAdmin();
     const { id } = req.params;
     const { id: _id, created_at, ...updates } = req.body;
 
@@ -122,6 +197,7 @@ router.patch('/admin/:id', authMiddleware, requireAdmin, async (req, res) => {
 // GET /api/profiles/admin/stats
 router.get('/admin/stats', authMiddleware, requireAdmin, async (req, res) => {
   try {
+    const dbAdmin = getDbAdmin();
     const [profilesRes, propertiesRes] = await Promise.all([
       dbAdmin.from('profiles').select('id, phone_verified, rera_number, rera_verified'),
       dbAdmin.from('properties').select('id, status')
@@ -146,9 +222,9 @@ router.get('/admin/stats', authMiddleware, requireAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ══════════════════════════════════════════════════════
-// ⚠️  WILDCARD — must be LAST
-// ══════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// ⚠️  WILDCARD — must stay LAST
+// ════════════════════════════════════════════════════
 
 // GET /api/profiles/:id  (public)
 router.get('/:id', async (req, res) => {
