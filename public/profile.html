@@ -1,142 +1,227 @@
+<!-- ============================================================
+     profile.html  —  Estate49  (Enhanced + Verification Badges)
+     ============================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Profile — Estate49</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/auth.js"></script><script src="/nav.js"></script>
-  <link rel="stylesheet" href="/style.css"/>
-  <style>
-    .pw{max-width:860px;margin:0 auto;padding:36px 24px;}
-    .ptabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);}
-    .ptab{padding:10px 18px;font-size:var(--text-sm);font-weight:600;color:var(--muted);border-bottom:2px solid transparent;transition:all var(--transition);margin-bottom:-1px;background:none;border-left:none;border-right:none;border-top:none;cursor:pointer;}
-    .ptab.active{color:var(--primary);border-bottom-color:var(--primary);}
-    .psec{display:none;}.psec.active{display:block;}
-    .pcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;margin-bottom:20px;}
-    .avatar-row{display:flex;align-items:center;gap:20px;margin-bottom:28px;}
-    .p-avatar{width:80px;height:80px;border-radius:50%;background:var(--primary);color:#fff;font-size:28px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;}
-    .p-avatar img{width:100%;height:100%;object-fit:cover;}
-    .p-name{font-size:var(--text-xl);font-weight:800;}
-    .p-email{font-size:var(--text-sm);color:var(--muted);}
-    .form-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-    .lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
-    .lcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:all var(--transition);}
-    .lcard:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}
-    .lc-img{height:160px;background:var(--surface-3);position:relative;overflow:hidden;}
-    .lc-img img{width:100%;height:100%;object-fit:cover;}
-    .lc-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px;}
-    .lc-body{padding:12px;}
-    .lc-price{font-size:var(--text-lg);font-weight:800;color:var(--primary);}
-    .lc-title{font-size:var(--text-sm);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
-    .lc-loc{font-size:var(--text-xs);color:var(--muted);margin-bottom:8px;}
-    .status-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--divider);}
-    .sbadge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-    .sbadge.pending{background:#fff3cd;color:#856404;}
-    .sbadge.approved{background:#d4edda;color:#155724;}
-    .sbadge.rejected{background:#f8d7da;color:#721c24;}
-    .admin-note{font-size:11px;color:#721c24;padding:6px 12px;background:#fff5f5;border-top:1px solid #f8d7da;display:flex;gap:6px;align-items:flex-start;}
-    .lc-acts{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--divider);}
-
-    /* ── Phone Verification Card ── */
-    .pv-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
-    .pv-left{display:flex;align-items:center;gap:14px;}
-    .pv-icon{font-size:32px;flex-shrink:0;}
-    .pv-title{font-size:var(--text-base);font-weight:700;margin-bottom:3px;}
-    .pv-sub{font-size:var(--text-xs);color:var(--muted);line-height:1.55;}
-    .pv-badge-yes{display:inline-flex;align-items:center;gap:5px;background:#d4edda;color:#155724;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;}
-    .pv-badge-no{display:inline-flex;align-items:center;gap:5px;background:#fff3cd;color:#856404;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;}
-
-    @media(max-width:768px){
-      .pw{padding:14px 14px 80px;}
-      .pcard{padding:18px 14px;}
-      .form-2{grid-template-columns:1fr;}
-      .lgrid{grid-template-columns:1fr;}
-      .ptab{padding:9px 12px;font-size:12px;}
-      .avatar-row{gap:14px;}
-      .p-avatar{width:60px;height:60px;font-size:22px;}
-      .p-name{font-size:var(--text-lg);}
-      .pv-row{flex-direction:column;align-items:flex-start;}
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale1.0">
+<title>Profile — Estate49</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="auth.js"></script>
+<script src="nav.js"></script>
+<link rel="stylesheet" href="style.css">
+<style>
+.pw{max-width:860px;margin:0 auto;padding:36px 24px}
+/* ── Tabs ── */
+.ptabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border)}
+.ptab{padding:10px 18px;font-size:var(--text-sm);font-weight:600;color:var(--muted);border-bottom:2px solid transparent;transition:all var(--transition);margin-bottom:-1px;background:none;border-left:none;border-right:none;border-top:none;cursor:pointer}
+.ptab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.psec{display:none}.psec.active{display:block}
+/* ── Profile card ── */
+.pcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:28px;margin-bottom:20px}
+/* ── Avatar with verified ring ── */
+.avatar-row{display:flex;align-items:center;gap:20px;margin-bottom:28px}
+.p-avatar-wrap{position:relative;flex-shrink:0}
+.p-avatar{width:80px;height:80px;border-radius:50%;background:var(--primary);color:#fff;font-size:28px;font-weight:800;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.p-avatar img{width:100%;height:100%;object-fit:cover}
+.p-avatar-wrap.verified .p-avatar{outline:3px solid #2e7d32;outline-offset:3px}
+.avatar-verified-tick{position:absolute;bottom:2px;right:2px;width:22px;height:22px;background:#2e7d32;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:900}
+.p-name{font-size:var(--text-xl);font-weight:800}
+.p-email{font-size:var(--text-sm);color:var(--muted)}
+.p-role-badge{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;background:var(--surface-2);color:var(--muted)}
+/* ── Trust / Verification Panel ── */
+.verify-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px;margin-bottom:20px}
+.verify-title{font-size:var(--text-base);font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.verify-sub{font-size:var(--text-xs);color:var(--muted);margin-bottom:18px}
+.trust-score-row{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.trust-score-bar-wrap{flex:1;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.trust-score-bar{height:100%;border-radius:4px;transition:width .4s}
+.trust-score-label{font-size:13px;font-weight:800;min-width:36px;text-align:right}
+.verify-list{display:flex;flex-direction:column;gap:10px}
+.verify-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:var(--radius-lg);border:1px solid var(--border);background:var(--surface)}
+.verify-item.done{border-color:#a5d6a7;background:#f1f8f1}
+.verify-item.done .vi-icon{color:#2e7d32}
+.verify-item.pending .vi-icon{color:#bbb}
+.vi-icon{font-size:18px;flex-shrink:0}
+.vi-body{flex:1}
+.vi-label{font-size:14px;font-weight:700}
+.vi-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.vi-badge{font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px}
+.vi-badge.verified{background:#c8e6c9;color:#2e7d32}
+.vi-badge.unverified{background:#f5f5f5;color:#999}
+.vi-badge.pending{background:#fff3cd;color:#856404}
+.vi-action{font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;background:none;border:none;font-family:inherit;padding:4px 10px;border:1.5px solid var(--primary);border-radius:var(--radius-sm)}
+.vi-action:hover{background:var(--primary-xlight)}
+/* ── Form ── */
+.form-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+/* ── Listings grid ── */
+.lgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.lcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;transition:all var(--transition)}
+.lcard:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.lc-img{height:160px;background:var(--surface-3);position:relative;overflow:hidden}
+.lc-img img{width:100%;height:100%;object-fit:cover}
+.lc-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:36px}
+.lc-body{padding:12px}
+.lc-price{font-size:var(--text-lg);font-weight:800;color:var(--primary)}
+.lc-title{font-size:var(--text-sm);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.lc-loc{font-size:var(--text-xs);color:var(--muted);margin-bottom:8px}
+.status-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--divider)}
+.sbadge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.sbadge.pending{background:#fff3cd;color:#856404}
+.sbadge.approved{background:#d4edda;color:#155724}
+.sbadge.rejected{background:#f8d7da;color:#721c24}
+.admin-note{font-size:11px;color:#721c24;padding:6px 12px;background:#fff5f5;border-top:1px solid #f8d7da;display:flex;gap:6px;align-items:flex-start}
+.lc-acts{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--divider)}
+/* ── More info panel in listing card ── */
+.lc-verified-row{display:flex;gap:6px;flex-wrap:wrap;padding:6px 12px;border-top:1px solid var(--divider)}
+.lc-vbadge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.lc-vbadge.phone{background:#e3f2fd;color:#1565c0}
+.lc-vbadge.rera{background:#f3e5f5;color:#6a1b9a}
+.lc-vbadge.vastu{background:#e8f5e9;color:#2e7d32}
+.lc-vbadge.nobroke{background:#fff8e1;color:#e65100}
+@media(max-width:768px){
+  .pw{padding:14px 14px 80px}
+  .pcard{padding:18px 14px}
+  .form-2{grid-template-columns:1fr}
+  .lgrid{grid-template-columns:1fr}
+  .ptab{padding:9px 12px;font-size:12px}
+  .avatar-row{gap:14px}
+  .p-avatar{width:60px;height:60px;font-size:22px}
+  .p-name{font-size:var(--text-lg)}
+  .verify-panel{padding:18px 14px}
+}
+</style>
 </head>
 <body>
-<div class="auth-loading" id="al"><div class="al-icon">🏠</div><div class="al-spin"></div></div>
+<div class="auth-loading" id="al"><div class="al-icon"></div><div class="al-spin"></div></div>
 <div class="page" id="page">
   <div id="navbar-root"></div>
   <div class="pw">
     <div class="ptabs">
-      <button class="ptab active" onclick="sw('profile')">👤 My Profile</button>
-      <button class="ptab" onclick="sw('listings')">🏠 My Listings</button>
+      <button class="ptab active" onclick="sw('profile')">My Profile</button>
+      <button class="ptab" onclick="sw('listings')">My Listings</button>
     </div>
 
-    <!-- ── PROFILE TAB ── -->
+    <!-- ═══════════════ PROFILE TAB ═══════════════ -->
     <div class="psec active" id="sec-profile">
 
-      <!-- Personal Details Card -->
+      <!-- Profile Card -->
       <div class="pcard">
         <div class="avatar-row">
-          <div class="p-avatar" id="pav">?</div>
+          <div class="p-avatar-wrap" id="pav-wrap">
+            <div class="p-avatar" id="pav">?</div>
+          </div>
           <div>
             <div class="p-name" id="p-name">Loading…</div>
             <div class="p-email" id="p-email"></div>
+            <div class="p-role-badge" id="p-role-badge" style="display:none"></div>
           </div>
         </div>
         <form onsubmit="saveProfile(event)">
           <div class="form-2" style="margin-bottom:16px">
-            <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="fullname" placeholder="Your name"/></div>
-            <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="phone" placeholder="9876543210"/></div>
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-input" id="fullname" placeholder="Your name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="tel" class="form-input" id="phone" placeholder="9876543210">
+            </div>
           </div>
           <div class="form-group" style="margin-bottom:16px">
             <label class="form-label">Bio</label>
-            <textarea class="form-textarea" id="bio" rows="3" placeholder="Tell others a bit about yourself…"></textarea>
+            <textarea class="form-textarea" id="bio" rows="3" placeholder="Tell others a bit about yourself"></textarea>
           </div>
           <div class="form-2" style="margin-bottom:16px">
-            <div class="form-group"><label class="form-label">I am a</label>
+            <div class="form-group">
+              <label class="form-label">I am a</label>
               <select class="form-select" id="role">
                 <option value="owner">Owner</option>
                 <option value="agent">Agent</option>
                 <option value="builder">Builder</option>
               </select>
             </div>
-            <div class="form-group"><label class="form-label">Agency Name</label><input type="text" class="form-input" id="agency_name" placeholder="Optional"/></div>
+            <div class="form-group">
+              <label class="form-label">Agency Name</label>
+              <input type="text" class="form-input" id="agencyname" placeholder="Optional">
+            </div>
           </div>
           <div class="form-group" style="margin-bottom:20px">
             <label class="form-label">RERA Number</label>
-            <input type="text" class="form-input" id="rera_number" placeholder="Optional — for agents/builders"/>
+            <input type="text" class="form-input" id="reranumber" placeholder="Optional — for agents/builders">
           </div>
-          <button type="submit" class="btn btn-primary" id="save-btn">💾 Save Profile</button>
+          <button type="submit" class="btn btn-primary" id="save-btn">Save Profile</button>
         </form>
       </div>
 
-      <!-- ── Phone Verification Card ── -->
-      <div class="pcard">
-        <div class="pv-row">
-          <div class="pv-left">
-            <div class="pv-icon">📱</div>
-            <div>
-              <div class="pv-title">Phone Verification</div>
-              <div class="pv-sub" id="pv-sub">
-                Verify your phone to build trust with buyers &amp; renters.<br>
-                Your number is <strong>never</strong> shown publicly.
-              </div>
-            </div>
+      <!-- ── Trust & Verification Panel ── -->
+      <div class="verify-panel" id="verify-panel">
+        <div class="verify-title">
+          <span>🔐</span> Trust & Verification
+        </div>
+        <div class="verify-sub">Verified accounts build more trust with property seekers.</div>
+
+        <!-- Trust score bar -->
+        <div class="trust-score-row">
+          <span style="font-size:13px;color:var(--muted);font-weight:600">Trust Score</span>
+          <div class="trust-score-bar-wrap">
+            <div class="trust-score-bar" id="trust-bar" style="width:0%;background:#c0392b"></div>
           </div>
-          <div id="pv-action">
-            <!-- filled by loadPhoneVerifyStatus() -->
+          <span class="trust-score-label" id="trust-score-label">0%</span>
+        </div>
+
+        <div class="verify-list">
+          <!-- Email -->
+          <div class="verify-item" id="vi-email">
+            <span class="vi-icon">✉️</span>
+            <div class="vi-body">
+              <div class="vi-label">Email Address</div>
+              <div class="vi-sub" id="vi-email-sub">Not verified</div>
+            </div>
+            <span class="vi-badge unverified" id="vi-email-badge">Unverified</span>
+          </div>
+          <!-- Phone -->
+          <div class="verify-item" id="vi-phone">
+            <span class="vi-icon">📱</span>
+            <div class="vi-body">
+              <div class="vi-label">Phone Number</div>
+              <div class="vi-sub" id="vi-phone-sub">Not verified</div>
+            </div>
+            <span class="vi-badge unverified" id="vi-phone-badge">Unverified</span>
+            <button class="vi-action" id="vi-phone-btn" onclick="window.location.href='phone-verify.html'" style="display:none">Verify</button>
+          </div>
+          <!-- Profile completeness -->
+          <div class="verify-item" id="vi-profile">
+            <span class="vi-icon">👤</span>
+            <div class="vi-body">
+              <div class="vi-label">Profile Complete</div>
+              <div class="vi-sub" id="vi-profile-sub">Fill in name, phone, and bio</div>
+            </div>
+            <span class="vi-badge unverified" id="vi-profile-badge">Incomplete</span>
+          </div>
+          <!-- RERA (for agents/builders) -->
+          <div class="verify-item" id="vi-rera" style="display:none">
+            <span class="vi-icon">🏛️</span>
+            <div class="vi-body">
+              <div class="vi-label">RERA Registration</div>
+              <div class="vi-sub" id="vi-rera-sub">Add your RERA number above</div>
+            </div>
+            <span class="vi-badge unverified" id="vi-rera-badge">Not Added</span>
           </div>
         </div>
       </div>
 
-    </div><!-- /#sec-profile -->
+    </div>
 
-    <!-- ── LISTINGS TAB ── -->
+    <!-- ═══════════════ LISTINGS TAB ═══════════════ -->
     <div class="psec" id="sec-listings">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
         <div style="font-size:var(--text-lg);font-weight:700">My Listed Properties</div>
-        <a href="/list-property.html" class="btn btn-primary">+ New Listing</a>
+        <a href="list-property.html" class="btn btn-primary">+ New Listing</a>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
         <span class="sbadge pending">⏳ Pending</span>
         <span class="sbadge approved">✅ Approved</span>
         <span class="sbadge rejected">❌ Rejected</span>
@@ -149,111 +234,218 @@
   </div>
 </div>
 <div class="toast" id="toast-el"></div>
+
 <script>
 let tok=null, cu=null;
-window.addEventListener('DOMContentLoaded', async () => {
-  const s=await getSession(); if(!s){window.location.href='/login.html';return;}
-  cu=s.user; tok=s.access_token;
+
+window.addEventListener('DOMContentLoaded', async ()=>{
+  const s = await getSession();
+  if(!s){ window.location.href='login.html'; return; }
+  cu=s.user; tok=s.accessToken;
   document.getElementById('al').style.display='none';
   document.getElementById('page').style.display='block';
-  await initNavbar({active:'profile'});
+  await initNavbar('active:profile');
   await loadProfile();
   if(new URLSearchParams(window.location.search).get('tab')==='listings') sw('listings');
 });
 
 async function loadProfile(){
   try{
-    const r=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${tok}`}});
+    const r = await fetch('/api/profiles/me', {headers:{Authorization:`Bearer ${tok}`}});
     if(!r.ok) throw new Error();
-    const p=await r.json();
-    const name=p.fullname||cu.email||'User';
-    const ini=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-    document.getElementById('pav').innerHTML=p.avatar_url?`<img src="${p.avatar_url}" alt="avatar"/>`:`<span>${ini}</span>`;
-    document.getElementById('p-name').textContent=name;
-    document.getElementById('p-email').textContent=cu.email||'';
-    ['fullname','phone','bio','role','agency_name','rera_number'].forEach(k=>{const el=document.getElementById(k);if(el&&p[k])el.value=p[k];});
-    loadPhoneVerifyStatus(p);
-  }catch(e){document.getElementById('p-name').textContent=cu.email||'User';}
+    const p = await r.json();
+    const name = p.fullname || cu.email || 'User';
+    const ini = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    // Avatar
+    const avWrap = document.getElementById('pav-wrap');
+    const av = document.getElementById('pav');
+    av.innerHTML = p.avatarurl ? `<img src="${p.avatarurl}" alt="avatar">` : `<span>${ini}</span>`;
+    // Verified ring + tick
+    if(p.phoneverified){
+      avWrap.classList.add('verified');
+      avWrap.insertAdjacentHTML('beforeend','<div class="avatar-verified-tick">✓</div>');
+    }
+    document.getElementById('p-name').textContent = name;
+    document.getElementById('p-email').textContent = cu.email;
+    // Role badge
+    if(p.role){
+      const rb = document.getElementById('p-role-badge');
+      const icons={owner:'🏠',agent:'🤝',builder:'🏗️'};
+      rb.innerHTML = `${icons[p.role]||''} ${cp(p.role)}`;
+      rb.style.display='inline-flex';
+    }
+    // Fill form
+    ['fullname','phone','bio','role','agencyname','reranumber'].forEach(k=>{
+      const el=document.getElementById(k); if(el && p[k]!=null) el.value=p[k];
+    });
+    // Update verification panel
+    updateVerifyPanel(p);
+    // Show RERA row for agents/builders
+    if(p.role==='agent'||p.role==='builder'){
+      document.getElementById('vi-rera').style.display='flex';
+    }
+  } catch(e){
+    document.getElementById('p-name').textContent = cu.email||'User';
+  }
 }
 
-function loadPhoneVerifyStatus(p){
-  const actionEl = document.getElementById('pv-action');
-  const subEl    = document.getElementById('pv-sub');
-  if(p.phone_verified){
-    subEl.innerHTML = `Verified as <strong>${p.phone || 'your number'}</strong>. Buyers &amp; renters see a ✅ Verified badge on your profile.`;
-    actionEl.innerHTML = `<span class="pv-badge-yes">✅ Verified</span>`;
+function updateVerifyPanel(p){
+  let score=0, total=4;
+  // Email
+  const emailVerified = !!cu.email_confirmed_at || !!cu.confirmed_at;
+  if(emailVerified){
+    score++;
+    document.getElementById('vi-email').classList.add('done');
+    document.getElementById('vi-email-badge').className='vi-badge verified';
+    document.getElementById('vi-email-badge').textContent='✓ Verified';
+    document.getElementById('vi-email-sub').textContent=cu.email;
   } else {
-    subEl.innerHTML = `Verify your phone to build trust with buyers &amp; renters.<br>Your number is <strong>never</strong> shown publicly.`;
-    actionEl.innerHTML = `<a href="/phone-verify.html" class="btn btn-primary" style="white-space:nowrap">📱 Verify Now</a>`;
+    document.getElementById('vi-email-sub').textContent='Please verify your email';
   }
+  // Phone
+  const phoneVerified = !!p.phoneverified;
+  if(phoneVerified){
+    score++;
+    document.getElementById('vi-phone').classList.add('done');
+    document.getElementById('vi-phone-badge').className='vi-badge verified';
+    document.getElementById('vi-phone-badge').textContent='✓ Verified';
+    document.getElementById('vi-phone-sub').textContent=p.phone||'Phone verified';
+    document.getElementById('vi-phone-btn').style.display='none';
+  } else {
+    document.getElementById('vi-phone-sub').textContent=p.phone?`${p.phone} — not verified yet`:'Add & verify your phone';
+    document.getElementById('vi-phone-btn').style.display='inline-block';
+  }
+  // Profile completeness
+  const complete = !!(p.fullname && p.phone && p.bio);
+  if(complete){
+    score++;
+    document.getElementById('vi-profile').classList.add('done');
+    document.getElementById('vi-profile-badge').className='vi-badge verified';
+    document.getElementById('vi-profile-badge').textContent='✓ Complete';
+    document.getElementById('vi-profile-sub').textContent='Name, phone and bio filled in';
+  } else {
+    const missing=[];
+    if(!p.fullname) missing.push('name');
+    if(!p.phone) missing.push('phone');
+    if(!p.bio) missing.push('bio');
+    document.getElementById('vi-profile-sub').textContent=`Missing: ${missing.join(', ')}`;
+  }
+  // RERA
+  if(p.role==='agent'||p.role==='builder'){
+    if(p.reranumber){
+      score++;
+      document.getElementById('vi-rera').classList.add('done');
+      document.getElementById('vi-rera-badge').className='vi-badge verified';
+      document.getElementById('vi-rera-badge').textContent='✓ Added';
+      document.getElementById('vi-rera-sub').textContent=p.reranumber;
+    } else {
+      document.getElementById('vi-rera-sub').textContent='Add your RERA number above';
+    }
+  } else {
+    total=3; // RERA not applicable
+  }
+  // Trust score bar
+  const pct=Math.round((score/total)*100);
+  const bar=document.getElementById('trust-bar');
+  bar.style.width=pct+'%';
+  bar.style.background = pct>=80?'#2e7d32':pct>=50?'#e65100':'#c0392b';
+  document.getElementById('trust-score-label').textContent=pct+'%';
+  document.getElementById('trust-score-label').style.color=bar.style.background;
 }
 
 async function saveProfile(e){
   e.preventDefault();
-  const btn=document.getElementById('save-btn'); btn.disabled=true; btn.textContent='Saving…';
+  const btn=document.getElementById('save-btn');
+  btn.disabled=true; btn.textContent='Saving…';
   const payload={};
-  ['fullname','phone','bio','role','agency_name','rera_number'].forEach(k=>{const v=document.getElementById(k)?.value?.trim();if(v)payload[k]=v;});
+  ['fullname','phone','bio','role','agencyname','reranumber'].forEach(k=>{
+    const v=document.getElementById(k)?.value?.trim; if(v) payload[k]=v;
+  });
+  // use .value directly:
+  ['fullname','phone','bio','role','agencyname','reranumber'].forEach(k=>{
+    const el=document.getElementById(k); if(el) payload[k]=el.value?.trim()||null;
+  });
   try{
-    const r=await fetch('/api/profiles/me',{method:'PATCH',headers:{'Content-Type':'application/json',Authorization:`Bearer ${tok}`},body:JSON.stringify(payload)});
-    if(!r.ok) throw new Error((await r.json()).error||'Failed');
-    toast('✅ Profile saved!');
+    const r=await fetch('/api/profiles/me',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':`Bearer ${tok}`},body:JSON.stringify(payload)});
+    if(!r.ok) throw new Error(await r.json().then(d=>d.error)||'Failed');
+    toast('Profile saved!');
     if(payload.fullname) document.getElementById('p-name').textContent=payload.fullname;
-  }catch(ex){toast('Error: '+ex.message);}
-  finally{btn.disabled=false;btn.textContent='💾 Save Profile';}
+    // Refresh verify panel with updated data
+    const rp=await fetch('/api/profiles/me',{headers:{Authorization:`Bearer ${tok}`}});
+    if(rp.ok) updateVerifyPanel(await rp.json());
+  } catch(ex){ toast('Error: '+ex.message); }
+  finally{ btn.disabled=false; btn.textContent='Save Profile'; }
 }
 
 async function loadListings(){
   try{
     const r=await fetch('/api/properties/mine',{headers:{Authorization:`Bearer ${tok}`}});
-    const data=await r.json(); if(!Array.isArray(data))throw new Error();
+    const data=await r.json();
+    if(!Array.isArray(data)) throw new Error();
     const g=document.getElementById('lgrid');
     if(!data.length){
-      g.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏠</div><div class="empty-title">No listings yet</div><a href="/list-property.html" class="btn btn-primary">List a Property</a></div>';
+      g.innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🏠</div><div class="empty-title">No listings yet</div><a href="list-property.html" class="btn btn-primary">List a Property</a></div>`;
       return;
     }
     g.innerHTML=data.map(p=>{
       const status=p.status||'pending';
       const icons={pending:'⏳',approved:'✅',rejected:'❌'};
       const labels={pending:'Pending Approval',approved:'Approved',rejected:'Rejected'};
-      return`<div class="lcard">
+      // Verification mini-badges on each listing card
+      let vbadges='';
+      if(p.phoneverified||p.contactphone) vbadges+=`<span class="lc-vbadge phone">📱 Phone</span>`;
+      if(p.reranumber) vbadges+=`<span class="lc-vbadge rera">🏛 RERA</span>`;
+      if(p.vastucompliance==='yes') vbadges+=`<span class="lc-vbadge vastu">🧿 Vastu</span>`;
+      if(p.nobrokerage) vbadges+=`<span class="lc-vbadge nobroke">0% Brokerage</span>`;
+      return `<div class="lcard">
         <div class="lc-img">
-          ${p.photos?.[0]?`<img src="${p.photos[0]}" alt="${x(p.title)}" loading="lazy"/>`:'<div class="lc-ph">🏠</div>'}
+          ${p.photos?.[0]?`<img src="${p.photos[0]}" alt="${x(p.title)}" loading="lazy">`:`<div class="lc-ph">🏠</div>`}
           <span style="position:absolute;top:8px;left:8px" class="badge badge-${p.type==='rent'?'rent':'buy'}">${p.type==='rent'?'Rent':'Sale'}</span>
         </div>
         <div class="lc-body">
-          <div class="lc-price">₹${fp(p.price)}${p.type==='rent'?'<span style="font-size:var(--text-xs);color:var(--muted);font-weight:400">/mo</span>':''}</div>
+          <div class="lc-price">${fp(p.price)}${p.type==='rent'?`<span style="font-size:var(--text-xs);color:var(--muted);font-weight:400">/mo</span>`:''}</div>
           <div class="lc-title">${x(p.title||'Property')}</div>
-          <div class="lc-loc">📍 ${x([p.locality,p.city].filter(Boolean).join(', '))}</div>
+          <div class="lc-loc">${x([p.locality,p.city].filter(Boolean).join(', '))}</div>
         </div>
-        <div class="status-bar"><span class="sbadge ${status}">${icons[status]} ${labels[status]}</span></div>
-        ${p.admin_note?`<div class="admin-note">📝 ${x(p.admin_note)}</div>`:''}
+        ${vbadges?`<div class="lc-verified-row">${vbadges}</div>`:''}
+        <div class="status-bar">
+          <span class="sbadge ${status}">${icons[status]} ${labels[status]||status}</span>
+        </div>
+        ${p.adminnote?`<div class="admin-note">⚠️ ${x(p.adminnote)}</div>`:''}
         <div class="lc-acts">
-          <button class="btn btn-primary" style="flex:1;font-size:var(--text-xs);padding:6px" onclick="window.location.href='/property.html?id=${p.id}'">View</button>
-          <button class="btn btn-secondary" style="flex:1;font-size:var(--text-xs);padding:6px" onclick="window.location.href='/list-property.html?edit=${p.id}'">Edit</button>
+          <button class="btn btn-primary" style="flex:1;font-size:var(--text-xs);padding:6px" onclick="window.location.href='property.html?id=${p.id}'">View</button>
+          <button class="btn btn-secondary" style="flex:1;font-size:var(--text-xs);padding:6px" onclick="window.location.href='list-property.html?edit=${p.id}'">Edit</button>
           <button style="padding:6px 10px;color:#dc2626;font-size:var(--text-xs);border:1px solid rgba(220,38,38,0.2);border-radius:var(--radius-md);background:transparent;cursor:pointer" onclick="delListing(${p.id})">🗑</button>
         </div>
       </div>`;
     }).join('');
-  }catch(e){document.getElementById('lgrid').innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><div class="empty-title">Could not load listings</div></div>';}
+  } catch(e){
+    document.getElementById('lgrid').innerHTML=`<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div><div class="empty-title">Could not load listings</div></div>`;
+  }
 }
 
 async function delListing(id){
-  if(!confirm('Delete this listing? This cannot be undone.'))return;
-  try{await fetch(`/api/properties/${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});toast('Listing deleted');await loadListings();}
-  catch(e){toast('Failed to delete');}
+  if(!confirm('Delete this listing? This cannot be undone.')) return;
+  try{
+    await fetch(`/api/properties/${id}`,{method:'DELETE',headers:{Authorization:`Bearer ${tok}`}});
+    toast('Listing deleted'); await loadListings();
+  } catch(e){ toast('Failed to delete'); }
 }
 
 function sw(tab){
   document.querySelectorAll('.psec').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.ptab').forEach(el=>el.classList.remove('active'));
   document.getElementById('sec-'+tab).classList.add('active');
-  document.querySelectorAll('.ptab').forEach((el,i)=>{if((i===0&&tab==='profile')||(i===1&&tab==='listings'))el.classList.add('active');});
+  document.querySelectorAll('.ptab').forEach((el,i)=>{
+    if((i===0&&tab==='profile')||(i===1&&tab==='listings')) el.classList.add('active');
+  });
   if(tab==='listings') loadListings();
 }
 
-function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN');}
-function x(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
+function fp(n){n=Number(n);if(n>=10000000)return(n/10000000).toFixed(1).replace(/\.0$/,'')+'Cr';if(n>=100000)return(n/100000).toFixed(1).replace(/\.0$/,'')+'L';return n.toLocaleString('en-IN')}
+function x(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function cp(s){return s?s.charAt(0).toUpperCase()+s.slice(1):''}
+function toast(m){const el=document.getElementById('toast-el');el.textContent=m;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500)}
 </script>
 </body>
 </html>

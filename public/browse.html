@@ -41,6 +41,16 @@
     .cstats{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--divider);flex-wrap:wrap;}
     .cstat{font-size:var(--text-xs);color:var(--muted);}
     .cstat.vastu-yes{color:#2e7d32;font-weight:600;}
+
+    /* ── Verification badge row ── */
+    .vbadge-row{display:flex;gap:5px;flex-wrap:wrap;padding:7px 14px;border-top:1px solid var(--divider);background:var(--surface-2);}
+    .vbadge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;display:inline-flex;align-items:center;gap:3px;letter-spacing:0.1px;}
+    .vb-phone{background:#e3f2fd;color:#1565c0;}
+    .vb-rera{background:#f3e5f5;color:#6a1b9a;}
+    .vb-agent{background:#fff3e0;color:#e65100;}
+    .vb-builder{background:#e8f5e9;color:#2e7d32;}
+    .vb-nobroke{background:#fff8e1;color:#e65100;}
+
     .cacts{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--divider);}
     .cbtn{flex:1;padding:7px;border-radius:var(--radius-md);font-size:var(--text-xs);font-weight:600;border:1.5px solid var(--border);background:var(--surface);transition:all var(--transition);cursor:pointer;font-family:inherit;}
     .cbtn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-xlight);}
@@ -167,7 +177,7 @@
 let all=[],fil=[],shown=0,typ='',cu=null,tok=null,favs=new Set();
 const PS=12;
 
-/* ── Verification (same key/logic as property.html & list-property.html) ── */
+/* ── Verification ── */
 const OTP_KEY='e49_phone_verified';
 const OTP_MONTHS=6;
 
@@ -326,13 +336,13 @@ function go(){
     if(bhk&&String(p.bhk)!==bhk)return false;
     if(city&&!p.city?.toLowerCase().includes(city.toLowerCase()))return false;
     if(q&&![p.title,p.locality,p.city,p.description].filter(Boolean).join(' ').toLowerCase().includes(q))return false;
-    if(vastu==='yes'&&!(p.vastu||p.vastu_compliance==='yes'))return false;
+    if(vastu==='yes'&&!(p.vastu||p.vastu_compliance==='yes'||p.vastucompliance==='yes'))return false;
     if(facing&&p.facing!==facing)return false;
     return true;
   });
   if(sort==='price_asc')fil.sort((a,b)=>a.price-b.price);
   else if(sort==='price_desc')fil.sort((a,b)=>b.price-a.price);
-  else fil.sort((a,b)=>new Date(b.posted_at)-new Date(a.posted_at));
+  else fil.sort((a,b)=>new Date(b.posted_at||b.createdat)-new Date(a.posted_at||a.createdat));
   shown=0;document.getElementById('grid').innerHTML='';
   document.getElementById('cnt').textContent=`${fil.length} propert${fil.length===1?'y':'ies'}`;
   more();
@@ -350,10 +360,25 @@ function more(){
 
 /* ── Card ── */
 function card(p){
-  const rent=p.type==='rent',sv=favs.has(String(p.id)),own=cu&&p.listed_by===cu.id;
+  const rent=p.type==='rent',sv=favs.has(String(p.id)),own=cu&&(p.listed_by===cu.id||p.listedby===cu.id);
   const pr=rent?`₹${Number(p.price).toLocaleString('en-IN')}<span>/mo</span>`:`₹${fp(p.price)}`;
-  const isVastuCompliant=p.vastu||p.vastu_compliance==='yes';
+  const isVastuCompliant=p.vastu||p.vastu_compliance==='yes'||p.vastucompliance==='yes';
   const facingLabel=p.facing?`🧭 ${p.facing.charAt(0).toUpperCase()+p.facing.slice(1)}`:'';
+
+  /* ── Verification badges ── */
+  const vb=[];
+  if(p.phoneverified)
+    vb.push(`<span class="vbadge vb-phone">📱 Verified</span>`);
+  if(p.reranumber)
+    vb.push(`<span class="vbadge vb-rera">🏛 RERA</span>`);
+  if((p.contactrole==='agent'||p.contactrole==='broker'))
+    vb.push(`<span class="vbadge vb-agent">🤝 Agent</span>`);
+  if(p.contactrole==='builder')
+    vb.push(`<span class="vbadge vb-builder">🏗️ Builder</span>`);
+  if(p.nobrokerage)
+    vb.push(`<span class="vbadge vb-nobroke">0% Brokerage</span>`);
+  const vbRow=vb.length?`<div class="vbadge-row">${vb.join('')}</div>`:'';
+
   return`<div class="pc">
     <div class="pc-body-link" onclick="window.location.href='/property.html?id=${p.id}'">
       <div class="ci">
@@ -375,17 +400,13 @@ function card(p){
         </div>
       </div>
     </div>
+    ${vbRow}
     <div class="cacts">
       <button class="cbtn p" onclick="window.location.href='/property.html?id=${p.id}'">👁 View</button>
-      ${!own&&p.listed_by?`<button class="cbtn" onclick="gm(event,'${p.id}','${p.listed_by}')">💬 Msg</button>`:''}
+      ${!own&&(p.listed_by||p.listedby)?`<button class="cbtn" onclick="gm(event,'${p.id}','${p.listed_by||p.listedby}')">💬 Msg</button>`:''}
       <button class="cbtn ${sv?'p':''}" id="sb${p.id}" onclick="tf(event,'${p.id}')">${sv?'❤️':'🤍'}</button>
     </div>
   </div>`;
-}
-
-/* ── Navigate to property ── */
-function gp(id){
-  window.location.href=`/property.html?id=${id}`;
 }
 
 /* ── Message owner — OTP gated ── */
